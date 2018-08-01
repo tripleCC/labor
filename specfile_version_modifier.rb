@@ -6,6 +6,7 @@ module Labor
 		class VersionInvalidError < ArgumentError; end
 
 		attr_reader :refer_version
+		attr_reader :specification
 
 		def initialize(specification_string, refer_version, path)
 			@specification_string = specification_string.encode('UTF-8')
@@ -19,11 +20,11 @@ module Labor
 			@refer_version != @specification.version
 		end
 
-		def modify
+		def modify(persist = false)
 			if should_modify?
 				validate!
 
-				synchronize(@refer_version.to_s)
+				synchronize(@refer_version.to_s, persist)
 			end
 		end
 
@@ -46,7 +47,7 @@ module Labor
 			raise VersionInvalidError, error.join('; ') if error.any?
 		end
 
-		def synchronize(version)
+		def synchronize(version, persist)
 			spec = []
 			@specification_string.split("\n").each do |line|  
         if line.match('.*\\.version\s*={1}\s*["\'].*["\']')
@@ -57,9 +58,11 @@ module Labor
       end
 
       spec_string = spec.join("\n")
-      File.open(@path, "w") do |io|  
-        io << spec_string
-      end if @path
+      if @path && persist
+	      File.open(@path, "w") do |io|  
+	        io << spec_string
+	      end 
+    	end
 
       spec_string
 		end

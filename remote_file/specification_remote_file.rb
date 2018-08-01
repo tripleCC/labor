@@ -22,7 +22,7 @@ module Labor
 			modifier = SpecfileVersionModifier.new(file_contents, refer_version, @path)
 			if modifier.should_modify? 
 				content = modifier.modify
-				gitlab.edit_file(pr.id, path, ref, content, "[ci skip] 更正 podspec 版本 #{refer_version}")
+				gitlab.edit_file(@project_id, @path, @ref, content, "[ci skip] 更正 podspec 版本 #{refer_version}")
 			end
 		end
 
