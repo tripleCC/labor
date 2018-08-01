@@ -4,12 +4,12 @@ module Labor
 	module ThreadPool
 		include Concurrent
 
-		def self.thread_pool
-			@thread_pool ||= Concurrent::CachedThreadPool.new  
+		def self.cache_thread_pool
+			@cache_thread_pool ||= Concurrent::CachedThreadPool.new  
 		end 
 
-		def thread_pool
-			ThreadPool::thread_pool
+		def cache_thread_pool
+			ThreadPool::cache_thread_pool
 		end
 	end
 end

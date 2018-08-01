@@ -25,6 +25,16 @@ module Labor
 			@client = gitlab_client
 		end
 
+		def podspec_tree_path(project_id, options = {})
+			# podspec 在根目录
+			tree = Labor::GitLab.gitlab.tree(project_id, options).find do |tr| 
+				tr.name.end_with?('.podspec') ||
+				tr.name.end_with?('.podspec.json')
+			end
+
+			tree.path if tree
+		end
+
 		# get_file 中获取的content是base64编码的，需要使用Base64.decode64解码
 		def file_contents(project_id, filepath, ref)
 			content = client.file_contents(project_id, filepath, ref)

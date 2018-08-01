@@ -75,13 +75,22 @@ require_relative './labor'
 # 	specification
 # rescue
 # end
-
+include Labor
 
 gitlab = Labor::GitLab.gitlab
+# pr = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
+
+# project_id = pr.id 
+# ref = 'master'
+# refer_version = '1.1.0'
+
+
+# p file
+
 pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:ios/restapp.git')
-data_source = ExternalPodSorter::RemoteDataSource.new(pr.id, 'RestApp/Podfile', 'release/5.6.72')
+data_source = RemoteDataSource.new(pr.id, 'release/5.6.72', 'RestApp/Podfile')
 sorter = ExternalPodSorter.new(data_source)
-sorter.sort
+p sorter.sort
 sorter.grouped_pods.each do |group|
 	group.each do |pod|
 	  display = pod.name.dup
