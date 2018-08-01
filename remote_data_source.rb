@@ -9,6 +9,7 @@ module Labor
 		include Labor::GitLab
 		include Labor::ThreadPool
 		include Labor::Config::Mixin
+		include Labor::Logger
 
 		def initialize(project_id, ref, podfile_path)
 			remote_file = Labor::PodfileRemoteFile.new(project_id, ref, podfile_path)
@@ -20,7 +21,7 @@ module Labor
 		end
 
 		def reference_specifications
-			untagged_specs + tagged_spec
+			untagged_specs + tagged_specs
 		end
 
 		private 
@@ -42,16 +43,28 @@ module Labor
 			untagged_specs
 		end
 
-		def tagged_spec
+		def tagged_specs
 			tagged_dependencies = @podfile.dependencies - untagged_dependencies
-			tagged_spec = tagged_dependencies.uniq { |dep| dep.root_name }.map do |dep|
-				version = config.default_source.versions(dep.root_name).sort.reverse.find do |v|
-					dep.requirement.satisfied_by?(v)
+			tagged_specs = tagged_dependencies.uniq { |dep| dep.root_name }.map do |dep|
+				begin
+					tagged_spec(dep)
+				rescue ArgumentError => error
+					# `retry` keywords also helps there
+					logger.error("fail to get specification with error #{error}, update private source and try again.")
+
+					config.default_source.update(false)
+					tagged_spec(dep)
 				end
-				spec = config.default_source.specification(dep.root_name, version)
-				spec 
 			end
-			tagged_spec
+			tagged_specs
 		end 
+
+		def tagged_spec(dep)
+			version = config.default_source.versions(dep.root_name).sort.reverse.find do |v|
+				dep.requirement.satisfied_by?(v)
+			end
+			spec = config.default_source.specification(dep.root_name, version)
+			spec 
+		end
 	end
 end
