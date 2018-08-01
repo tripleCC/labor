@@ -36,10 +36,6 @@ module Labor
 		end
 
 		def create_merge_request(project_id, title, assignee_name, options = {})
-			# 取前20个即可
-			# https://docs.gitlab.com/ce/api/search.html#project-search-api
-			# 10.5 及之后版本才有
-			# 上面的 api 也可以查找 project 中特定 title 的 mr
 			exist_opened_mr = client.merge_requests(project_id).find do |mr|
 				mr.state == 'opened' &&  
 				mr.source_branch == options[:source_branch] &&
@@ -47,7 +43,7 @@ module Labor
 			end
 			return exist_opened_mr if exist_opened_mr
 
-			assignee_user = all_users.find { |user| user.name == assignee_name }
+			assignee_user = client.user_search(assignee_name).first
 			options = options.merge({ assignee_id: assignee_user.id }) if assignee_user
 			mr = client.create_merge_request(project_id, title, options)
 			mr 

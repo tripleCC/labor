@@ -1,5 +1,5 @@
 require_relative './repo/repo_manager'
-require_relative './specfile_version_modifier'
+# require_relative './specfile_version_modifier'
 require_relative './logger'
 
 module Labor

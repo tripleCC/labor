@@ -1,9 +1,11 @@
 require 'cocoapods'
 require_relative '../remote_file'
 require_relative '../git/gitlab'
+require_relative './specification_remote_file/version_modifier'
 
 module Labor
 	class SpecificationRemoteFile < RemoteFile
+
 		attr_reader :specification
 
 		def initialize(project_id, ref)
@@ -19,7 +21,7 @@ module Labor
 
 
 		def modify_version(refer_version)
-			modifier = SpecfileVersionModifier.new(file_contents, refer_version, @path)
+			modifier = VersionModifier.new(file_contents, refer_version, @path)
 			if modifier.should_modify? 
 				content = modifier.modify
 				gitlab.edit_file(@project_id, @path, @ref, content, "[ci skip] 更正 podspec 版本 #{refer_version}")

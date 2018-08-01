@@ -85,16 +85,18 @@ ref = 'master'
 refer_version = '1.3.0'
 
 
-rf = SpecificationRemoteFile.new(pr.id, ref)
-p rf.modify_version(refer_version)
+# rf = SpecificationRemoteFile.new(pr.id, ref)
+# p rf.modify_version(refer_version)
 # p file
-
 
 # pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:ios/restapp.git')
 # data_source = RemoteDataSource.new(pr.id, 'release/5.6.72', 'RestApp/Podfile')
 # sorter = ExternalPodSorter.new(data_source)
-# p sorter.sort
-# sorter.grouped_pods.each do |group|
+# sorter.sort
+# sorter.grouped_pods
+
+# p gitlab.user_search('青木').first
+# .each do |group|
 # 	group.each do |pod|
 # 	  display = pod.name.dup
 # 	  if pod.external_dependency_names.any?
