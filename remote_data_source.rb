@@ -11,7 +11,7 @@ module Labor
 		include Labor::Config::Mixin
 		include Labor::Logger
 
-		def initialize(project_id, ref, podfile_path)
+		def initialize(project_id, ref, podfile_path = nil)
 			remote_file = Labor::PodfileRemoteFile.new(project_id, ref, podfile_path)
 			@podfile = remote_file.podfile
 		end

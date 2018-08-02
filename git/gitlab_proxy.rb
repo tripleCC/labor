@@ -25,9 +25,32 @@ module Labor
 			@client = gitlab_client
 		end
 
+		def file_path(project_id, file_name)
+			find_file_path(project_id) do |name|
+				file_name == name
+			end
+		end
+
+		def find_file_path(project_id, path = '', &matcher)
+			tree = client.tree(project_id, {path: path})
+			target = tree.find do |tr|
+				yield tr.name if block_given?
+			end
+			return File.join(path, target.name) if target
+
+			finded_path = nil
+			directory_tree = tree.select { |tr| File.extname(tr.name).empty? }
+			directory_tree.each do | tr|
+				finded_path = find_file_path(project_id, path + tr.name + '/', &matcher)
+				break if finded_path
+			end
+			finded_path
+		end
+
 		# get_file 中获取的content是base64编码的，需要使用Base64.decode64解码
-		def file_contents(project_id, filepath, ref)
-			content = client.file_contents(project_id, filepath, ref)
+		def file_contents(project_id, file_path, ref)
+			# Gitlab::Error::NotFound
+			content = client.file_contents(project_id, file_path, ref)
       content = content.force_encoding("UTF-8") if content
 		end
 

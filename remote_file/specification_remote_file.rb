@@ -6,10 +6,14 @@ require_relative './specification_remote_file/version_modifier'
 module Labor
 	class SpecificationRemoteFile < RemoteFile
 
+		SPECIFICATION_EXTNAMES = ['.podspec', '.podspec.json'].freeze
+
 		attr_reader :specification
 
-		def initialize(project_id, ref)
-			super project_id, ref, podspec_path(project_id)
+		def initialize(project_id, ref, path = nil)
+			path ||= podspec_path(project_id)
+
+			super project_id, ref, path
 		end
 
 		def specification
@@ -30,12 +34,10 @@ module Labor
 
 		private
 		def podspec_path(project_id)
-			tree = gitlab.tree(project_id).find do |tr| 
-				tr.name.end_with?('.podspec') ||
-				tr.name.end_with?('.podspec.json')
+			file_path = gitlab.find_file_path(project_id) do |name| 
+				SPECIFICATION_EXTNAMES.find { |extname| name.end_with?(extname) }
 			end
-
-			tree.path if tree
+			file_path
 		end
 	end
 end
