@@ -20,6 +20,48 @@ require 'cocoapods-external-pod-sorter'
 require 'yaml'
 # require_relative './member_reminder'
 require_relative './labor'
+require 'state_machine'
+
+
+class Deploy
+	state_machine :status, initial: :created do 
+		event :analyze do
+      transition created: :analyzing
+    end
+
+		event :deploy do 
+			transition pending: :deploying
+		end
+
+		event :success do 
+			transition deploying: :success
+		end
+
+		event :skip do 
+			transition analyzing: :skipped
+		end
+
+		event :retry do 
+			transition [:skipped, :canceled, :failed, :success] => :created
+		end
+
+	  event :drop do
+      transition [:created, :analyzing, :pending, :deploying] => :failed
+    end
+
+		event :cancel do
+      transition [:created, :analyzing, :pending, :deploying] => :canceled
+    end
+
+    after_transition do |status, transition|
+    	p status
+    	p transition
+    end
+	end
+end
+
+
+
 
 # def test(name = nil, *argv)
 # 	pp argv
@@ -45,9 +87,11 @@ require_relative './labor'
 # 	end
 # end
 # Labor::Logger.logger.info('232323')
-# gitlab = Labor::GitLab.gitlab
+gitlab = Labor::GitLab.gitlab
 
-# pr = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
+pr = gitlab.project('git@git.2dfire-inc.com:ios/TDFMGameCenter.git')
+gitlab_ci_yaml = Labor::RemoteFile::GitLabCIYaml.new(pr.id)
+p gitlab_ci_yaml.has_deploy_jobs?
 # pp gitlab.tags(pr.id).map(&:name)
 
 # pp gitlab.create_tag(pr.id, '0.2.6', 'master')
@@ -75,24 +119,31 @@ require_relative './labor'
 # 	specification
 # rescue
 # end
-include Labor
+# include Labor
 
-gitlab = Labor::GitLab.gitlab
-pr = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
+# gitlab = Labor::GitLab.gitlab
+# pr = gitlab.project('git@git.2dfire-inc.com:qingmu/PodE.git')
 
 # project_id = pr.id 
-ref = 'master'
-refer_version = '1.3.0'
+# ref = 'master'
+# refer_version = '1.3.0'
 
 # rf = SpecificationRemoteFile.new(pr.id, ref)
 # p rf.modify_version(refer_version)
 # p file
 
-pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:ios/restapp.git')
-data_source = RemoteDataSource.new(pr.id, 'release/5.6.72')
-sorter = ExternalPodSorter.new(data_source)
-sorter.sort
-p sorter.grouped_pods
+# pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:ios/restapp.git')
+# data_source = RemoteDataSource.new(pr.id, 'release/0.0.1')
+# sorter = ExternalPodSorter.new(data_source)
+# sorter.sort
+
+
+# sorter.grouped_pods
+
+
+
+
+
 
 # p gitlab.user_search('青木').first
 # .each do |group|

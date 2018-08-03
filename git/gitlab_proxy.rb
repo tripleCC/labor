@@ -25,23 +25,25 @@ module Labor
 			@client = gitlab_client
 		end
 
-		def file_path(project_id, file_name)
-			find_file_path(project_id) do |name|
+		def file_path(project_id, file_name, ref = 'master', depth = 5)
+			find_file_path(project_id, ref, depth) do |name|
 				file_name == name
 			end
 		end
 
-		def find_file_path(project_id, path = '', &matcher)
-			tree = client.tree(project_id, {path: path})
+		def find_file_path(project_id, ref = 'master', depth = 5, path = '', &matcher)
+			tree = client.tree(project_id, {path: path, ref_name: ref})
 			target = tree.find do |tr|
 				yield tr.name if block_given?
 			end
 			return File.join(path, target.name) if target
+			return nil unless depth > 0
+			depth -= 1
 
 			finded_path = nil
 			directory_tree = tree.select { |tr| File.extname(tr.name).empty? }
 			directory_tree.each do | tr|
-				finded_path = find_file_path(project_id, path + tr.name + '/', &matcher)
+				finded_path = find_file_path(project_id, ref, depth, path + tr.name + '/', &matcher)
 				break if finded_path
 			end
 			finded_path

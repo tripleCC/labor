@@ -1,8 +1,8 @@
 require 'cocoapods-external-pod-sorter'
 require_relative './thread_pool'
 require_relative './config'
-require_relative './remote_file/podfile_remote_file'
-require_relative './remote_file/specification_remote_file'
+require_relative './remote_file/podfile'
+require_relative './remote_file/specification'
 
 module Labor
 	class RemoteDataSource < ExternalPodSorter::DataSource
@@ -12,7 +12,7 @@ module Labor
 		include Labor::Logger
 
 		def initialize(project_id, ref, podfile_path = nil)
-			remote_file = Labor::PodfileRemoteFile.new(project_id, ref, podfile_path)
+			remote_file = Labor::RemoteFile::Podfile.new(project_id, ref, podfile_path)
 			@podfile = remote_file.podfile
 		end
 
@@ -34,7 +34,7 @@ module Labor
 					ref = dep.external_source[:branch]
 					# 这里后期再考虑 Podfile.lock 限定问题
 					component_project = gitlab.project(git)
-					remote_file = Labor::SpecificationRemoteFile.new(component_project.id, ref)
+					remote_file = Labor::RemoteFile::Specification.new(component_project.id, ref)
 					untagged_specs << remote_file.specification
 				end
 			end
