@@ -1,19 +1,21 @@
 require 'gitlab'
-require_relative './string_git_parser'
+require_relative './string_extension'
+require_relative './gitlab_api'
 
 module Labor
 	class GitLabProxy
 		
-		using StringGitParser		
+		using StringExtension		
 
 		DEFAULT_TRIGGER_DESCRIPTION = 'ci/cd default trigger'.freeze
 		DEFAULT_PROJECT_HOOK_OPTIONS = { 
-			'issues_events' => false,
-			'merge_requests_events' => true,
-			'note_events' => false,
-			'pipeline_events' => true,
-			'wiki_page_events' => false,
-			'job_events' => false
+			issues_events: false,
+			merge_requests_events: true,
+			note_events: false,
+			pipeline_events: true,
+			wiki_page_events: false,
+			job_events: false,
+			push_events: false
 		}.freeze
 		DEFAULT_PROJECT_PUSH_RULE = { 
 			deny_delete_tag: true
@@ -23,6 +25,12 @@ module Labor
 
 		def initialize(gitlab_client)
 			@client = gitlab_client
+		end
+
+		def branch(project_id, ref)
+			client.branch(project_id, ref)
+		rescue Gitlab::Error::NotFound
+			nil
 		end
 
 		def file_path(project_id, file_name, ref = 'master', depth = 5)
@@ -60,26 +68,30 @@ module Labor
 			client.add_push_rule(project_id, push_rule)
 		end
 
+		# Gitlab.accept_merge_request 可以自动合并，通过 merge_when_pipeline_succeeds 出发 pipeline 成功后合并
 		def create_merge_request(project_id, title, assignee_name, options = {})
-			# 取前20个即可
-			# https://docs.gitlab.com/ce/api/search.html#project-search-api
-			# 10.5 及之后版本才有
-			# 上面的 api 也可以查找 project 中特定 title 的 mr
-			exist_opened_mr = client.merge_requests(project_id).find do |mr|
-				mr.state == 'opened' &&  
-				mr.source_branch == options[:source_branch] &&
-				mr.target_branch == options[:target_branch]
-			end
+			search_options = {
+				search: title, 
+				state: 'opened', 
+				source_branch: options[:source_branch],
+				target_branch: options[:target_branch]
+			}
+			exist_opened_mr = client.merge_requests(project_id, search_options).first
 			return exist_opened_mr if exist_opened_mr
 
-			assignee_user = all_users.find { |user| user.name == assignee_name }
+			assignee_user = client.user_search(assignee_name).first
 			options = options.merge({ assignee_id: assignee_user.id }) if assignee_user
-			mr = client.create_merge_request(project_id, title, options)
-			mr 
+			# remove_source_branch ，是否移除 source 分支
+			merge_request = client.create_merge_request(project_id, title, options)
+			merge_request 
 		end
 
 		# merge_requests_events 触发，合并完成后，可以触发打包功能，可打包标志位置 1
 		# pipeline_events 触发，更新网页打包状态
+		#
+		# webhook 触发失败原因
+		# https://gitlab.com/gitlab-org/omnibus-gitlab/issues/3307#note_64245578
+		#
 		def add_project_hook(project_id, hook_url, options = DEFAULT_PROJECT_HOOK_OPTIONS)
 			return if project_hooks(project_id, hook_url, options).any?
 

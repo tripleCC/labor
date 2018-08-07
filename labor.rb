@@ -1,7 +1,6 @@
 
 require_relative './git/git_proxy'
 require_relative './git/gitlab_proxy'
-require_relative './git/string_git_parser'
 require_relative './git/gitlab'
 require_relative './repo/repo'
 require_relative './repo/repo_cache'

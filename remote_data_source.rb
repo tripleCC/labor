@@ -1,13 +1,13 @@
 require 'cocoapods-external-pod-sorter'
 require_relative './thread_pool'
 require_relative './config'
+require_relative './logger'
 require_relative './remote_file/podfile'
 require_relative './remote_file/specification'
 
 module Labor
 	class RemoteDataSource < ExternalPodSorter::DataSource
 		include Labor::GitLab
-		include Labor::ThreadPool
 		include Labor::Config::Mixin
 		include Labor::Logger
 
@@ -27,19 +27,23 @@ module Labor
 		private 
 
 		def untagged_specs
-			untagged_specs = Array.new
-			untagged_dependencies.each do |dep|
-				cache_thread_pool.post do
+			untagged_specs = []
+			lock = Mutex.new
+			# 过滤本地依赖
+			untagged_git_dependencies = untagged_dependencies.select { |dep| dep.external_source[:git] }
+			untagged_git_dependencies.map do |dep|
+				th = Thread.new do
 					git = dep.external_source[:git]
 					ref = dep.external_source[:branch]
 					# 这里后期再考虑 Podfile.lock 限定问题
 					component_project = gitlab.project(git)
 					remote_file = Labor::RemoteFile::Specification.new(component_project.id, ref)
-					untagged_specs << remote_file.specification
+					lock.synchronize do 
+						untagged_specs << remote_file.specification
+					end
 				end
-			end
-			cache_thread_pool.shutdown
-			cache_thread_pool.wait_for_termination
+				th
+			end.each(&:join)
 			untagged_specs
 		end
 

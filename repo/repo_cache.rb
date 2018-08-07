@@ -1,10 +1,10 @@
 require_relative './repo'
-require_relative '../git/string_git_parser'
+require_relative '../git/string_extension'
 
 module Labor
 	class Repo
 		class Cache
-			using StringGitParser
+			using StringExtension
 
 			WORKSPACE = '~/.repo-manager'.freeze
 
