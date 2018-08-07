@@ -2,6 +2,7 @@ require_relative '../git/string_extension'
 require_relative '../deploy_service'
 require_relative '../thread_pool'
 require_relative '../logger'
+require_relative '../remote_file/specification'
 
 module Labor
 	class PrepareMainDeployService < DeployService
@@ -11,6 +12,8 @@ module Labor
 		def execute
 			# 向所有组件发起 MR 请求
 			deploy.grouped_pods.flatten.map do |pod|
+
+				# 这里可以考虑创建 PodDeploy，然后通过其 prepare 方法执行以下动作
 				thread = Thread.new do 
 					project_id = project_id_of_pod(pod)
 					ref = pod.dependency.external_source[:branch]
@@ -20,8 +23,9 @@ module Labor
 					add_project_hook(project_id)
 
 					unless ref.is_master?
+						update_spec_version(project_id, ref) if ref.is_release?
+
 						owner = pod.spec.member
-						
 						post_content = "#{pod.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust."
 						assignee_name = owner.name if owner 
 
@@ -38,6 +42,9 @@ module Labor
 				thread
 			end.each(&:join)
 
+			# TODO
+			# 这里还有个分析合并分支的 podspec 文件，更新正确版本操作
+
 			# 这里还没合并 MR ，无法 process
 			# project hook 监听到 MR 执行成功后，即可 process
 			# deploy.process
@@ -47,6 +54,11 @@ module Labor
 			repo_url = pod.dependency.external_source[:git]
 			pod_project = gitlab.project(repo_url)
 			pod_project.id
+		end
+
+		def update_spec_version(project_id, ref)
+			specification = RemoteFile::Specification.new(project_id, ref)
+			specification.modify_version(ref.release_version)
 		end
 
 		def create_merge_request(project_id, ref, target, assignee_name)

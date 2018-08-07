@@ -15,5 +15,13 @@ module StringExtension
 		def is_develop?
 			self == 'develop'
 		end
+
+		def is_release?
+			start_with?('release/')
+		end
+
+		def release_version
+			split('/').last
+		end
 	end
 end
