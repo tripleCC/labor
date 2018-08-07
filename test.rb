@@ -67,6 +67,8 @@ require 'state_machine'
 require_relative './deploy_service/process_pod_deploy_service'
 require_relative './deploy_service/create_main_deploy_service'
 require_relative './deploy_service/prepare_main_deploy_service'
+require_relative './deploy_service/prepare_pod_deploy_service'
+require_relative './deploy_service/auto_merge_pod_deploy_service'
 
 gitlab = Labor::GitLab.gitlab
 include Labor
@@ -152,12 +154,14 @@ class MainDeploy < Deploy
 	end
 
 	def pod_deploys
-		@pod_deploys || []
+		@pod_deploys ||= []
 	end
 end
 
 class PodDeploy < Deploy 
 	attr_accessor :pod
+	attr_accessor :reviewed
+	attr_accessor :merge_requests 
 
 	def prepare
 		Labor::PreparePodDeployService.new(self).execute
@@ -174,16 +178,12 @@ class PodDeploy < Deploy
 	def ref 
 		pod.dependency.external_source[:branch] || 'master'
 	end
-end
 
-module Labor
-	# 自动合并 pod 的 mr
-	class AutoMergePodDeployService < DeployService
-		def execute
-			
-		end
+	def merge_requests
+		@merge_requests ||= []
 	end
 end
+
 
 # project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodE.git')
 # # p project
@@ -199,6 +199,13 @@ deploy.ref = 'release/0.0.1'
 deploy.pods_access_lock = Mutex.new
 deploy.create
 
+deploy.pod_deploys.select { |d| d.repo_url == 'git@git.2dfire-inc.com:qingmu/PodD.git' }.each do |d|
+	AutoMergePodDeployService.new(d).execute
+end
+
+# p gitlab.merge_requests(2444, '6')
+
+# sleep(2)
 # deploy = PodDeploy.new
 # deploy.pod = pod
 # deploy.process

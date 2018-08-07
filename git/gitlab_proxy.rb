@@ -20,6 +20,9 @@ module Labor
 		DEFAULT_PROJECT_PUSH_RULE = { 
 			deny_delete_tag: true
 		}.freeze
+		DEFAULT_ACCEPT_MERGE_REQUEST = {
+			merge_when_pipeline_succeeds: true
+		}.freeze
 
 		attr_reader :client
 
@@ -59,9 +62,10 @@ module Labor
 
 		# get_file 中获取的content是base64编码的，需要使用Base64.decode64解码
 		def file_contents(project_id, file_path, ref)
-			# Gitlab::Error::NotFound
 			content = client.file_contents(project_id, file_path, ref)
       content = content.force_encoding("UTF-8") if content
+    rescue Gitlab::Error::NotFound
+    	nil
 		end
 
 		def add_push_rule(project_id, push_rule = DEFAULT_PROJECT_PUSH_RULE)
@@ -84,6 +88,10 @@ module Labor
 			# remove_source_branch ，是否移除 source 分支
 			merge_request = client.create_merge_request(project_id, title, options)
 			merge_request 
+		end
+
+		def accept_merge_request(project_id, iid, options = DEFAULT_ACCEPT_MERGE_REQUEST)
+			client.accept_merge_request(project_id, iid, options)
 		end
 
 		# merge_requests_events 触发，合并完成后，可以触发打包功能，可打包标志位置 1
@@ -123,8 +131,8 @@ module Labor
 		end
 
 		def newest_active_pipeline(project_id, ref)
-			target = client.tags(project_id).find { |t| t.name == ref }
-			target = client.branches(project_id).find { |b| b.name == ref } if target.nil?
+			target = client.branches(project_id).find { |b| b.name == ref }
+			target = client.tags(project_id).find { |t| t.name == ref } if target.nil?
 			return nil if target.nil?
 			pipeline = client.pipelines(project_id, { per_page: 10 }).find do |pl|
 				%w[pending running created manual].include?(pl.status) &&

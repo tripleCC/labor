@@ -16,11 +16,12 @@ module StringExtension
 			self == 'develop'
 		end
 
-		def is_release?
-			start_with?('release/')
+		def has_version?
+			start_with?('release/') ||
+			start_with?('hotfix/')
 		end
 
-		def release_version
+		def version
 			split('/').last
 		end
 	end
