@@ -18,7 +18,7 @@ module Labor
 			def podfile
 				@podfile ||= begin
 					content = file_contents
-					podfile = Pod::Podfile.from_ruby(nil, content)
+					podfile = Pod::Podfile.from_ruby(Pathname.new(path), content)
 					podfile
 				end
 			end

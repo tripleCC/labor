@@ -1,47 +1,44 @@
+require 'member_reminder'
 require_relative '../git/string_extension'
+require_relative '../logger'
 require_relative '../deploy_service'
 
 module Labor
 	class PreparePodDeployService < DeployService
+		# include MemberReminder::DingTalk
 		include Labor::Logger
 		using StringExtension
 
 		def execute
-			pod = deploy.pod
-			project_id = project_id_of_pod(pod)
-			ref = pod.dependency.external_source[:branch]
+			project = gitlab.project(deploy.repo_url)
+			project_id = project.id
+			ref = deploy.ref
 
-			logger.info("prepare for #{pod.name} #{project_id} deploy")
+			logger.info("prepare for #{deploy.name} #{project_id} deploy")
 			# 添加 project hook，监听 MR / PL 的执行进度
 			add_project_hook(project_id)
 
 			unless ref.is_master?
 				update_spec_version(project_id, ref) if ref.has_version?
 
-				owner = pod.spec.member
-				post_content = "#{pod.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust."
-				assignee_name = owner.name if owner 
+				post_content = "#{deploy.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust." 
+				merge_request_iids = []
 
 				# gitflow 工作流需要合并至 master 和 develop
-				mr, content = create_merge_request(project_id, ref, 'master', assignee_name)
-				deploy.merge_requests << mr.iid
+				mr, content = create_merge_request(project_id, ref, 'master', deploy.owner)
+				merge_request_iids << mr.iid
 				post_content << content
 
 				unless ref.is_develop? || gitlab.branch(project_id, 'develop').nil?
-					mr, content = create_merge_request(project_id, ref, 'develop', assignee_name) 
-					deploy.merge_requests << mr.iid
+					mr, content = create_merge_request(project_id, ref, 'develop', deploy.owner) 
+					merge_request_iids << mr.iid
 					post_content << content
 				end
-
+				deploy.set_merge_request_iids(merge_request_iids)
+				deploy.save
 				# 发送组件合并钉钉消息
-				# owner.post(post_content) if owner
+				# post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 			end
-		end
-
-		def project_id_of_pod(pod)
-			repo_url = pod.dependency.external_source[:git]
-			pod_project = gitlab.project(repo_url)
-			pod_project.id
 		end
 
 		def update_spec_version(project_id, ref)

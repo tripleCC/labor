@@ -1,4 +1,36 @@
 #!/usr/bin/env ruby
+# $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '.'))
+
+require 'state_machines-activerecord'
+require_relative './app'
+require_relative './models/pod_deploy'
+require_relative './models/main_deploy'
+include Labor
+
+MainDeploy.all.each(&:destroy)
+main_deploy = MainDeploy.create(
+	name: '发布1.6.5', 
+	repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+	ref: 'release/0.0.1'
+	)
+main_deploy.prepare
+
+
+p MainDeploy.all.size
+deploy = MainDeploy.first
+p deploy.pod_deploys.size
+# p deploy
+# p deploy.status
+# deploy.enqueue
+
+# p Deploy.create(name: 'qingmu', repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git')
+# require 'sinatra'
+
+# get '/' do 
+# 	
+# end
+
+return
 
 require 'pp'
 require 'gitlab'
@@ -65,7 +97,6 @@ require 'state_machine'
 
 # end
 require_relative './deploy_service/process_pod_deploy_service'
-require_relative './deploy_service/create_main_deploy_service'
 require_relative './deploy_service/prepare_main_deploy_service'
 require_relative './deploy_service/prepare_pod_deploy_service'
 require_relative './deploy_service/auto_merge_pod_deploy_service'
@@ -135,6 +166,7 @@ class Deploy
 end
 
 class MainDeploy < Deploy 
+
 	attr_accessor :pod_deploys
 	attr_accessor :grouped_pods
 	attr_accessor :task_lock
@@ -184,7 +216,6 @@ class PodDeploy < Deploy
 	end
 end
 
-
 # project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodE.git')
 # # p project
 # data_source = RemoteDataSource.new(project.id, 'release/0.0.1')
@@ -193,15 +224,15 @@ end
 # pod = sorter.grouped_pods.flatten.find { |pod| pod.name == 'PodA' }
 
 
-deploy = MainDeploy.new
-deploy.repo_url = 'git@git.2dfire-inc.com:qingmu/PodE.git'
-deploy.ref = 'release/0.0.1'
-deploy.pods_access_lock = Mutex.new
-deploy.create
+# deploy = MainDeploy.new
+# deploy.repo_url = 'git@git.2dfire-inc.com:qingmu/PodE.git'
+# deploy.ref = 'release/0.0.1'
+# deploy.pods_access_lock = Mutex.new
+# deploy.create
 
-deploy.pod_deploys.select { |d| d.repo_url == 'git@git.2dfire-inc.com:qingmu/PodD.git' }.each do |d|
-	AutoMergePodDeployService.new(d).execute
-end
+# deploy.pod_deploys.select { |d| d.repo_url == 'git@git.2dfire-inc.com:qingmu/PodD.git' }.each do |d|
+# 	AutoMergePodDeployService.new(d).execute
+# end
 
 # p gitlab.merge_requests(2444, '6')
 
