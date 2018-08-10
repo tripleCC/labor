@@ -7,6 +7,9 @@ module Labor
   class PodDeploy < ActiveRecord::Base
   	belongs_to :main_deploy
 
+    # sqlite3 不支持 array 类型
+    serialize :merge_request_iids
+    
   	state_machine :status, :initial => :created do
       event :enqueue do
         transition [:created, :canceled, :failed, :success] => :analyzing
@@ -52,27 +55,26 @@ module Labor
     end
 
 
-    # sqlite3 不支持 array 类型
-    def set_merge_request_iids(iids)
-      self.merge_request_iids = iids.join('|')
-    end
+    # def set_merge_request_iids(iids)
+    #   self.merge_request_iids = iids.join('&')
+    # end
 
-    def add_merge_request_iid(iid)
-      iids = get_merge_request_iids
-      iids << iid
-      self.merge_request_iids = iids.join('|')
-    end
+    # def add_merge_request_iid(iid)
+    #   iids = get_merge_request_iids
+    #   iids << iid
+    #   self.merge_request_iids = iids.join('&')
+    # end
 
-    def delete_merge_request_iid(iid)
-      iids = get_merge_request_iids
-      iids.delete(iid)
-      self.merge_request_iids = iids.join('|')
-    end
+    # def delete_merge_request_iid(iid)
+    #   iids = get_merge_request_iids
+    #   iids.delete(iid)
+    #   self.merge_request_iids = iids.join('&')
+    # end
 
-    def get_merge_request_iids
-      iids_string = merge_request_iids
-      iids = iids_string.split('|') if iids_string
-      iids || []
-    end
+    # def get_merge_request_iids
+    #   iids_string = merge_request_iids
+    #   iids = iids_string.split('&') if iids_string
+    #   iids || []
+    # end
   end
 end

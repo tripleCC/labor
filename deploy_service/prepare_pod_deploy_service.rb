@@ -34,7 +34,7 @@ module Labor
 					merge_request_iids << mr.iid
 					post_content << content
 				end
-				deploy.set_merge_request_iids(merge_request_iids)
+				deploy.merge_request_iids = merge_request_iids
 				deploy.save
 				# 发送组件合并钉钉消息
 				# post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner

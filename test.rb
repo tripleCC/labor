@@ -18,7 +18,13 @@ main_deploy.prepare
 
 p MainDeploy.all.size
 deploy = MainDeploy.first
-p deploy.pod_deploys.size
+p deploy.pod_deploys.pluck(:merge_request_iids)
+ 
+# pod_deploy.merge_request_iids << 1
+# p deploy.pod_deploys.first.merge_request_iids
+# pod_deploy.save
+
+# p pod_deploy.merge_request_iids
 # p deploy
 # p deploy.status
 # deploy.enqueue

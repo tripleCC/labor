@@ -1,7 +1,9 @@
 module Labor
 	module SqliteArraySupport
-		def sqlite_id_array(sym)
-			
+		def sqlite_ids_accessor(sym)
+			define_method("set#{sym}") do 
+				
+			end
 		end
 	end
 end
