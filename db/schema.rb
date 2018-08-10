@@ -28,8 +28,11 @@ ActiveRecord::Schema.define(version: 20180809031253) do
   create_table "pod_deploys", force: :cascade do |t|
     t.integer  "main_deploy_id"
     t.string   "name"
+    t.string   "project_id"
     t.string   "repo_url"
     t.string   "ref",                default: "master"
+    t.string   "version"
+    t.string   "pipeline_id"
     t.string   "owner"
     t.string   "owner_mobile"
     t.string   "owner_ding_token"

@@ -9,5 +9,9 @@ class ExternalPodSorter
 		def ref
 			dependency.external_source[:branch] 
 		end
+
+		def version
+			 spec.version.to_s
+		end
 	end
 end

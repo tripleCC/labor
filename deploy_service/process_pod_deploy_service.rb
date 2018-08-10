@@ -7,7 +7,7 @@ module Labor
 	# 3、监听 pl 状态
 	class ProcessPodDeployService < DeployService
 		def execute
-			name = deploy.pod.spec.version.to_s
+			name = deploy.version
 			create_tag(name)
 			create_pipeline(name)
 		rescue Gitlab::Error::BadRequest => error
@@ -24,7 +24,9 @@ module Labor
 			# 但是依然会抛出 400 错误，提示 tag 不存在
 			# 这里先去查找是否有最新的 pipeline，一定程度上
 			# 规避了这个问题
-			gitlab.create_pipeline(project.id, name) if gitlab.newest_active_pipeline(project_id, name).nil?
+			pipeline = gitlab.newest_active_pipeline(project_id, name)
+			pipeline = gitlab.create_pipeline(project.id, name)	if pipeline.nil?
+			deploy.update(pipeline_id: pipeline.id)
 		end
 	end
 end

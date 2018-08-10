@@ -31,7 +31,8 @@ module Labor
 				deploy_hash = {
 					name: pod.name,
 					repo_url: pod.repo_url,
-					ref: pod.ref
+					ref: pod.ref,
+					version: pod.version
 				}
 				member = bank.member_of_spec(pod.spec)
 				deploy_hash.merge!({

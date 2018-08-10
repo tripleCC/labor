@@ -7,18 +7,6 @@ require_relative './models/pod_deploy'
 require_relative './models/main_deploy'
 include Labor
 
-MainDeploy.all.each(&:destroy)
-main_deploy = MainDeploy.create(
-	name: '发布1.6.5', 
-	repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
-	ref: 'release/0.0.1'
-	)
-main_deploy.prepare
-
-
-p MainDeploy.all.size
-deploy = MainDeploy.first
-p deploy.pod_deploys.pluck(:merge_request_iids)
  
 # pod_deploy.merge_request_iids << 1
 # p deploy.pod_deploys.first.merge_request_iids
@@ -35,6 +23,53 @@ p deploy.pod_deploys.pluck(:merge_request_iids)
 # get '/' do 
 # 	
 # end
+require 'pp'
+# 
+require 'gitlab'
+require_relative './hook_event_handler/merge_request'
+require_relative './hook_event_handler/pipeline'
+require_relative './hook_event_handler/push'
+
+# p Labor::HookEventHandler.constants.map(&:to_s).map(&:underscore)
+# p Labor::HookEventHandler::MergeRequest.event_name
+# p "startMenuIconCls".underscore
+# return
+
+#(:lower)
+require 'sinatra'
+post '/' do 
+	# 1 找出 mr 对应的 pod_deploy
+	# 2 看 mr 是否为 merged && mr 是否为 -> master 
+	# 2.1 merged 则 设置 pod_deploy 发布为 merged
+	# 2.2 main_deploy 执行 process ，发布满足条件的 deploy (merged ，并且没有需要发布的依赖)
+
+	hook_string = request.body.read
+	hash = JSON.parse(hook_string)
+
+	object_kind = hash['object_kind']
+	if Labor::HookEventHandler.event_kinds.include?(object_kind)
+		handler = Labor::HookEventHandler.handler(object_kind, hash)
+		handler.handle
+	end
+
+	''
+end
+
+get '/' do 
+	# MainDeploy.all.each(&:destroy)
+	main_deploy = MainDeploy.create(
+		name: '发布1.6.5', 
+		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+		ref: 'release/0.0.1'
+		)
+	main_deploy.prepare
+
+
+	p MainDeploy.all.size
+	deploy = MainDeploy.first
+	p deploy.pod_deploys.pluck(:merge_request_iids)
+	''
+end
 
 return
 

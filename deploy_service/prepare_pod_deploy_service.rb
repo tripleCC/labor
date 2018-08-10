@@ -11,31 +11,35 @@ module Labor
 
 		def execute
 			project = gitlab.project(deploy.repo_url)
-			project_id = project.id
-			ref = deploy.ref
+			deploy.update(project_id: project.id)
 
-			logger.info("prepare for #{deploy.name} #{project_id} deploy")
+			logger.info("prepare for #{deploy.name} #{deploy.project_id} deploy")
 			# 添加 project hook，监听 MR / PL 的执行进度
-			add_project_hook(project_id)
+			add_project_hook(deploy.project_id)
 
-			unless ref.is_master?
-				update_spec_version(project_id, ref) if ref.has_version?
+			unless deploy.ref.is_master?
+
+				# TODO
+				# 这里到时候要优化下，更新 version 的条件
+				if deploy.ref.has_version? && deploy.version != deploy.ref.version
+					update_spec_version(deploy.project_id, deploy.ref) 
+					deploy.update(version: deploy.ref.version)
+				end
 
 				post_content = "#{deploy.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust." 
 				merge_request_iids = []
 
 				# gitflow 工作流需要合并至 master 和 develop
-				mr, content = create_merge_request(project_id, ref, 'master', deploy.owner)
+				mr, content = create_merge_request(deploy.project_id, deploy.ref, 'master', deploy.owner)
 				merge_request_iids << mr.iid
 				post_content << content
 
-				unless ref.is_develop? || gitlab.branch(project_id, 'develop').nil?
-					mr, content = create_merge_request(project_id, ref, 'develop', deploy.owner) 
+				unless deploy.ref.is_develop? || gitlab.branch(deploy.project_id, 'develop').nil?
+					mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
 					merge_request_iids << mr.iid
 					post_content << content
 				end
-				deploy.merge_request_iids = merge_request_iids
-				deploy.save
+				deploy.update(merge_request_iids: merge_request_iids)
 				# 发送组件合并钉钉消息
 				# post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 			end

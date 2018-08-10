@@ -3,8 +3,11 @@ class CreatePodDeploys < ActiveRecord::Migration
   	create_table :pod_deploys do |t|
   		t.belongs_to :main_deploy, index: true
   		t.string :name
+  		t.string :project_id
   		t.string :repo_url, presence: true
   		t.string :ref, default: 'master'
+  		t.string :version
+  		t.string :pipeline_id
   		t.string :owner
   		t.string :owner_mobile
   		t.string :owner_ding_token
