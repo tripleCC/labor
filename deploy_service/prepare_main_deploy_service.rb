@@ -15,7 +15,7 @@ module Labor
 			# 分析依赖，获取需要发布的组件
 
 			grouped_pods = sort_grouped_pods
-			logger.info("create pod deploys for #{deploy.repo_url} : #{grouped_pods}")
+			logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): create pod deploys: #{grouped_pods}")
 			deploy.pod_deploys = create_pod_deploys(grouped_pods)
 			prepare_pod_deploys(deploy.pod_deploys)
 
@@ -33,6 +33,7 @@ module Labor
 					repo_url: pod.repo_url,
 					ref: pod.ref,
 					version: pod.version
+					external_dependency_names: pod.external_dependency_names
 				}
 				member = bank.member_of_spec(pod.spec)
 				deploy_hash.merge!({

@@ -26,11 +26,11 @@ module Labor
 						pipeline = activate_pipeline(mr)
 
 						begin
-							logger.info("accept #{pod_project.name}'s MR(#{mr_iid})")
+							logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{pod_project.name}'s MR(#{mr_iid})")
 							# 发起合并请求，必须是 PL 成功后才合并
 							gitlab.accept_merge_request(pod_project.id, mr_iid)
 						rescue Gitlab::Error::MethodNotAllowed => error
-							logger.error("fail to accept #{pod_project.name}'s MR(#{mr_iid}) with error: #{error}")
+							logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to accept #{pod_project.name}'s MR(#{mr_iid}) with error: #{error}")
 						end
 					end
 				end
@@ -50,11 +50,11 @@ module Labor
 				if no_skiped_pipelines.any? 
 					# 重试非 skipped 的 PL
 					retry_pipeline_id = no_skiped_pipelines.first.id
-					logger.info("retry project(#{mr.project_id}) pipeline(#{retry_pipeline_id}) for MR(#{mr.iid})")
+					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): retry project(#{mr.project_id}) pipeline(#{retry_pipeline_id}) for MR(#{mr.iid})")
 					gitlab.retry_pipeline(mr.project_id, retry_pipeline_id) 
 				else
 					# 如果没有活动的 PL ，则手动创建一个，这个 PL 会忽略 [ci skip]
-					logger.info("create project(#{mr.project_id}) pipeline(#{pipelines.first.id}) for MR(#{mr.iid})")
+					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create project(#{mr.project_id}) pipeline(#{pipelines.first.id}) for MR(#{mr.iid})")
 					gitlab.create_pipeline(mr.project_id, mr.source_branch)
 				end
 			end

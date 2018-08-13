@@ -7,6 +7,7 @@ class CreatePodDeploys < ActiveRecord::Migration
   		t.string :repo_url, presence: true
   		t.string :ref, default: 'master'
   		t.string :version
+  		t.string :external_dependency_names, default: ''
   		t.string :pipeline_id
   		t.string :owner
   		t.string :owner_mobile

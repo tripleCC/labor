@@ -9,6 +9,7 @@ module Labor
 
     # sqlite3 不支持 array 类型
     serialize :merge_request_iids
+    serialize :external_dependency_names
     
   	state_machine :status, :initial => :created do
       event :enqueue do

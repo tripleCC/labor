@@ -1,4 +1,5 @@
 require_relative '../deploy_service'
+require_relative '../logger'
 
 module Labor
 	# 执行 pod 合并到 master 后的步骤
@@ -6,17 +7,22 @@ module Labor
 	# 2、创建此 tag 的 pipeline
 	# 3、监听 pl 状态
 	class ProcessPodDeployService < DeployService
+		include Labor::Logger
+
 		def execute
 			name = deploy.version
 			create_tag(name)
 			create_pipeline(name)
 		rescue Gitlab::Error::BadRequest => error
+			logger.error("pod_deploy (id: #{deploy.id}, name: #{deploy.name}): fail to process pod deploy with error #{error.message}")
 			deploy.drop(error.message)
 		end
 
 		def create_tag(name)
 			# 注意，tag 重复的话会抛出错误
-			gitlab.create_tag(project.id, name, 'master')
+			tag = gitlab.create_tag(project.id, name, 'master')
+			logger.info("pod_deploy (id: #{deploy.id}, name: #{deploy.name}): create tag #{tag.name}")
+			tag
 		end
 
 		def create_pipeline(name)
@@ -26,7 +32,9 @@ module Labor
 			# 规避了这个问题
 			pipeline = gitlab.newest_active_pipeline(project_id, name)
 			pipeline = gitlab.create_pipeline(project.id, name)	if pipeline.nil?
+			logger.info("pod_deploy (id: #{deploy.id}, name: #{deploy.name}): run pipeline (#{pipeline.id})")
 			deploy.update(pipeline_id: pipeline.id)
+			pipeline
 		end
 	end
 end

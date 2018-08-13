@@ -1,4 +1,4 @@
-require 'activerecord'
+require 'state_machines-activerecord'
 require 'gitlab'
 require_relative './logger'
 
@@ -27,6 +27,10 @@ module Labor
 			
 			def self.event_kind
 				self.name.demodulize.underscore
+			end
+
+			def object_attributes
+				@object.object_attributes
 			end
 
 			def handle

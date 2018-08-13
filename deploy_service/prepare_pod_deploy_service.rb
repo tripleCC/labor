@@ -13,7 +13,7 @@ module Labor
 			project = gitlab.project(deploy.repo_url)
 			deploy.update(project_id: project.id)
 
-			logger.info("prepare for #{deploy.name} #{deploy.project_id} deploy")
+			logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): prepare deploy")
 			# 添加 project hook，监听 MR / PL 的执行进度
 			add_project_hook(deploy.project_id)
 
@@ -52,14 +52,14 @@ module Labor
 
 		def create_merge_request(project_id, ref, target, assignee_name)
 			title = "merge #{ref} into #{target}".ci_skip
-			logger.info("create MR to project #{project_id} with assignee #{assignee_name} and title #{title}")
+			logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create MR to project #{project_id} with assignee #{assignee_name} and title #{title}")
 
 			mr = gitlab.create_merge_request(project_id, title, assignee_name, {source_branch: ref, target_branch: target})
 			[mr, "\n#{ref} to #{target}: #{mr.web_url}"]
 		end
 
 		def add_project_hook(project_id)
-			logger.info("add project hook to project #{project_id}")
+			logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): add project hook to project #{project_id}")
 			gitlab.add_project_hook(project_id, 'http://10.1.130.206:8080/')
 		end
 	end

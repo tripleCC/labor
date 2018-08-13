@@ -1,36 +1,32 @@
 require_relative '../deploy_service'
+require_relative '../logger'
 
 module Labor
+	# 启动可以执行 CD 的组件发布
+	# 1、获取还未发布的组件
+	# 2、过滤出可发布的组件
+	# 3、执行组件发布
 	class ProcessMainDeployService < DeployService
-		def execute
-			# deploy 是在多个 CD 上并行的，需要加锁访问 pod_deploys
-			deploy.pods_access_lock.lock
-			# 计算已经完成的发布
-			done_pod_names = deploy.pod_deploys.select { |deploy| deploy.success? }.map(&:name)
-			deploy.pods_access_lock.unlock
+		include Labor::Logger
 
+		def execute
 			# 计算还未发布的 pod
-			left_pods = deploy.grouped_pods.flatten.reject { |pod| done_pod_names.include?(pod.name) }
+			left_pod_deploys = deploy.pod_deploys.reject { |deploy| deploy.success? }
+			left_pod_deploy_names = left_pod_deploys.map(&:name)
 
 			# 计算接下来可发布的 pod
-			next_pods = left_pods.select do |pod|
-				left_pods.find { |left_pod| pod.external_dependency_names.include?(left_pod.name) }.nil?
+			next_pod_deploys = left_pod_deploys.select do |pod_deploy|
+				# 依赖中没有未发布的组件 && 已经合并过 MR 
+				(pod_deploy.external_dependency_names & left_pod_deploy_names).empty? &&
+				pod_deploy.merged?
 			end
+
+			logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): left pod deploys #{left_pod_deploy_names}, start next pod deploys #{next_pod_deploys.map(&:name)}")
 			
-			# 下一阶段的 deploy
-			new_pod_deploys = next_pods.map do |pod|
-				deploy = PodDeploy.new
-				deploy
-			end
 			# 执行下一阶段的 deploy
-			new_pod_deploys.each(&:enqueue)
+			next_pod_deploys.each(&:enqueue)
 
-			deploy.pods_access_lock.lock
-			# 添加进工程发布下的组件发布数组
-			deploy.pod_deploys << new_pod_deploys
-			deploy.pods_access_lock.unlock
-
-			new_pod_deploys.any?
+			next_pod_deploys.any?
 		end
 	end
 end
