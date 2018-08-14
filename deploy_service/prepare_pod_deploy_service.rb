@@ -2,22 +2,40 @@ require 'member_reminder'
 require_relative '../git/string_extension'
 require_relative '../logger'
 require_relative '../deploy_service'
+require_relative '../remote_file/gitlab_ci_yaml'
 
 module Labor
 	class PreparePodDeployService < DeployService
-		# include MemberReminder::DingTalk
+		include MemberReminder::DingTalk
 		include Labor::Logger
 		using StringExtension
 
 		def execute
 			project = gitlab.project(deploy.repo_url)
 			deploy.update(project_id: project.id)
-
+			
 			logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): prepare deploy")
 			# 添加 project hook，监听 MR / PL 的执行进度
 			add_project_hook(deploy.project_id)
 
+			# 没有 CI/CD 配置文件的情况，直接 skipped
+			# 需要用户勾选手动发布成功后，直接将其设置为 manual
+			ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new(deploy.project_id, deploy.ref)
+			unless ci_yaml_file.has_deploy_jobs?
+				deploy.skip
+				post_content = "pod deploy (id: #{deploy.id}, name: #{deploy.name}): .gitlab-ci.yaml 文件未包含发布操作，无法自动发布。手动发布后，再勾选发布的的 <已手动发布>"
+				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+				return
+			end
+
 			unless deploy.ref.is_master?
+				# 如果已经合并到 master ，直接标志改组件为可发布
+				if gitlab.branch(deploy.project_id, deploy.ref).merged
+					# TODO
+					# 这里如果网页上可以填写 version 的话，也需要有更新 version 这一步
+					deploy.ready
+					return
+				end
 
 				# TODO
 				# 这里到时候要优化下，更新 version 的条件
@@ -26,23 +44,32 @@ module Labor
 					deploy.update(version: deploy.ref.version)
 				end
 
-				post_content = "#{deploy.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust." 
-				merge_request_iids = []
+				create_gitflow_merge_requests
+			end
 
-				# gitflow 工作流需要合并至 master 和 develop
-				mr, content = create_merge_request(deploy.project_id, deploy.ref, 'master', deploy.owner)
+			# TODO
+			# 如果网页可以设置版本，master这里也应该更新 version
+		end
+
+		def create_gitflow_merge_requests
+			post_content = "#{deploy.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust." 
+			merge_request_iids = []
+
+			# gitflow 工作流需要合并至 master 和 develop
+			mr, content = create_merge_request(deploy.project_id, deploy.ref, 'master', deploy.owner)
+			merge_request_iids << mr.iid
+			post_content << content
+
+			unless deploy.ref.is_develop? || gitlab.branch(deploy.project_id, 'develop').nil?
+				mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
 				merge_request_iids << mr.iid
 				post_content << content
-
-				unless deploy.ref.is_develop? || gitlab.branch(deploy.project_id, 'develop').nil?
-					mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
-					merge_request_iids << mr.iid
-					post_content << content
-				end
-				deploy.update(merge_request_iids: merge_request_iids)
-				# 发送组件合并钉钉消息
-				# post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 			end
+			deploy.update(merge_request_iids: merge_request_iids)
+			deploy.pend
+
+			# 发送组件合并钉钉消息
+			# post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 		end
 
 		def update_spec_version(project_id, ref)

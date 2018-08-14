@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '.'))
 
-require 'state_machines-activerecord'
+# require 'state_machines-activerecord'
 require_relative './app'
 require_relative './models/pod_deploy'
 require_relative './models/main_deploy'
@@ -27,25 +27,55 @@ require 'pp'
 # 
 require 'gitlab'
 require_relative './hook_event_handler/merge_request'
-require_relative './hook_event_handler/pipeline'
+# require_relative './hook_event_handler/pipeline'
 require_relative './hook_event_handler/push'
+
+
+# main_deploy = MainDeploy.create(
+# 		name: '发布1.6.5', 
+# 		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+# 		ref: 'release/0.0.1'
+# 		)
+# main_deploy.prepare
 
 # p Labor::HookEventHandler.constants.map(&:to_s).map(&:underscore)
 # p Labor::HookEventHandler::MergeRequest.event_name
 # p "startMenuIconCls".underscore
 # return
+# MainDeploy.all.each(&:destroy)
+# d = MainDeploy.create(
+# 				name: 'i', 
+# 				repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+# 				ref: 'release/0.0.1'
+# 				)
+# d.prepare
+
+# 10.times.map do |i|
+# 	t = Thread.new do 
+# 		d = MainDeploy.create(
+# 				name: 'i', 
+# 				repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+# 				ref: 'release/0.0.1'
+# 				)
+# 		p d
+# 		p d.update(ref: i.to_s)
+# 		p d.update(name: i.to_s)
+
+# 		# p d.enqueue
+# 		# p d.deploy
+# 		# p d.status
+# 	end
+# 	t
+# end.each(&:join)
 
 #(:lower)
 require 'sinatra'
-post '/' do 
-	# 1 找出 mr 对应的 pod_deploy
-	# 2 看 mr 是否为 merged && mr 是否为 -> master 
-	# 2.1 merged 则 设置 pod_deploy 发布为 merged
-	# 2.2 main_deploy 执行 process ，发布满足条件的 deploy (merged ，并且没有需要发布的依赖)
+require 'sinatra/activerecord'
 
+post '/' do 
 	hook_string = request.body.read
 	hash = JSON.parse(hook_string)
-
+	# pp hash
 	object_kind = hash['object_kind']
 	if Labor::HookEventHandler.event_kinds.include?(object_kind)
 		handler = Labor::HookEventHandler.handler(object_kind, hash)
@@ -67,10 +97,14 @@ get '/' do
 
 	p MainDeploy.all.size
 	deploy = MainDeploy.first
-	p deploy.pod_deploys.pluck(:merge_request_iids)
 	''
 end
 
+
+# gitlab = Labor::GitLab.gitlab
+# project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodD.git')
+# p gitlab.cancel_pipeline(project.id, gitlab.pipelines(project.id).first.id)
+# pp gitlab.branch(project.id, "release/0.0.1")
 
 
 
@@ -83,7 +117,7 @@ require 'fileutils'
 require 'open-uri'
 require 'git'
 require 'logger'
-require 'cocoapods'
+# require 'cocoapods'
 
 # require_relative './cocoapods/specification'
 # require_relative './cocoapods/sources_manager'
@@ -91,13 +125,12 @@ require 'cocoapods'
 # require_relative './external_pod_sorter'
 include Pod
 
-require 'cocoapods-external-pod-sorter'
+# require 'cocoapods-external-pod-sorter'
 
 require 'yaml'
 # require_relative './member_reminder'
 require_relative './labor'
 require 'state_machine'
-
 
 # module HashStatus
 # 	extend ActiveSupport::Concern
@@ -145,7 +178,7 @@ require_relative './deploy_service/prepare_main_deploy_service'
 require_relative './deploy_service/prepare_pod_deploy_service'
 require_relative './deploy_service/auto_merge_pod_deploy_service'
 
-gitlab = Labor::GitLab.gitlab
+
 include Labor
 
 class Deploy
@@ -209,56 +242,56 @@ class Deploy
 	end
 end
 
-class MainDeploy < Deploy 
+# class MainDeploy < Deploy 
 
-	attr_accessor :pod_deploys
-	attr_accessor :grouped_pods
-	attr_accessor :task_lock
+# 	attr_accessor :pod_deploys
+# 	attr_accessor :grouped_pods
+# 	attr_accessor :task_lock
 
-	attr_accessor :pods_access_lock
+# 	attr_accessor :pods_access_lock
 	
-	def process
-		Labor::ProcessMainDeployService.new(self).execute
-	end
+# 	def process
+# 		Labor::ProcessMainDeployService.new(self).execute
+# 	end
 
-	def prepare
-		Labor::PrepareMainDeployService.new(self).execute
-	end
+# 	def prepare
+# 		Labor::PrepareMainDeployService.new(self).execute
+# 	end
 
-	def create
-		Labor::CreateMainDeployService.new(self).execute
-	end
+# 	def create
+# 		Labor::CreateMainDeployService.new(self).execute
+# 	end
 
-	def pod_deploys
-		@pod_deploys ||= []
-	end
-end
+# 	def pod_deploys
+# 		@pod_deploys ||= []
+# 	end
+# end
 
-class PodDeploy < Deploy 
-	attr_accessor :pod
-	attr_accessor :reviewed
-	attr_accessor :merge_requests 
+# class PodDeploy < Deploy 
+# 	attr_accessor :pod
+# 	attr_accessor :reviewed
+# 	attr_accessor :merge_requests 
 
-	def prepare
-		Labor::PreparePodDeployService.new(self).execute
-	end
+# 	def prepare
+# 		Labor::PreparePodDeployService.new(self).execute
+# 	end
 
-	def process
-		Labor::ProcessPodDeployService.new(self).execute
-	end
+# 	def process
+# 		Labor::ProcessPodDeployService.new(self).execute
+# 	end
 
-	def repo_url
-		pod.dependency.external_source[:git] || pod.spec.source[:git] 
-	end
+# 	def repo_url
+# 		pod.dependency.external_source[:git] || pod.spec.source[:git] 
+# 	end
 
-	def ref 
-		pod.dependency.external_source[:branch] || 'master'
-	end
+# 	def ref 
+# 		pod.dependency.external_source[:branch] || 'master'
+# 	end
 
-	def merge_requests
-		@merge_requests ||= []
-	end
-end
+# 	def merge_requests
+# 		@merge_requests ||= []
+# 	end
+# end
 
 # project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodE.git')
 # # p project

@@ -8,13 +8,15 @@ class CreatePodDeploys < ActiveRecord::Migration
   		t.string :ref, default: 'master'
   		t.string :version
   		t.string :external_dependency_names, default: ''
-  		t.string :pipeline_id
+  		t.string :mr_pipeline_id
+  		t.string :cd_pipeline_id
   		t.string :owner
   		t.string :owner_mobile
   		t.string :owner_ding_token
   		t.string :merge_request_iids, default: ''
   		t.string :status
   		t.string :failure_reason
+  		t.boolean :reviewed, default: false, null: false
   		t.datetime :started_at
 	    t.datetime :finished_at
   		t.timestamps null: true

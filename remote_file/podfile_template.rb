@@ -1,4 +1,4 @@
-require 'cocoapods'
+require 'cocoapods-core'
 require_relative '../remote_file'
 
 module Labor

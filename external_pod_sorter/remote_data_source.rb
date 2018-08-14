@@ -1,14 +1,14 @@
-require 'cocoapods-external-pod-sorter'
-require_relative './thread_pool'
-require_relative './config'
-require_relative './logger'
-require_relative './remote_file/podfile'
-require_relative './remote_file/specification'
+require_relative './data_source'
+require_relative '../thread_pool'
+require_relative '../config'
+require_relative '../logger'
+require_relative '../remote_file/podfile'
+require_relative '../remote_file/specification'
 
 module Labor
 	class RemoteDataSource < ExternalPodSorter::DataSource
 		include Labor::GitLab
-		include Labor::Config::Mixin
+		# include Labor::Config::Mixin
 		include Labor::Logger
 
 		def initialize(project_id, ref, podfile_path = nil)

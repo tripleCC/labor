@@ -13,6 +13,9 @@
 
 ActiveRecord::Schema.define(version: 20180809031253) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "main_deploys", force: :cascade do |t|
     t.string   "name"
     t.string   "repo_url"
@@ -30,21 +33,24 @@ ActiveRecord::Schema.define(version: 20180809031253) do
     t.string   "name"
     t.string   "project_id"
     t.string   "repo_url"
-    t.string   "ref",                default: "master"
+    t.string   "ref",                       default: "master"
     t.string   "version"
-    t.string   "pipeline_id"
+    t.string   "external_dependency_names", default: ""
+    t.string   "mr_pipeline_id"
+    t.string   "cd_pipeline_id"
     t.string   "owner"
     t.string   "owner_mobile"
     t.string   "owner_ding_token"
-    t.string   "merge_request_iids", default: ""
+    t.string   "merge_request_iids",        default: ""
     t.string   "status"
     t.string   "failure_reason"
+    t.boolean  "reviewed",                  default: false,    null: false
     t.datetime "started_at"
     t.datetime "finished_at"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "pod_deploys", ["main_deploy_id"], name: "index_pod_deploys_on_main_deploy_id"
+  add_index "pod_deploys", ["main_deploy_id"], name: "index_pod_deploys_on_main_deploy_id", using: :btree
 
 end

@@ -1,8 +1,8 @@
-require 'cocoapods'
+require 'cocoapods-core'
 require_relative '../remote_file'
 require_relative '../git/gitlab'
 require_relative '../git/string_extension'
-require_relative './specification_remote_file/version_modifier'
+require_relative './specification/version_modifier'
 require_relative '../logger'
 
 module Labor

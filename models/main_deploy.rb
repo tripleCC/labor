@@ -27,6 +27,16 @@ module Labor
       event :cancel do
         transition [:created, :analyzing, :deploying] => :canceled
       end
+
+      after_transition any => :deploying do |deploy, transition|
+        next if transition.loopback?
+        deploy.process
+      end
+
+      after_transition any => :analyzing do |deploy, transition|
+        next if transition.loopback?
+        deploy.prepare
+      end
     end
 
     def process
