@@ -24,6 +24,13 @@ include Labor
 # 	
 # end
 require 'pp'
+
+
+# pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:qingmu/PodE.git')
+# data_source = ExternalPod::Sorter::DataSource::Remote.new(pr.id, 'release/0.0.1')
+# sorter = ExternalPod::Sorter.new(data_source)
+# pp sorter.sort
+
 # 
 require 'gitlab'
 require_relative './hook_event_handler/merge_request'
@@ -69,36 +76,36 @@ require_relative './hook_event_handler/push'
 # end.each(&:join)
 
 #(:lower)
-require 'sinatra'
-require 'sinatra/activerecord'
+# require 'sinatra'
+# require 'sinatra/activerecord'
 
-post '/' do 
-	hook_string = request.body.read
-	hash = JSON.parse(hook_string)
-	# pp hash
-	object_kind = hash['object_kind']
-	if Labor::HookEventHandler.event_kinds.include?(object_kind)
-		handler = Labor::HookEventHandler.handler(object_kind, hash)
-		handler.handle
-	end
+# post '/' do 
+# 	hook_string = request.body.read
+# 	hash = JSON.parse(hook_string)
+# 	# pp hash
+# 	object_kind = hash['object_kind']
+# 	if Labor::HookEventHandler.event_kinds.include?(object_kind)
+# 		handler = Labor::HookEventHandler.handler(object_kind, hash)
+# 		handler.handle
+# 	end
 
-	''
-end
+# 	''
+# end
 
-get '/' do 
-	# MainDeploy.all.each(&:destroy)
-	main_deploy = MainDeploy.create(
-		name: '发布1.6.5', 
-		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
-		ref: 'release/0.0.1'
-		)
-	main_deploy.prepare
+# get '/' do 
+# 	# MainDeploy.all.each(&:destroy)
+# 	main_deploy = MainDeploy.create(
+# 		name: '发布1.6.5', 
+# 		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+# 		ref: 'release/0.0.1'
+# 		)
+# 	main_deploy.prepare
 
 
-	p MainDeploy.all.size
-	deploy = MainDeploy.first
-	''
-end
+# 	p MainDeploy.all.size
+# 	deploy = MainDeploy.first
+# 	''
+# end
 
 
 # gitlab = Labor::GitLab.gitlab
@@ -173,74 +180,74 @@ require 'state_machine'
 #   end
 
 # end
-require_relative './deploy_service/process_pod_deploy_service'
-require_relative './deploy_service/prepare_main_deploy_service'
-require_relative './deploy_service/prepare_pod_deploy_service'
-require_relative './deploy_service/auto_merge_pod_deploy_service'
+# require_relative './deploy_service/process_pod_deploy_service'
+# require_relative './deploy_service/prepare_main_deploy_service'
+# require_relative './deploy_service/prepare_pod_deploy_service'
+# require_relative './deploy_service/auto_merge_pod_deploy_service'
 
 
-include Labor
+# include Labor
 
-class Deploy
-	attr_accessor :failure_reason
-	attr_accessor :started_at
-	attr_accessor :finished_at
-	attr_accessor :repo_url
-	attr_accessor :ref
+# class Deploy
+# 	attr_accessor :failure_reason
+# 	attr_accessor :started_at
+# 	attr_accessor :finished_at
+# 	attr_accessor :repo_url
+# 	attr_accessor :ref
 
-	state_machine :status, initial: :created do 
-		event :analyze do
-      transition created: :analyzing
-    end
+# 	state_machine :status, initial: :created do 
+# 		event :analyze do
+#       transition created: :analyzing
+#     end
 
-		event :deploy do 
-			transition pending: :deploying
-		end
+# 		event :deploy do 
+# 			transition pending: :deploying
+# 		end
 
-		event :success do 
-			transition deploying: :success
-		end
+# 		event :success do 
+# 			transition deploying: :success
+# 		end
 
-		event :skip do 
-			transition analyzing: :skipped
-		end
+# 		event :skip do 
+# 			transition analyzing: :skipped
+# 		end
 
-		event :enqueue do  
-			transition [:created, :skipped, :canceled, :failed, :success] => :analyzing
-		end
+# 		event :enqueue do  
+# 			transition [:created, :skipped, :canceled, :failed, :success] => :analyzing
+# 		end
 
-	  event :drop do
-      transition [:created, :analyzing, :pending, :deploying] => :failed
-    end
+# 	  event :drop do
+#       transition [:created, :analyzing, :pending, :deploying] => :failed
+#     end
 
-		event :cancel do
-      transition [:created, :analyzing, :pending, :deploying] => :canceled
-    end
+# 		event :cancel do
+#       transition [:created, :analyzing, :pending, :deploying] => :canceled
+#     end
 
 
-    before_transition [:created, :analyzing, :pending] => :running do |deploy|
-      deply.started_at = Time.now
-    end
+#     before_transition [:created, :analyzing, :pending] => :running do |deploy|
+#       deply.started_at = Time.now
+#     end
 
-    before_transition any => [:success, :failed, :canceled] do |deploy|
-      deploy.finished_at = Time.now
-    end
+#     before_transition any => [:success, :failed, :canceled] do |deploy|
+#       deploy.finished_at = Time.now
+#     end
 
-    before_transition any => :failed do |deploy, transition|
-    	failure_reason = transition.args.first
-    	deploy.failure_reason = failure_reason
-    end
+#     before_transition any => :failed do |deploy, transition|
+#     	failure_reason = transition.args.first
+#     	deploy.failure_reason = failure_reason
+#     end
 
-    after_transition do |deploy, transition|
-    	next if transition.loopback?
+#     after_transition do |deploy, transition|
+#     	next if transition.loopback?
 
-    	# puts '========================'
-    	# p status
-    	# p transition.loopback?
-    	# puts '========================'
-    end
-	end
-end
+#     	# puts '========================'
+#     	# p status
+#     	# p transition.loopback?
+#     	# puts '========================'
+#     end
+# 	end
+# end
 
 # class MainDeploy < Deploy 
 
@@ -466,11 +473,6 @@ end
 # rf = SpecificationRemoteFile.new(pr.id, ref)
 # p rf.modify_version(refer_version)
 # p file
-
-# pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:ios/restapp.git')
-# data_source = RemoteDataSource.new(pr.id, 'release/0.0.1')
-# sorter = ExternalPodSorter.new(data_source)
-# sorter.sort
 
 
 # p sorter.grouped_pods

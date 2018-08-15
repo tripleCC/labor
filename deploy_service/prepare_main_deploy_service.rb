@@ -1,9 +1,9 @@
-require_relative '../external_pod_sorter/external_pod_sorter'
+require_relative '../external_pod/sorter'
 require_relative '../git/string_extension'
 require_relative '../deploy_service'
 require_relative '../thread_pool'
 require_relative '../logger'
-require_relative '../external_pod_sorter/remote_data_source'
+require_relative '../external_pod/data_source/remote'
 require_relative '../remote_file/specification'
 require_relative '../utils/async'
 
@@ -55,8 +55,8 @@ module Labor
 
 		def sort_grouped_pods
 			# 排序分析未发布的组件
-			data_source = RemoteDataSource.new(project.id, deploy.ref)
-			sorter = ExternalPodSorter.new(data_source)
+			data_source = ExternalPod::Sorter::DataSource::Remote.new(project.id, deploy.ref)
+			sorter = ExternalPod::Sorter.new(data_source)
 			sorter.sort
 			sorter.grouped_pods
 		end

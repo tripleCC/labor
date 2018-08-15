@@ -1,4 +1,4 @@
-require 'active_record'
+# require 'active_record'
 require 'state_machines-activerecord'
 require_relative '../deploy_service/prepare_pod_deploy_service'
 require_relative '../deploy_service/process_pod_deploy_service'

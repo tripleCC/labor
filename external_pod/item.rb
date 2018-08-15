@@ -1,7 +1,7 @@
 require 'cocoapods-core'
 
-class ExternalPodSorter
-	class PodItem
+module ExternalPod		
+	class Item
 		attr_accessor :name
 		attr_accessor :external_dependency_names
 		attr_accessor :dependency
