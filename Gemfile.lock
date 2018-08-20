@@ -114,10 +114,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activemodel (~> 4.2)
   activerecord (~> 4.0)
-  activesupport (~> 4.2)
-  cocoapods
+  cocoapods (~> 1.5)
   git
   gitlab (~> 4.5.0)
   member_reminder

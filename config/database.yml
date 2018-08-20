@@ -13,7 +13,7 @@ development:
   username: postgres
   password: daimao
 
-production:
+production: 
   <<: *default
   database: mydatabase_production
   username: postgres

@@ -76,36 +76,36 @@ require_relative './hook_event_handler/push'
 # end.each(&:join)
 
 #(:lower)
-# require 'sinatra'
-# require 'sinatra/activerecord'
+require 'sinatra'
+require 'sinatra/activerecord'
 
-# post '/' do 
-# 	hook_string = request.body.read
-# 	hash = JSON.parse(hook_string)
-# 	# pp hash
-# 	object_kind = hash['object_kind']
-# 	if Labor::HookEventHandler.event_kinds.include?(object_kind)
-# 		handler = Labor::HookEventHandler.handler(object_kind, hash)
-# 		handler.handle
-# 	end
+post '/' do 
+	hook_string = request.body.read
+	hash = JSON.parse(hook_string)
+	# pp hash
+	object_kind = hash['object_kind']
+	if Labor::HookEventHandler.event_kinds.include?(object_kind)
+		handler = Labor::HookEventHandler.handler(object_kind, hash)
+		handler.handle
+	end
 
-# 	''
-# end
+	''
+end
 
-# get '/' do 
-# 	# MainDeploy.all.each(&:destroy)
-# 	main_deploy = MainDeploy.create(
-# 		name: '发布1.6.5', 
-# 		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
-# 		ref: 'release/0.0.1'
-# 		)
-# 	main_deploy.prepare
+get '/' do 
+	# MainDeploy.all.each(&:destroy)
+	main_deploy = MainDeploy.create(
+		name: '发布1.6.5', 
+		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+		ref: 'release/0.0.1'
+		)
+	main_deploy.prepare
 
 
-# 	p MainDeploy.all.size
-# 	deploy = MainDeploy.first
-# 	''
-# end
+	p MainDeploy.all.size
+	deploy = MainDeploy.first
+	''
+end
 
 
 # gitlab = Labor::GitLab.gitlab
@@ -115,7 +115,7 @@ require_relative './hook_event_handler/push'
 
 
 
-return
+# return 0
 
 require 'pp'
 require 'gitlab'
@@ -137,7 +137,7 @@ include Pod
 require 'yaml'
 # require_relative './member_reminder'
 require_relative './labor'
-require 'state_machine'
+# require 'state_machine'
 
 # module HashStatus
 # 	extend ActiveSupport::Concern
