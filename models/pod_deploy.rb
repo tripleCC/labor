@@ -15,7 +15,7 @@ module Labor
     
   	state_machine :status, :initial => :created do
       event :enqueue do
-        # transition any - [:enqueue] => :analyzing
+        # transition any - [:analyzing] => :analyzing
         transition [:created, :canceled, :failed, :success] => :analyzing
       end
 
@@ -62,7 +62,7 @@ module Labor
         deploy.main_deploy.process
       end
 
-      before_transition any => :analyzing do |deploy, transition|
+      after_transition any => :analyzing do |deploy, transition|
         next if transition.loopback?
         deploy.prepare
       end

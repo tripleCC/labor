@@ -9,6 +9,8 @@ module Labor
 			include MemberReminder::DingTalk
 
 			def handle 
+				logger.info("receive project(#{object.project.name}) pipeline(id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref}")
+
 				if object_attributes.tag
 				# 组件 CD 流程 
 					handle_deploy_pipeline
@@ -22,7 +24,7 @@ module Labor
 				deploy = PodDeploy.where(project_id: object.project.id, mr_pipeline_id: object_attributes.id, ref: object_attributes.ref)
 				# 成功了会走 MergeRequst 流程，这里不用管，失败了推送钉钉消息
 				return unless deploy 
-				logger.info("handle deploy #{deploy} pipeline with status #{object_attributes.status}")
+				logger.info("handle deploy #{deploy.name} pipeline with status #{object_attributes.status}")
 				
 				return unless object_attributes.status == 'failed'
 					# post_content = ""

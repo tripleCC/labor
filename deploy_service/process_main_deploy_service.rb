@@ -28,7 +28,7 @@ module Labor
 			
 			# 执行下一阶段的 deploy
 			if next_pod_deploys.any?
-				next_pod_deploys.each(&:enqueue)
+				next_pod_deploys.each(&:deploy)
 			else 
 				# 没有需要发布的组件，标志此次工程发布成功
 				deploy.success

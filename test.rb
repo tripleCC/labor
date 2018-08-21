@@ -37,7 +37,6 @@ require_relative './hook_event_handler/merge_request'
 # require_relative './hook_event_handler/pipeline'
 require_relative './hook_event_handler/push'
 
-require 'sinatra/activerecord'
 # MainDeploy.all.each(&:destroy)
 # PodDeploy.all.each(&:destroy)
 # main_deploy = MainDeploy.create(
@@ -99,23 +98,24 @@ require 'sinatra/activerecord'
 # end.each(&:join)
 
 #(:lower)
-# require 'sinatra'
+require 'sinatra'
 require 'sinatra/activerecord'
 
-# post '/' do 
-# 	hook_string = request.body.read
-# 	hash = JSON.parse(hook_string)
-# 	pp hash
-# 	object_kind = hash['object_kind']
-# 	if Labor::HookEventHandler.event_kinds.include?(object_kind)
-# 		handler = Labor::HookEventHandler.handler(object_kind, hash)
-# 		handler.handle
-# 	end
+post '/' do 
+	hook_string = request.body.read
+	hash = JSON.parse(hook_string)
+	# pp hash
+	object_kind = hash['object_kind']
+	if Labor::HookEventHandler.event_kinds.include?(object_kind)
+		handler = Labor::HookEventHandler.handler(object_kind, hash)
+		handler.handle
+	end
 
-# 	''
-# end
+	''
+end
 
-# get '/' do 
+get '/' do 
+	# p PodDeploy.where(project_id: 2441, ref: 'release/0.2.3').find { |deploy| deploy.merge_request_iids.include?('30') }
 	PodDeploy.all.each(&:destroy)
 	MainDeploy.all.each(&:destroy)
 	main_deploy = MainDeploy.find_or_create_by(
@@ -124,27 +124,34 @@ require 'sinatra/activerecord'
 		ref: 'release/0.0.1'
 		)
 
-	# p main_deploy
-
 	main_deploy.enqueue
  
   # p main_deploy
 
 	# p MainDeploy.all.size
 	# deploy = MainDeploy.first
-	PodDeploy.all.each do |deploy|
-		p deploy
-		p deploy.merge_request_iids
-	end
-	# ''p Thread.current
-# end
+	# PodDeploy.all.each do |deploy|
+	# 	p deploy
+	# 	p deploy.merge_request_iids
+	# end
+	''
+end
 
-# get '/reviewed/:id' do 
-# 	deploy = Labor::PodDeploy.find_by(id: params['id'])
-# 	deploy.update(reviewed: true)
-# 	deploy.auto_merge
-# 	''
-# end
+get '/pod_deploys' do 
+	d = PodDeploy.all.select { |d| d.name == 'PodB' }.first
+	d.enqueue
+	# PodDeploy.all.each(&:enqueue)
+	# p PodDeploy.pluck('status')	
+	# p PodDeploy.pluck('name')
+	''
+end
+
+get '/reviewed/:id' do 
+	deploy = Labor::PodDeploy.find_by(id: params['id'])
+	deploy.update(reviewed: true)
+	deploy.auto_merge
+	''
+end
 
 
 # gitlab = Labor::GitLab.gitlab

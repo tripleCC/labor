@@ -65,7 +65,6 @@ module Labor
 				post_content << content
 			end
 			deploy.save
-			p deploy
 			deploy.pend
 
 			# 发送组件合并钉钉消息

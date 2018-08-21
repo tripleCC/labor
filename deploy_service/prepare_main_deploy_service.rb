@@ -17,9 +17,9 @@ module Labor
 			grouped_pods = sort_grouped_pods
 			logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): create pod deploys: #{grouped_pods}")
 
-			deploy.deploy
 			deploy.pod_deploys = create_pod_deploys(grouped_pods)
 			deploy.pod_deploys.each(&:enqueue)
+			deploy.deploy
 			# 多线程会出问题
 			# async_each(deploy.pod_deploys, &:enqueue)
 

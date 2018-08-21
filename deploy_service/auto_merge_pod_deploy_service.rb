@@ -32,7 +32,7 @@ module Labor
 						deploy.update(mr_pipeline_id: pipeline.id)
 
 						begin
-							logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{deploy.name}'s MR(#{mr_iid})")
+							logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{deploy.name}'s MR(#{mr_iid}) when pipeline success")
 							# 发起合并请求，必须是 PL 成功后才合并
 							gitlab.accept_merge_request(deploy.project_id, mr_iid)
 						rescue Gitlab::Error::MethodNotAllowed => error

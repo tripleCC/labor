@@ -4,8 +4,6 @@ require_relative './logger'
 
 module Labor
 	module HookEventHandler
-		include Labor::Logger
-
 		class << self 
 			def event_kinds
 				constants.map { |c| const_get(c) }.map(&:event_kind) - ['base']
@@ -19,6 +17,8 @@ module Labor
 
 
 		class Base
+			include Labor::Logger
+			
 			attr_reader :object
 
 			def initialize(hash) 
