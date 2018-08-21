@@ -53,19 +53,19 @@ module Labor
 
 		def create_gitflow_merge_requests
 			post_content = "#{deploy.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust." 
-			merge_request_iids = []
 
 			# gitflow 工作流需要合并至 master 和 develop
 			mr, content = create_merge_request(deploy.project_id, deploy.ref, 'master', deploy.owner)
-			merge_request_iids << mr.iid
+			deploy.merge_request_iids << mr.iid
 			post_content << content
 
 			unless deploy.ref.is_develop? || gitlab.branch(deploy.project_id, 'develop').nil?
 				mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
-				merge_request_iids << mr.iid
+				deploy.merge_request_iids << mr.iid
 				post_content << content
 			end
-			deploy.update(merge_request_iids: merge_request_iids)
+			deploy.save
+			p deploy
 			deploy.pend
 
 			# 发送组件合并钉钉消息

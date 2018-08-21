@@ -14,15 +14,14 @@ module Labor
 
 		def execute
 			# 分析依赖，获取需要发布的组件
-			deploy.enqueue
 			grouped_pods = sort_grouped_pods
 			logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): create pod deploys: #{grouped_pods}")
 
 			deploy.deploy
 			deploy.pod_deploys = create_pod_deploys(grouped_pods)
-
-			async_each(deploy.pod_deploys, &:enqueue)
-
+			deploy.pod_deploys.each(&:enqueue)
+			# 多线程会出问题
+			# async_each(deploy.pod_deploys, &:enqueue)
 
 			# 这里还没合并 MR ，无法 process
 			# project hook 监听到 MR 执行成功后，即可 process

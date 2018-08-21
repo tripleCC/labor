@@ -1,9 +1,11 @@
 require 'member_reminder'
 require_relative '../hook_event_handler'
+require_relative '../logger'
 
 module Labor
 	module HookEventHandler
 		class Pipeline < Base 
+			include Labor::Logger
 			include MemberReminder::DingTalk
 
 			def handle 
@@ -19,7 +21,10 @@ module Labor
 			def handle_merge_request_pipeline
 				deploy = PodDeploy.where(project_id: object.project.id, mr_pipeline_id: object_attributes.id, ref: object_attributes.ref)
 				# 成功了会走 MergeRequst 流程，这里不用管，失败了推送钉钉消息
-				return unless deploy && object_attributes.status == 'failed'
+				return unless deploy 
+				logger.info("handle deploy #{deploy} pipeline with status #{object_attributes.status}")
+				
+				return unless object_attributes.status == 'failed'
 					# post_content = ""
 					# post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				end

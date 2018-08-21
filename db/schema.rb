@@ -35,13 +35,13 @@ ActiveRecord::Schema.define(version: 20180809031253) do
     t.string   "repo_url"
     t.string   "ref",                       default: "master"
     t.string   "version"
-    t.string   "external_dependency_names", default: ""
+    t.text     "external_dependency_names", default: [],                    array: true
     t.string   "mr_pipeline_id"
     t.string   "cd_pipeline_id"
     t.string   "owner"
     t.string   "owner_mobile"
     t.string   "owner_ding_token"
-    t.string   "merge_request_iids",        default: ""
+    t.text     "merge_request_iids",        default: [],                    array: true
     t.string   "status"
     t.string   "failure_reason"
     t.boolean  "reviewed",                  default: false,    null: false

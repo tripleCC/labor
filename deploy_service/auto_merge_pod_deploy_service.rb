@@ -57,13 +57,14 @@ module Labor
 					# 重试非 skipped 的 PL
 					retry_pipeline_id = no_skiped_pipelines.first.id
 					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): retry project(#{mr.project_id}) pipeline(#{retry_pipeline_id}) for MR(#{mr.iid})")
-					gitlab.retry_pipeline(mr.project_id, retry_pipeline_id) 
+					active_pipeline = gitlab.retry_pipeline(mr.project_id, retry_pipeline_id) 
 				else
 					# 如果没有活动的 PL ，则手动创建一个，这个 PL 会忽略 [ci skip]
 					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create project(#{mr.project_id}) pipeline(#{pipelines.first.id}) for MR(#{mr.iid})")
-					gitlab.create_pipeline(mr.project_id, mr.source_branch)
+					active_pipeline = gitlab.create_pipeline(mr.project_id, mr.source_branch)
 				end
 			end
+			active_pipeline
 		end
 
 		def pipelines(mr)

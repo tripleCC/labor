@@ -1,0 +1,5 @@
+
+main_deploy: 
+
+pod_deploy:
+  create_mr_only_not_merged: true

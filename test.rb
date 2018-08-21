@@ -37,12 +37,35 @@ require_relative './hook_event_handler/merge_request'
 # require_relative './hook_event_handler/pipeline'
 require_relative './hook_event_handler/push'
 
-
+require 'sinatra/activerecord'
+# MainDeploy.all.each(&:destroy)
+# PodDeploy.all.each(&:destroy)
 # main_deploy = MainDeploy.create(
 # 		name: '发布1.6.5', 
 # 		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
 # 		ref: 'release/0.0.1'
 # 		)
+
+# main_deploy.pod_deploys = 5.times.map { |i|
+# 	i = i.to_s
+# 	deploy_hash = {
+# 						name: i,
+# 						repo_url: i,
+# 						ref: i
+# 					}
+# 	d = PodDeploy.create(deploy_hash)
+# 	d
+# }
+
+# main_deploy.pod_deploys.map do |d|
+# 	Thread.new do 
+# 		# main_deploy = MainDeploy.find_by(id: main_deploy.id)
+# 		# p d
+# 		d.update(name: 'kkkkk')
+# 	end
+# end.each(&:join)
+
+# p PodDeploy.all.map(&:name)
 # main_deploy.prepare
 
 # p Labor::HookEventHandler.constants.map(&:to_s).map(&:underscore)
@@ -76,36 +99,52 @@ require_relative './hook_event_handler/push'
 # end.each(&:join)
 
 #(:lower)
-require 'sinatra'
+# require 'sinatra'
 require 'sinatra/activerecord'
 
-post '/' do 
-	hook_string = request.body.read
-	hash = JSON.parse(hook_string)
-	# pp hash
-	object_kind = hash['object_kind']
-	if Labor::HookEventHandler.event_kinds.include?(object_kind)
-		handler = Labor::HookEventHandler.handler(object_kind, hash)
-		handler.handle
-	end
+# post '/' do 
+# 	hook_string = request.body.read
+# 	hash = JSON.parse(hook_string)
+# 	pp hash
+# 	object_kind = hash['object_kind']
+# 	if Labor::HookEventHandler.event_kinds.include?(object_kind)
+# 		handler = Labor::HookEventHandler.handler(object_kind, hash)
+# 		handler.handle
+# 	end
 
-	''
-end
+# 	''
+# end
 
-get '/' do 
-	# MainDeploy.all.each(&:destroy)
-	main_deploy = MainDeploy.create(
+# get '/' do 
+	PodDeploy.all.each(&:destroy)
+	MainDeploy.all.each(&:destroy)
+	main_deploy = MainDeploy.find_or_create_by(
 		name: '发布1.6.5', 
 		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
 		ref: 'release/0.0.1'
 		)
-	main_deploy.prepare
 
+	# p main_deploy
 
-	p MainDeploy.all.size
-	deploy = MainDeploy.first
-	''
-end
+	main_deploy.enqueue
+ 
+  # p main_deploy
+
+	# p MainDeploy.all.size
+	# deploy = MainDeploy.first
+	PodDeploy.all.each do |deploy|
+		p deploy
+		p deploy.merge_request_iids
+	end
+	# ''p Thread.current
+# end
+
+# get '/reviewed/:id' do 
+# 	deploy = Labor::PodDeploy.find_by(id: params['id'])
+# 	deploy.update(reviewed: true)
+# 	deploy.auto_merge
+# 	''
+# end
 
 
 # gitlab = Labor::GitLab.gitlab

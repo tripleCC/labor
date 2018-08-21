@@ -11,6 +11,7 @@ module Labor
 				deploys = PodDeploy.where(project_id: object.project.id, ref: object_attributes.source.default_branch)
 				target_deploy = deploys.find { |deploy| deploy.merge_request_iids.include?(object_attributes.iid) }
 
+				p target_deploy
 				return unless target_deploy
 				logger.info("handle pod deploy #{target_deploy.name} with MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source.default_branch}, target: #{object_attributes.target.default_branch})")
 
