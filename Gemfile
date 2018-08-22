@@ -7,12 +7,18 @@ gem 'state_machines-activerecord', '~> 0.5'
 gem 'gitlab', '~> 4.5.0'
 gem 'cocoapods', '~> 1.5'
 gem 'pg', '~> 0.21.0'
+gem 'sidekiq'
 
 # gem 'sqlite3'
 # gem 'cocoapods-external-pod-sorter'
 gem 'member_reminder'
-gem 'rake'
 gem 'git'
+
+group :development do
+	gem 'rake'
+	gem 'better_errors'
+end
+
 
 # bundle exec ruby test.rb -e production -p 8080
 
