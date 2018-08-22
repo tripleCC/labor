@@ -1,0 +1,6 @@
+require_relative './deploy_service/auto_merge_pod'
+require_relative './deploy_service/cancel_pod'
+require_relative './deploy_service/prepare_main'
+require_relative './deploy_service/prepare_pod'
+require_relative './deploy_service/process_main'
+require_relative './deploy_service/process_pod'

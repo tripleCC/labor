@@ -1,5 +1,9 @@
+# port: 9797
+port: 8080
+host: localhost
+log_file: "~/.labor/labor.log"
 
-main_deploy: 
+# main_deploy: 
 
-pod_deploy:
-  create_mr_only_not_merged: true
+# pod_deploy:
+#   create_mr_only_not_merged: true

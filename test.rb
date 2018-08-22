@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 # $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '.'))
-
+require_relative './lib/labor'
 # require 'state_machines-activerecord'
-require_relative './app'
-require_relative './models/pod_deploy'
-require_relative './models/main_deploy'
+# require_relative './app'
+# require_relative './models/pod_deploy'
+# require_relative './models/main_deploy'
 include Labor
 
  
@@ -32,10 +32,10 @@ require 'pp'
 # pp sorter.sort
 
 # 
-require 'gitlab'
-require_relative './hook_event_handler/merge_request'
-require_relative './hook_event_handler/pipeline'
-require_relative './hook_event_handler/push'
+# require 'gitlab'
+# require_relative './hook_event_handler/merge_request'
+# require_relative './hook_event_handler/pipeline'
+# require_relative './hook_event_handler/push'
 
 # MainDeploy.all.each(&:destroy)
 # PodDeploy.all.each(&:destroy)
@@ -98,61 +98,70 @@ require_relative './hook_event_handler/push'
 # end.each(&:join)
 
 #(:lower)
-require 'sinatra'
-require 'sinatra/activerecord'
+# require 'sinatra'
+# require 'sinatra/activerecord'
 
-post '/' do 
-	hook_string = request.body.read
-	hash = JSON.parse(hook_string)
-	# pp hash
-	object_kind = hash['object_kind']
+# post '/' do 
+# 	hook_string = request.body.read
+# 	hash = JSON.parse(hook_string)
+# 	# pp hash
+# 	object_kind = hash['object_kind']
 
-	if Labor::HookEventHandler.event_kinds.include?(object_kind)
-		handler = Labor::HookEventHandler.handler(object_kind, hash)
-		handler.handle
-	end
+# 	if Labor::HookEventHandler.event_kinds.include?(object_kind)
+# 		handler = Labor::HookEventHandler.handler(object_kind, hash)
+# 		handler.handle
+# 	end
 
-	''
-end
+# 	''
+# end
 
-get '/' do 
-	# p PodDeploy.where(project_id: 2441, ref: 'release/0.2.3').find { |deploy| deploy.merge_request_iids.include?('30') }
-	PodDeploy.all.each(&:destroy)
-	MainDeploy.all.each(&:destroy)
-	main_deploy = MainDeploy.find_or_create_by(
-		name: '发布1.6.5', 
-		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
-		ref: 'release/0.0.1'
-		)
+# get '/' do 
+# 	# p PodDeploy.where(project_id: 2441, ref: 'release/0.2.3').find { |deploy| deploy.merge_request_iids.include?('30') }
+# 	PodDeploy.all.each(&:destroy)
+# 	MainDeploy.all.each(&:destroy)
+# 	main_deploy = MainDeploy.find_or_create_by(
+# 		name: '发布1.6.5', 
+# 		repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+# 		ref: 'release/0.0.1'
+# 		)
 
-	main_deploy.enqueue
+# 	main_deploy.enqueue
  
-  # p main_deploy
+#   # p main_deploy
 
-	# p MainDeploy.all.size
-	# deploy = MainDeploy.first
-	# PodDeploy.all.each do |deploy|
-	# 	p deploy
-	# 	p deploy.merge_request_iids
-	# end
-	''
-end
+# 	# p MainDeploy.all.size
+# 	# deploy = MainDeploy.first
+# 	# PodDeploy.all.each do |deploy|
+# 	# 	p deploy
+# 	# 	p deploy.merge_request_iids
+# 	# end
+# 	''
+# end
 
-get '/pod_deploys' do 
-	d = PodDeploy.all.select { |d| d.name == 'PodB' }.first
-	d.enqueue
-	# PodDeploy.all.each(&:enqueue)
-	# p PodDeploy.pluck('status')	
-	# p PodDeploy.pluck('name')
-	''
-end
+# get '/deploys/main/' do 
 
-get '/reviewed/:id' do 
-	deploy = Labor::PodDeploy.find_by(id: params['id'])
-	deploy.update(reviewed: true)
-	deploy.auto_merge
-	''
-end
+# end
+
+# get '/deploys/pod/' do 
+
+# end
+
+
+# get '/podDeploys' do 
+# 	d = PodDeploy.all.select { |d| d.name == 'PodB' }.first
+# 	d.enqueue
+# 	# PodDeploy.all.each(&:enqueue)
+# 	# p PodDeploy.pluck('status')	
+# 	# p PodDeploy.pluck('name')
+# 	''
+# end
+
+# get '/reviewed/:id' do 
+# 	deploy = Labor::PodDeploy.find_by(id: params['id'])
+# 	deploy.update(reviewed: true)
+# 	deploy.auto_merge
+# 	''
+# end
 
 
 # gitlab = Labor::GitLab.gitlab
@@ -177,13 +186,13 @@ require 'logger'
 # require_relative './cocoapods/sources_manager'
 # require_relative './cocoapods/podfile'
 # require_relative './external_pod_sorter'
-include Pod
+# include Pod
 
 # require 'cocoapods-external-pod-sorter'
 
 require 'yaml'
 # require_relative './member_reminder'
-require_relative './labor'
+# require_relative './labor'
 # require 'state_machine'
 
 # module HashStatus
