@@ -5,7 +5,6 @@ require_relative '../logger'
 module Labor
 	module HookEventHandler
 		class Pipeline < Base 
-			include Labor::Logger
 			include MemberReminder::DingTalk
 
 			def handle 
@@ -21,19 +20,20 @@ module Labor
 			end
 
 			def handle_merge_request_pipeline
-				deploy = PodDeploy.where(project_id: object.project.id, mr_pipeline_id: object_attributes.id, ref: object_attributes.ref)
+				deploy = PodDeploy.find_by(project_id: object.project.id, mr_pipeline_id: object_attributes.id, ref: object_attributes.ref)
 				# 成功了会走 MergeRequst 流程，这里不用管，失败了推送钉钉消息
 				return unless deploy 
 				logger.info("handle deploy #{deploy.name} pipeline with status #{object_attributes.status}")
-				
-				return unless object_attributes.status == 'failed'
-					# post_content = ""
-					# post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+
+				if object_attributes.status == 'failed'
+					# 这里不 drop，继续 pending ，直到负责人来解决
+					post_content = "pod deploy #{deploy.name} 合并 MR (#{object_attributes.ref}) 必须通过的 CI 执行失败, 地址: #{pipeline_web_url}"
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				end
 			end
 
 			def handle_deploy_pipeline
-				deploy = PodDeploy.where(project_id: object.project.id, cd_pipeline_id: object_attributes.id, version: object_attributes.ref)
+				deploy = PodDeploy.find_by(project_id: object.project.id, cd_pipeline_id: object_attributes.id, version: object_attributes.ref)
 				return unless deploy
 
 				case object_attributes.status
@@ -44,10 +44,16 @@ module Labor
 					# 凡是外界干预没有执行完全 CD pipeline，均视为失败
 					# pod deloy 失败，更新 status
 					deploy.drop()
+					post_content = "pod deploy #{deploy.name} 发布 #{object_attributes.ref} 执行 CD 失败, 地址: #{pipeline_web_url}"
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				when 'success'
 					# pod deloy 成功，更新 status
 					deploy.success
 				end
+			end
+
+			def pipeline_web_url
+				"#{object_attributes.web_url}/pipelines/#{object_attributes.id}"
 			end
 		end
 	end

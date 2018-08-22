@@ -31,7 +31,7 @@ module Labor
 			# 但是依然会抛出 400 错误，提示 tag 不存在
 			# 这里先去查找是否有最新的 pipeline，一定程度上
 			# 规避了这个问题
-			pipeline = gitlab.newest_active_pipeline(project_id, name)
+			pipeline = gitlab.newest_active_pipeline(project.id, name)
 			pipeline = gitlab.create_pipeline(project.id, name)	if pipeline.nil?
 			logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): run pipeline (#{pipeline.id})")
 			pipeline

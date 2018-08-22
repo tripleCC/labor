@@ -34,7 +34,7 @@ require 'pp'
 # 
 require 'gitlab'
 require_relative './hook_event_handler/merge_request'
-# require_relative './hook_event_handler/pipeline'
+require_relative './hook_event_handler/pipeline'
 require_relative './hook_event_handler/push'
 
 # MainDeploy.all.each(&:destroy)
@@ -106,6 +106,7 @@ post '/' do
 	hash = JSON.parse(hook_string)
 	# pp hash
 	object_kind = hash['object_kind']
+
 	if Labor::HookEventHandler.event_kinds.include?(object_kind)
 		handler = Labor::HookEventHandler.handler(object_kind, hash)
 		handler.handle
