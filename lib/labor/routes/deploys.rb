@@ -9,7 +9,7 @@ module Labor
 	class App < Sinatra::Base
 
 		get '/deploys' do 
-			@deploys = MainDeploy.paginate(page: params[:page])
+			@deploys = MainDeploy.order('id DESC').page(params[:page]).per_page(params[:page_size])
 
 			labor_response @deploys
 		end
