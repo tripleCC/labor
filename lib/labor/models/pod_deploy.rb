@@ -1,5 +1,7 @@
-# require 'active_record'
+require 'active_record'
 require 'state_machines-activerecord'
+require 'will_paginate'
+require 'will_paginate/active_record'
 require_relative '../deploy_service'
 
 module Labor
@@ -9,7 +11,9 @@ module Labor
     # sqlite3 不支持 array 类型
     # serialize :merge_request_iids
     # serialize :external_dependency_names
-    
+
+    self.per_page = 30
+
   	state_machine :status, :initial => :created do
       event :enqueue do
         # transition any - [:analyzing] => :analyzing

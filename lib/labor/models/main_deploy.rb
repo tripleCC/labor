@@ -1,10 +1,14 @@
 require 'active_record'
 require 'state_machines-activerecord'
+require 'will_paginate'
+require 'will_paginate/active_record'
 require_relative '../deploy_service'
 
 module Labor
   class MainDeploy < ActiveRecord::Base
   	has_many :pod_deploys, dependent: :destroy
+
+    self.per_page = 20
 
   	state_machine :status, :initial => :created do
       event :enqueue do

@@ -9,12 +9,12 @@ default: &default
 
 development:
   <<: *default
-  database: mydatabase_development
+  database: labor_development
   username: postgres
   password: daimao
 
 production: 
   <<: *default
-  database: mydatabase_production
+  database: labor_production
   username: postgres
   password: daimao

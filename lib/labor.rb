@@ -1,4 +1,8 @@
+require "sinatra/base"
 require 'sinatra/activerecord'
+require 'sinatra/param'
+require 'will_paginate'
+require 'will_paginate/active_record'
 require_relative './labor/models/pod_deploy'
 require_relative './labor/models/main_deploy'
 require_relative './labor/hook_event_handler'
@@ -7,6 +11,11 @@ require_relative './labor/config'
 module Labor
 	class App < Sinatra::Base
 		register Sinatra::ActiveRecordExtension
+		register WillPaginate::Sinatra
+
+		before do
+	    content_type :json
+		end
 
 		configure do 
 			set :host, Labor.config.host
@@ -14,7 +23,17 @@ module Labor
       enable :dump_errors, :logging
 		end
 
+		configure :production do 
+			set :raise_sinatra_param_exceptions, true
+      error Sinatra::Param::InvalidParameterError do
+			    { error: "#{env['sinatra.error'].param} is invalid" }.to_json
+			end
+		end
+
 		configure :development do
+			# set :show_exceptions, false
+      # set :raise_errors, true
+
       require 'better_errors'
       use BetterErrors::Middleware
       BetterErrors.application_root = settings.root
@@ -25,16 +44,23 @@ module Labor
     end
 
 		get '/deploys' do 
-			PodDeploy.all.each(&:destroy)
-			MainDeploy.all.each(&:destroy)
-			main_deploy = MainDeploy.find_or_create_by(
-				name: '发布1.6.5', 
-				repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
-				ref: 'release/0.0.1'
-				)
+			WillPaginate.per_page = 20
+			MainDeploy.paginate(:page => params[:page]).to_json
+			# .to_json
 
-			main_deploy.enqueue
-			''
+			# # MainDeploy.find_in_batches(batch_size: 100) do |deploy|
+
+			# # end
+			# PodDeploy.all.each(&:destroy)
+			# MainDeploy.all.each(&:destroy)
+			# main_deploy = MainDeploy.find_or_create_by(
+			# 	name: '发布1.6.5', 
+			# 	repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git', 
+			# 	ref: 'release/0.0.1'
+			# 	)
+
+			# main_deploy.enqueue
+			# ''
 		end
 
 		post '/webhook' do 
