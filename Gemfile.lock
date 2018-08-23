@@ -137,17 +137,17 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 4.0)
-  better_errors
+  better_errors (~> 2.4)
   cocoapods (~> 1.5)
-  git (~> 1.5.0)
+  git (~> 1.5)
   gitlab (~> 4.5.0)
-  member_reminder (~> 0.1.6)
+  member_reminder (~> 0.1)
   pg (~> 0.21.0)
   rake
-  sidekiq
+  sidekiq (~> 5.2)
   sinatra (~> 2.0)
   sinatra-activerecord (~> 2.0)
-  sinatra-contrib
+  sinatra-contrib (~> 2.0)
   state_machines-activerecord (~> 0.5)
 
 BUNDLED WITH

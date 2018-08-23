@@ -7,12 +7,24 @@ options = {
   deploy_host: Labor.config.deploy_host
 }
 
+pid_file = File.expand_path("#{__FILE__}/../labor.pid")
+
 task :run do 
-	system "bundle exec rackup -p #{options[:port]} -o #{options[:host]}"
+	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:host]}"
 end
 
 task :deploy do 
-	system "bundle exec rackup -p #{options[:port]} -o #{options[:deploy_host]} -E production"
+	system "bundle exec rackup -D -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
+	puts "Deployed Labor web server"
+end
+
+task :stop do 
+	if File.exist?(pid_file)
+    pid = File.read(pid_file)
+    Process.kill('INT', pid.to_i)
+    File.delete(pid_file)
+    puts "Stopped Labor web server"
+  end
 end
 
 
