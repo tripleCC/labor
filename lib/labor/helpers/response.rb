@@ -5,7 +5,7 @@ module Labor
 				data: data,
 				errors: errors,
 				meta: meta
-			}.to_json
+			}.reject {|_, v| v.nil? }.to_json
 		end
 	end
 end
