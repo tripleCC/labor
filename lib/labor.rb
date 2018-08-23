@@ -5,6 +5,7 @@ require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative './labor/config'
 require_relative './labor/routes'
+require_relative './labor/helpers'
 
 module Labor
 	class App < Sinatra::Base
@@ -12,6 +13,7 @@ module Labor
 		register WillPaginate::Sinatra
 
 		helpers Sinatra::Param
+		helpers Labor::Response
 
 		before do
 	    content_type :json
@@ -20,6 +22,7 @@ module Labor
 		configure do 
 			set :host, Labor.config.host
       set :port, Labor.config.port
+      set :app_file, File.expand_path(__FILE__)
       enable :dump_errors, :logging
 		end
 
@@ -40,7 +43,7 @@ module Labor
 
       require 'sinatra/reloader'
       register Sinatra::Reloader
-      Dir["#{settings.root}/labor/*.rb"].each { |file| also_reload file }
+      Dir["#{settings.root}/labor/**/*.rb"].each { |file| also_reload file }
     end
 	end
 end
