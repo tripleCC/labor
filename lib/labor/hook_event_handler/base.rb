@@ -1,5 +1,6 @@
 require 'gitlab'
 require_relative '../logger'
+require_relative '../models/pod_deploy'
 
 module Labor
 	module HookEventHandler
