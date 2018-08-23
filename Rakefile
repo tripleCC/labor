@@ -15,8 +15,7 @@ task :run do
 end
 
 task :deploy do 
-	# -D
-	system "bundle exec rackup  -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
+	system "bundle exec rackup -D -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
 	puts "Deployed Labor web server"
 end
 
@@ -27,6 +26,11 @@ task :stop do
     File.delete(pid_file)
     puts "Stopped Labor web server"
   end
+end
+
+task :restart do 
+	system 'rake stop'
+	system 'rake run'
 end
 
 

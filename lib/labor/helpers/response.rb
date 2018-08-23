@@ -7,12 +7,9 @@ module Labor
 				meta: meta
 			}.reject {|_, v| v.nil? }.to_json
 		end
+
+		def labor_error(error)
+			labor_response(nil, Array(error)) 
+		end
 	end
 end
-
-
-		# {
-# 	data: [],
-# 	errors: [],
-# 	meta: {}
-# }

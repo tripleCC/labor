@@ -23,17 +23,20 @@ module Labor
 			set :host, Labor.config.host
       set :port, Labor.config.port
       set :app_file, File.expand_path(__FILE__)
-      enable :dump_errors, :logging
+      enable :logging
 		end
 
 		configure :production do 
 			set :raise_sinatra_param_exceptions, true
+			disable :dump_errors
       error Sinatra::Param::InvalidParameterError do
 			    { error: "#{env['sinatra.error'].param} is invalid" }.to_json
 			end
 		end
 
 		configure :development do
+			set :show_exceptions, :after_handler
+			enable :dump_errors
 			# set :show_exceptions, false
       # set :raise_errors, true
 
@@ -45,5 +48,13 @@ module Labor
       register Sinatra::Reloader
       Dir["#{settings.root}/labor/**/*.rb"].each { |file| also_reload file }
     end
+
+    not_found do
+    	labor_error 'page not found'
+    end
+
+    error ActiveRecord::RecordNotFound do |error|
+    	halt 404, labor_error(error.message)
+	  end
 	end
 end

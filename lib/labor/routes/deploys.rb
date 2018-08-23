@@ -9,24 +9,28 @@ module Labor
 	class App < Sinatra::Base
 
 		get '/deploys' do 
-			@deploys = MainDeploy.order('id DESC').page(params[:page]).per_page(params[:page_size])
+			@deploys = MainDeploy.paginate(params).order('id DESC')
 
 			labor_response @deploys
 		end
 
 		get '/deploys/:id' do |id|
 			@deploy = MainDeploy.find(id)
-			@deploy.to_json
+
+			labor_response @deploy
 		end
 
 		post '/deploys' do 
 			# 可以针对同个仓库，同个分支创建发布
 			@deploy = MainDeploy.create(params)
+
+			labor_response @deploy
 		end
 
 		delete '/deploys/:id' do |id|
 			@deploy = MainDeploy.find(id).destroy
-			@deploy.to_json
+
+			labor_response @deploy
 		end
 	end
 end
