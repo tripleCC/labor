@@ -25,13 +25,12 @@ module Labor
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): left pod deploys #{left_pod_deploy_names}, start next pod deploys #{next_pod_deploys.map(&:name)}")
 				
 				# 执行下一阶段的 deploy
-				if next_pod_deploys.any?
-					next_pod_deploys.each(&:deploy)
-				else 
-					# 没有需要发布的组件，标志此次工程发布成功
-					deploy.success
-				end
-				next_pod_deploys.any?
+				next_pod_deploys.each(&:deploy)
+
+				# 没有遗留的组件，标志此次工程发布成功
+				deploy.success if left_pod_deploys.empty?
+
+				left_pod_deploys.empty?
 			end
 		end
 	end

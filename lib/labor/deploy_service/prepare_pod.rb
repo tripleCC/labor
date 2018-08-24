@@ -7,6 +7,7 @@ require_relative '../remote_file'
 module Labor
 	module DeployService
 		class PreparePod < Base 
+			include MemberReminder::DingTalk
 			using StringExtension
 			
 			def execute
@@ -51,23 +52,29 @@ module Labor
 			end
 
 			def create_gitflow_merge_requests
-				post_content = "#{deploy.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust." 
+				post_content = "发版进程[id: #{deploy.main_deploy.id}, name: #{deploy.main_deploy.name}]:#{deploy.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust." 
 
 				# gitflow 工作流需要合并至 master 和 develop
 				mr, content = create_merge_request(deploy.project_id, deploy.ref, 'master', deploy.owner)
 				deploy.merge_request_iids << mr.iid
 				post_content << content
 
-				unless deploy.ref.is_develop? || gitlab.branch(deploy.project_id, 'develop').nil?
-					mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
-					deploy.merge_request_iids << mr.iid
-					post_content << content
+				# develop 分支可能没有，这里不抛出错误
+				begin 
+					unless deploy.ref.is_develop? || gitlab.branch(deploy.project_id, 'develop').nil?
+						mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
+						deploy.merge_request_iids << mr.iid
+						post_content << content
+					end
+				rescue Gitlab::Error::NotFound => error
+					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): don't have develop branch.")
 				end
+				
 				deploy.save
 				deploy.pend
 
 				# 发送组件合并钉钉消息
-				# post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 			end
 
 			def update_spec_version(project_id, ref)

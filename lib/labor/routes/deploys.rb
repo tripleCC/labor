@@ -5,32 +5,61 @@ require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative '../models/main_deploy'
 
+
 module Labor
 	class App < Sinatra::Base
 
 		get '/deploys' do 
-			@deploys = MainDeploy.paginate(params).order('id DESC')
+			# page ; per_page
+			@deploys = MainDeploy.paginate(page: params[:page], per_page: params[:per_page]).order('id DESC')
 
 			labor_response @deploys
 		end
 
 		get '/deploys/:id' do |id|
-			@deploy = MainDeploy.find(id)
+			@deploy = MainDeploy.includes(:pod_deploys).find(id)
 
-			labor_response @deploy
+			labor_response @deploy, [:pod_deploys]
+		end
+
+		get '/deploys/:id/pods' do |id|
+			@deploy = MainDeploy.includes(:pod_deploys).find(id)
+
+			labor_response @deploy.pod_deploys
 		end
 
 		post '/deploys' do 
-			# 可以针对同个仓库，同个分支创建发布
-			@deploy = MainDeploy.create(params)
+			begin 
+				# 可以针对同个仓库，同个分支创建发布
+				@deploy = MainDeploy.create!(params)
 
-			labor_response @deploy
+				labor_response @deploy
+			rescue ActiveRecord::RecordInvalid => error 
+				logger.error "Failed to create main deploy with error #{error.message}"
+
+				halt 400, labor_error(error.message)
+			end
 		end
 
 		delete '/deploys/:id' do |id|
 			@deploy = MainDeploy.find(id).destroy
 
 			labor_response @deploy
+		end
+
+		post '/deploys/:id/enqueue' do |id|
+			@deploy = MainDeploy.find(id)
+			@deploy.enqueue
+
+			labor_response @deploy
+		end
+
+		post '/deploys/:id/cancel' do |id|
+
+		end
+
+		post '/deploys/:id/retry' do |id|
+
 		end
 	end
 end

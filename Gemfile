@@ -10,6 +10,7 @@ gem 'cocoapods', '~> 1.5'
 gem 'pg', '~> 0.21.0'
 gem 'sidekiq', '~> 5.2'
 gem 'will_paginate', '~> 3.1.0'
+# kaminari
 
 # gem 'sqlite3' # 并发访问有问题，文件级锁
 # gem 'cocoapods-external-pod-sorter'

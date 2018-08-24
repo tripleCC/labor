@@ -1,4 +1,5 @@
 require 'logger'
+require 'sinatra'
 require_relative './config'
 
 module Labor
@@ -10,7 +11,7 @@ module Labor
     def self.logger
       return @logger if @logger
 
-      if Labor.config.log_file
+      if Labor.config.log_file && Sinatra::Base.settings.production?
           log_file = File.expand_path('~/.labor/labor.log')
       else
           log_file = STDOUT

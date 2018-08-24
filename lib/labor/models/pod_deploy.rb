@@ -14,6 +14,8 @@ module Labor
 
     self.per_page = 30
 
+    validates :repo_url, presence: true
+
   	state_machine :status, :initial => :created do
       event :enqueue do
         # transition any - [:analyzing] => :analyzing

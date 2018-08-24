@@ -5,7 +5,7 @@ require_relative './lib/labor'
 # require_relative './app'
 # require_relative './models/pod_deploy'
 # require_relative './models/main_deploy'
-include Labor
+# include Labor
 
  
 # pod_deploy.merge_request_iids << 1
@@ -26,7 +26,8 @@ include Labor
 require 'pp'
 
 
-# pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:qingmu/PodE.git')
+pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:qingu/PodE.git')
+p pr
 # data_source = ExternalPod::Sorter::DataSource::Remote.new(pr.id, 'release/0.0.1')
 # sorter = ExternalPod::Sorter.new(data_source)
 # pp sorter.sort

@@ -10,6 +10,10 @@ module Labor
 
     self.per_page = 20
 
+    validates :name, presence: true
+    validates :repo_url, presence: true
+    validates :ref, presence: true
+
   	state_machine :status, :initial => :created do
       event :enqueue do
         transition [:created, :canceled, :failed, :success] => :analyzing
@@ -38,6 +42,7 @@ module Labor
 
       after_transition any => :analyzing do |deploy, transition|
         next if transition.loopback?
+
         deploy.prepare
       end
     end

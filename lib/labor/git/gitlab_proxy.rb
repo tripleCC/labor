@@ -1,6 +1,7 @@
 require 'gitlab'
 require_relative './string_extension'
 require_relative './gitlab_api'
+require_relative '../errors'
 
 module Labor
 	class GitLabProxy
@@ -32,8 +33,6 @@ module Labor
 
 		def branch(project_id, ref)
 			client.branch(project_id, ref)
-		rescue Gitlab::Error::NotFound
-			nil
 		end
 
 		def file_path(project_id, file_name, ref = 'master', depth = 5)
@@ -64,9 +63,7 @@ module Labor
 		def file_contents(project_id, file_path, ref)
 			content = client.file_contents(project_id, file_path, ref)
       content = content.force_encoding("UTF-8") if content
-    rescue Gitlab::Error::NotFound
-    	nil
-		end
+   	end
 
 		def add_push_rule(project_id, push_rule = DEFAULT_PROJECT_PUSH_RULE)
 			client.add_push_rule(project_id, push_rule)
@@ -143,10 +140,13 @@ module Labor
 		end
 
 		def project(git_url)
-			client.project_search(git_url.git_name).find do |project| 
+			project = client.project_search(git_url.git_name).find do |project| 
           project.ssh_url_to_repo == git_url ||
           project.http_url_to_repo == git_url
       end
+
+      raise Labor::Error::NotFound.new("Can't find project with url #{git_url}") if project.nil?
+      project
 		end
 
 		def all_branches(project_id)

@@ -1,5 +1,6 @@
 require_relative '../git/gitlab'
 require_relative '../logger'
+require_relative '../errors'
 
 module Labor
 	module DeployService

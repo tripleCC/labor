@@ -15,7 +15,9 @@ task :run do
 end
 
 task :deploy do 
-	system "bundle exec rackup -D -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
+	# 后台运行
+	#  -D   
+	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
 	puts "Deployed Labor web server"
 end
 

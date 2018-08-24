@@ -40,7 +40,7 @@ module Labor
 						owner_ding_token: member.team.ding_token
 					}) if member 
 
-					pod_deploy = PodDeploy.create(deploy_hash)
+					pod_deploy = PodDeploy.create!(deploy_hash)
 					pod_deploy
 				end
 				pod_deploys

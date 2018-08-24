@@ -1,3 +1,4 @@
+require 'member_reminder'
 require_relative './base'
 
 module Labor
@@ -7,6 +8,8 @@ module Labor
 		# 2、创建此 tag 的 pipeline
 		# 3、监听 pl 状态
 		class ProcessPod < Base 
+			include MemberReminder::DingTalk
+
 			def execute
 				name = deploy.version
 				create_tag(name)
@@ -15,12 +18,15 @@ module Labor
 			rescue Gitlab::Error::BadRequest => error
 				logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to process pod deploy with error #{error.message}")
 				deploy.drop(error.message)
+
+				post_content = "发版进程[id: #{deploy.main_deploy.id}, name: #{deploy.main_deploy.name}]:  #{deploy.name} 组件发版失败，错误信息：#{error.message}." 
+				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 			end
 
 			def create_tag(name)
 				# 注意，tag 重复的话会抛出错误
+				logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create tag #{name}")
 				tag = gitlab.create_tag(project.id, name, 'master')
-				logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create tag #{tag.name}")
 				tag
 			end
 

@@ -3,12 +3,17 @@ require 'sinatra/activerecord'
 require 'sinatra/param'
 require 'will_paginate'
 require 'will_paginate/active_record'
+require "gitlab"
+require_relative './labor/logger'
 require_relative './labor/config'
 require_relative './labor/routes'
 require_relative './labor/helpers'
+require_relative './labor/errors'
 
 module Labor
 	class App < Sinatra::Base
+		include Labor::Logger
+
 		register Sinatra::ActiveRecordExtension
 		register WillPaginate::Sinatra
 
@@ -28,7 +33,7 @@ module Labor
 
 		configure :production do 
 			set :raise_sinatra_param_exceptions, true
-			disable :dump_errors
+			# disable :dump_errors
       error Sinatra::Param::InvalidParameterError do
 			    { error: "#{env['sinatra.error'].param} is invalid" }.to_json
 			end
@@ -44,17 +49,27 @@ module Labor
       use BetterErrors::Middleware
       BetterErrors.application_root = settings.root
 
+      # reloader 感觉没啥用了，对于非 labor.rb 文件改动，还是要手动重启
       require 'sinatra/reloader'
       register Sinatra::Reloader
-      Dir["#{settings.root}/labor/**/*.rb"].each { |file| also_reload file }
+      # Dir["#{settings.root}/labor/**/*.rb"]
+      Dir["#{settings.root}/labor/*.rb"].each { |file| also_reload file }
     end
 
     not_found do
     	labor_error 'page not found'
     end
 
-    error ActiveRecord::RecordNotFound do |error|
+    # 这里如果是 webhook 阶段抛出的错误
+    # 设置 error 就没用了，因为是返回给 gitlab 接口
+    error ActiveRecord::RecordNotFound, 
+    			Labor::Error::NotFound,
+    			Gitlab::Error::NotFound do |error|
     	halt 404, labor_error(error.message)
+	  end
+
+	  error Gitlab::Error::Forbidden do |error|
+	  	halt 403, labor_error(error.message)
 	  end
 	end
 end
