@@ -18,7 +18,8 @@ module Labor
 				end
 			end
 
-			def handle_merge_request_pipeline
+			# TODO 这里如果已经合并过，那么 pipeline_id 都会为空，以下代码逻辑会有问题
+ 			def handle_merge_request_pipeline
 				deploy = PodDeploy.find_by(project_id: object.project.id, mr_pipeline_id: object_attributes.id, ref: object_attributes.ref)
 				# 成功了会走 MergeRequst 流程，这里不用管，失败了推送钉钉消息
 				return unless deploy 

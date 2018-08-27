@@ -1,5 +1,6 @@
 require 'member_reminder'
 require_relative './base'
+require_relative '../config'
 
 module Labor
 	module DeployService
@@ -12,7 +13,11 @@ module Labor
 
 			def execute
 				name = deploy.version
+
+				delete_tag(name) if Labor.config.allow_delete_tag_when_already_existed
 				create_tag(name)
+				# 这里立刻创建 pipeline 的话，会出现找不到 tag 错误，所以延迟 0.15
+				sleep(0.15)
 				pipeline = create_pipeline(name)
 				deploy.update(cd_pipeline_id: pipeline.id)
 			rescue Gitlab::Error::BadRequest => error
@@ -21,6 +26,13 @@ module Labor
 
 				post_content = "发版进程[id: #{deploy.main_deploy.id}, name: #{deploy.main_deploy.name}]:  #{deploy.name} 组件发版失败，错误信息：#{error.message}." 
 				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+			end
+
+			def delete_tag(name)
+				# gitlab.tag(project.id, name)
+				gitlab.delete_tag(project.id, name)
+			rescue Gitlab::Error::NotFound => error
+				logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): failed to delete tag(#{name}) with error #{error}")
 			end
 
 			def create_tag(name)

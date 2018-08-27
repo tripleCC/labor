@@ -16,7 +16,8 @@ module Labor
 
   	state_machine :status, :initial => :created do
       event :enqueue do
-        transition [:created, :canceled, :failed, :success] => :analyzing
+        transition any - [:analyzing] => :analyzing
+        # transition [:created, :canceled, :failed, :success] => :analyzing
       end
 
       event :deploy do

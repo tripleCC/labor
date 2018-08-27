@@ -26,8 +26,16 @@ require_relative './lib/labor'
 require 'pp'
 
 
-pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:qingu/PodE.git')
-p pr
+# pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:qingu/PodE.git')
+# p pr
+
+Labor::GitLab.gitlab.delete_tag('2441', '0.36')
+# p Labor::GitLab.gitlab.newest_active_pipeline('2441', '0.34')
+p Labor::GitLab.gitlab.create_tag('2441', '0.36', 'master')
+sleep(0.15)
+p Labor::GitLab.gitlab.create_pipeline('2441', '0.36')
+file = Labor::RemoteFile::GitLabCIYaml.new('2441', 'release/0.2.3')
+p file.config.keys
 # data_source = ExternalPod::Sorter::DataSource::Remote.new(pr.id, 'release/0.0.1')
 # sorter = ExternalPod::Sorter.new(data_source)
 # pp sorter.sort

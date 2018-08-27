@@ -19,7 +19,7 @@ module Labor
   	state_machine :status, :initial => :created do
       event :enqueue do
         # transition any - [:analyzing] => :analyzing
-        transition [:created, :canceled, :failed, :success] => :analyzing
+        transition [:created, :canceled, :failed, :success, :skipped] => :analyzing
       end
 
       event :skip do 
@@ -62,6 +62,12 @@ module Labor
       after_transition any => :merged do |deploy, transition|
         next if transition.loopback?
         # 当组件标识为已合并，则让主发布处理组件 CD
+        deploy.main_deploy.process
+      end
+
+      after_transition any => :success do |deploy, transition|
+        next if transition.loopback?
+        # 当组件标识为已成功，则让主发布处理组件 CD
         deploy.main_deploy.process
       end
 

@@ -47,6 +47,14 @@ module Labor
 			labor_response @deploy
 		end
 
+		post '/deploys/:id/review/:pid' do |_, pid|
+			@deploy = PodDeploy.find(pid)
+			@deploy.update(reviewed: true)
+			@deploy.auto_merge
+
+			labor_response @deploy			
+		end
+
 		post '/deploys/:id/enqueue' do |id|
 			@deploy = MainDeploy.find(id)
 			@deploy.enqueue

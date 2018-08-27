@@ -5,6 +5,7 @@ log_file: "~/.labor/labor.log"
 gitlab_endpoint: 'http://git.2dfire-inc.com/api/v4'
 # RestBuild's token
 gitlab_private_token: 'Se79zS8rgUupDZv6JN8G'
+allow_delete_tag_when_already_existed: true
 
 # main_deploy: 
 
