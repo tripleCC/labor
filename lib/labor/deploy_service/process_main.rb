@@ -15,6 +15,8 @@ module Labor
 				left_pod_deploys = deploy.pod_deploys.reject { |deploy| deploy.success? || deploy.manual? }
 				left_pod_deploy_names = left_pod_deploys.map(&:name)
 
+				running_deploy_names = deploy.pod_deploys.select { |deploy| deploy.deploying? }.map(&:name)
+
 				# 计算接下来可发布的 pod
 				next_pod_deploys = left_pod_deploys.select do |pod_deploy|
 					# 依赖中没有未发布的组件 && 已经合并过 MR 
@@ -22,13 +24,16 @@ module Labor
 					pod_deploy.merged? 
 				end
 
-				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): left pod deploys #{left_pod_deploy_names}, start next pod deploys #{next_pod_deploys.map(&:name)}")
+				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): left pod deploys #{left_pod_deploy_names}, running deploys #{running_deploy_names}, start next pod deploys #{next_pod_deploys.map(&:name)}")
 				
 				# 执行下一阶段的 deploy
 				next_pod_deploys.each(&:deploy)
 
 				# 没有遗留的组件，标志此次工程发布成功
-				deploy.success if left_pod_deploys.empty?
+				if left_pod_deploys.empty?
+					logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): deploy success")	
+					deploy.success 
+				end
 
 				left_pod_deploys.empty?
 			end

@@ -1,6 +1,7 @@
 require 'member_reminder'
 require_relative './base'
 require_relative '../config'
+require_relative '../utils/retry_rescue'
 
 module Labor
 	module DeployService
@@ -10,6 +11,7 @@ module Labor
 		# 3、监听 pl 状态
 		class ProcessPod < Base 
 			include MemberReminder::DingTalk
+			include Labor::RetryRescue
 
 			def execute
 				name = deploy.version
@@ -50,22 +52,13 @@ module Labor
 				# 这里先去查找是否有最新的 pipeline，一定程度上
 				# 规避了这个问题
 				pipeline = gitlab.newest_active_pipeline(project.id, name)
-				tries ||= 6
-				begin
+				# 这里立刻创建 pipeline 的话，可能会出现找不到 tag 错误，所以延迟重试 0.15
+				retry_rescue Gitlab::Error::BadRequest do |rest_times|
+					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create pipeline with rest times #{rest_times}")
 					pipeline = gitlab.create_pipeline(project.id, name)	if pipeline.nil?
-					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): run pipeline (#{pipeline.id})")
-					pipeline
-				rescue Gitlab::Error::BadRequest => error
-					tries -= 1
-					if tries.zero? 
-						drop_deploy(error)
-					else
-						logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): tag(#{name}) hadn't been created, try again (#{tries}) after sleeping 0.15s")
-						# 这里立刻创建 pipeline 的话，会出现找不到 tag 错误，所以延迟 0.15
-						sleep(0.15)	
-						retry 
-					end
 				end
+				logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): run pipeline (#{pipeline.id})")
+				pipeline
 			end
 		end
 	end

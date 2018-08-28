@@ -29,13 +29,35 @@ require 'pp'
 # pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:qingu/PodE.git')
 # p pr
 
+# error = 
+
+def retry_rescue(error_cls, times = 5, sleep_duration = 0.15, &block)
+	tries ||= times
+	yield if block_given?
+rescue error_cls => error
+	tries -= 1
+	if tries.zero? 
+		raise error
+	else
+		sleep(sleep_duration)
+		retry
+	end
+end
+
+
 Labor::GitLab.gitlab.delete_tag('2441', '0.36')
 # p Labor::GitLab.gitlab.newest_active_pipeline('2441', '0.34')
 p Labor::GitLab.gitlab.create_tag('2441', '0.36', 'master')
-sleep(0.15)
-p Labor::GitLab.gitlab.create_pipeline('2441', '0.36')
-file = Labor::RemoteFile::GitLabCIYaml.new('2441', 'release/0.2.3')
-p file.config.keys
+# p Labor::GitLab.gitlab.create_pipeline('2441', '0.36')
+retry_rescue(Gitlab::Error::BadRequest) do 
+	Labor::GitLab.gitlab.create_pipeline('2441', '0.36')
+	p "============="
+end
+
+# sleep(0.15)
+# p Labor::GitLab.gitlab.create_pipeline('2441', '0.36')
+# file = Labor::RemoteFile::GitLabCIYaml.new('2441', 'release/0.2.3')
+# p file.config.keys
 # data_source = ExternalPod::Sorter::DataSource::Remote.new(pr.id, 'release/0.0.1')
 # sorter = ExternalPod::Sorter.new(data_source)
 # pp sorter.sort
