@@ -81,9 +81,13 @@ module Labor
         deploy.process
       end
 
+      after_transition any => :manual do |deploy, transition|
+        next if transition.loopback?
+        DeployService::CancelPod.new(deploy).execute
+      end
+
       before_transition any => :canceled do |deploy, transition|
         next if transition.loopback?
-
         DeployService::CancelPod.new(deploy).execute
       end
 

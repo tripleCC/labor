@@ -47,12 +47,19 @@ module Labor
 			labor_response @deploy
 		end
 
-		post '/deploys/:id/review/:pid' do |_, pid|
+		post '/deploys/:id/pods/:pid/review' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(reviewed: true)
 			@deploy.auto_merge
 
 			labor_response @deploy			
+		end
+
+		post '/deploys/:id/pods/:pid/manual' do |id|
+			# @deploy = MainDeploy.find(id)
+			# @deploy.manual
+
+			# labor_response @deploy
 		end
 
 		post '/deploys/:id/enqueue' do |id|
@@ -63,11 +70,17 @@ module Labor
 		end
 
 		post '/deploys/:id/cancel' do |id|
+			@deploy = MainDeploy.find(id)
+			@deploy.cancel
 
+			labor_response @deploy
 		end
 
 		post '/deploys/:id/retry' do |id|
+			@deploy = MainDeploy.find(id)
+			@deploy.enqueue
 
+			labor_response @deploy
 		end
 	end
 end

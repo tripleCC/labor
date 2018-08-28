@@ -28,8 +28,11 @@ module Labor
 					return
 				end
 
-				unless deploy.ref.is_master?
-					# 如果已经合并到 master ，直接标志改组件为可发布
+				if deploy.ref == 'master'
+					# 发布分支是 master 的情况下，直接标志为可发布
+					deploy.ready
+				else
+					# 如果发布分支已经合并到 master ，直接标志为可发布
 					if gitlab.branch(deploy.project_id, deploy.ref).merged
 						# TODO
 						# 这里如果网页上可以填写 version 的话，也需要有更新 version 这一步
@@ -61,13 +64,13 @@ module Labor
 
 				# develop 分支可能没有，这里不抛出错误
 				begin 
-					unless deploy.ref.is_develop? || gitlab.branch(deploy.project_id, 'develop').nil?
+					unless deploy.ref == 'develop' || gitlab.branch(deploy.project_id, 'develop').nil?
 						mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
 						deploy.merge_request_iids << mr.iid
 						post_content << content
 					end
 				rescue Gitlab::Error::NotFound => error
-					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): don't have develop branch.")
+					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): can't find develop branch.")
 				end
 				
 				deploy.save

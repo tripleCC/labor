@@ -11,35 +11,37 @@ module Labor
 		class AutoMergePod < Base 
 
 			def execute
-				# TODO 
-				# 这里需要处理下 ref 是 master 分支， merge_request_iids 为空的情况
-				# 直接设置 merge 给 main_deploy process ？
+				if deploy.merge_request_iids.any?
+					deploy.merge_request_iids.map do |mr_iid|
+						thread = Thread.new do 
+							mr = gitlab.merge_requests(deploy.project_id, mr_iid.to_s).first
+							# 已合并，直接走 process 流程
+							# 已合并时，prepare 阶段不会提 mr，也就是 merge_request_iids 为空
+							# 这里主要考虑了 prepare 阶段创建了 mr ，开发者手动合并的情况
+							if mr.state == 'merged'
+								deploy.main_deploy.process
+							else
+								# accept_merge_request 的 merge_when_pipeline_succeeds 参数需要有活动的 PL 才会生效
+								# 这里处理完 PL 之后，才请求自动合并
+								pipeline = activate_pipeline(mr)
 
-				deploy.merge_request_iids.map do |mr_iid|
-					thread = Thread.new do 
-						mr = gitlab.merge_requests(deploy.project_id, mr_iid.to_s).first
-						# 已合并，直接走 process 流程
-						if mr.state == 'merged'
-							deploy.main_deploy.process
-						else
-							# accept_merge_request 的 merge_when_pipeline_succeeds 参数需要有活动的 PL 才会生效
-							# 这里处理完 PL 之后，才请求自动合并
-							pipeline = activate_pipeline(mr)
+								# 记录 MR 对应的 PL id ，失败了去 hook event handler 中的 Pipeline 提醒开发者
+								deploy.update(mr_pipeline_id: pipeline.id)
 
-							# 记录 MR 对应的 PL id ，失败了去 hook event handler 中的 Pipeline 提醒开发者
-							deploy.update(mr_pipeline_id: pipeline.id)
-
-							begin
-								logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{deploy.name}'s MR(#{mr_iid}) when pipeline success")
-								# 发起合并请求，必须是 PL 成功后才合并
-								gitlab.accept_merge_request(deploy.project_id, mr_iid)
-							rescue Gitlab::Error::MethodNotAllowed => error
-								logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to accept #{deploy.name}'s MR(#{mr_iid}) with error: #{error}")
+								begin
+									logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{deploy.name}'s MR(#{mr_iid}) when pipeline success")
+									# 发起合并请求，必须是 PL 成功后才合并
+									gitlab.accept_merge_request(deploy.project_id, mr_iid)
+								rescue Gitlab::Error::MethodNotAllowed => error
+									logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to accept #{deploy.name}'s MR(#{mr_iid}) with error: #{error}")
+								end
 							end
 						end
-					end
-					thread
-				end.each(&:join)
+						thread
+					end.each(&:join)
+				else 
+					deploy.main_deploy.process
+				end
 			end
 
 			private
