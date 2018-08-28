@@ -55,11 +55,13 @@ module Labor
 			labor_response @deploy			
 		end
 
-		post '/deploys/:id/pods/:pid/manual' do |id|
-			# @deploy = MainDeploy.find(id)
-			# @deploy.manual
+		post '/deploys/:id/pods/:pid/manual' do |_, pid|
+			@deploy = PodDeploy.find(pid)
+			@deploy.update(manual: true)
+			@deploy.success
+			@deploy.cancel_all_operation
 
-			# labor_response @deploy
+			labor_response @deploy
 		end
 
 		post '/deploys/:id/enqueue' do |id|

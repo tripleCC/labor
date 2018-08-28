@@ -19,6 +19,7 @@ class CreatePodDeploys < ActiveRecord::Migration
   		t.string :status
   		t.string :failure_reason
   		t.boolean :reviewed, default: false, null: false
+      t.boolean :manual, default: false, null: false
   		t.datetime :started_at
 	    t.datetime :finished_at
   		t.timestamps null: true

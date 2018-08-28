@@ -42,13 +42,7 @@ module Labor
       end
 
       event :success do 
-        # 两种情况
-        # 1、正常发布 -> success
         transition deploying: :success
-        # 2、标志手动发布成功 -> manual, 只有不满足 CI/CD 条件，即没有 skipped ，才可以手动发布
-        # TODO
-        # manual 之后，需要取消所有 PL
-        transition skipped: :manual
       end
 
       event :drop do
@@ -81,14 +75,9 @@ module Labor
         deploy.process
       end
 
-      after_transition any => :manual do |deploy, transition|
-        next if transition.loopback?
-        DeployService::CancelPod.new(deploy).execute
-      end
-
       before_transition any => :canceled do |deploy, transition|
         next if transition.loopback?
-        DeployService::CancelPod.new(deploy).execute
+        deploy.cancel_all_operation
       end
 
       before_transition any => :failed do |deploy, transition|
@@ -96,6 +85,10 @@ module Labor
           deploy.failure_reason = reason
         end
       end
+    end
+
+    def cancel_all_operation
+      DeployService::CancelPod.new(self).execute 
     end
 
     def prepare

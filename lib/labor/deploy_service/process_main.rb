@@ -9,10 +9,7 @@ module Labor
 		class ProcessMain < Base
 			def execute
 				# 计算还未发布的 pod
-				# TODO
-				# || deploy.manual? 需要发布者手动去发布网页勾选 已手动合并/发布 skipped -> manual
-				# 发布成功 || 标识为手动发布成功
-				left_pod_deploys = deploy.pod_deploys.reject { |deploy| deploy.success? || deploy.manual? }
+				left_pod_deploys = deploy.pod_deploys.reject { |deploy| deploy.success? }
 				left_pod_deploy_names = left_pod_deploys.map(&:name)
 
 				running_deploy_names = deploy.pod_deploys.select { |deploy| deploy.deploying? }.map(&:name)

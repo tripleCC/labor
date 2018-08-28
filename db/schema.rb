@@ -45,6 +45,7 @@ ActiveRecord::Schema.define(version: 20180809031253) do
     t.string   "status"
     t.string   "failure_reason"
     t.boolean  "reviewed",                  default: false,    null: false
+    t.boolean  "manual",                    default: false,    null: false
     t.datetime "started_at"
     t.datetime "finished_at"
     t.datetime "created_at"
