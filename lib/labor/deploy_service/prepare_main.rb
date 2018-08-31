@@ -7,7 +7,6 @@ module Labor
 	module DeployService
 		class PrepareMain < Base 
 			def execute
-				p deploy.repo_url
 				project = gitlab.project(deploy.repo_url)
 				deploy.update(project_id: project.id)
 
