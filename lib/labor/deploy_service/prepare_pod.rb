@@ -82,7 +82,7 @@ module Labor
 
 			def update_spec_version(project_id, ref)
 				specification = RemoteFile::Specification.new(project_id, ref)
-				specification.modify_version(ref.version)
+				specification.edit_remote_version#(ref.version)
 			end
 
 			def create_merge_request(project_id, ref, target, assignee_name)

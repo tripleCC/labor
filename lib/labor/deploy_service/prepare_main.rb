@@ -7,6 +7,10 @@ module Labor
 	module DeployService
 		class PrepareMain < Base 
 			def execute
+				p deploy.repo_url
+				project = gitlab.project(deploy.repo_url)
+				deploy.update(project_id: project.id)
+
 				# 分析依赖，获取需要发布的组件
 				grouped_pods = sort_grouped_pods
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): create pod deploys: #{grouped_pods}")
@@ -48,7 +52,7 @@ module Labor
 
 			def sort_grouped_pods
 				# 排序分析未发布的组件
-				data_source = ExternalPod::Sorter::DataSource::Remote.new(project.id, deploy.ref)
+				data_source = ExternalPod::Sorter::DataSource::Remote.new(deploy.project_id, deploy.ref)
 				sorter = ExternalPod::Sorter.new(data_source)
 				sorter.sort
 				sorter.grouped_pods

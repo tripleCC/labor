@@ -24,35 +24,33 @@ require_relative './lib/labor'
 # 	
 # end
 require 'pp'
+require 'cocoapods-tdfire-binary'
 
+require_relative 'lib/labor/remote_file'
 
+podfile = Labor::RemoteFile::Podfile.new('2441', 'master')
+# s = Labor::RemoteFile::Podfile::Generator.new(podfile, podfile.template.file_contents).generate
+p podfile.edit_remote
+# podfile_template = Labor::RemoteFile::Podfile::Template.new('2441', 'master')
+# podfile = podfile.podfile
+
+# p Labor::RemoteFile::Podfile::Generator.new(podfile, podfile_template.file_contents).generate
+# podfile
+# p podfile_template
 # pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:qingu/PodE.git')
 # p pr
 
 # error = 
 
-def retry_rescue(error_cls, times = 5, sleep_duration = 0.15, &block)
-	tries ||= times
-	yield if block_given?
-rescue error_cls => error
-	tries -= 1
-	if tries.zero? 
-		raise error
-	else
-		sleep(sleep_duration)
-		retry
-	end
-end
 
-
-Labor::GitLab.gitlab.delete_tag('2441', '0.36')
+# Labor::GitLab.gitlab.delete_tag('2441', '0.36')
 # p Labor::GitLab.gitlab.newest_active_pipeline('2441', '0.34')
-p Labor::GitLab.gitlab.create_tag('2441', '0.36', 'master')
+# p Labor::GitLab.gitlab.create_tag('2441', '0.36', 'master')
 # p Labor::GitLab.gitlab.create_pipeline('2441', '0.36')
-retry_rescue(Gitlab::Error::BadRequest) do 
-	Labor::GitLab.gitlab.create_pipeline('2441', '0.36')
-	p "============="
-end
+# retry_rescue(Gitlab::Error::BadRequest) do 
+# 	Labor::GitLab.gitlab.create_pipeline('2441', '0.36')
+# 	p "============="
+# end
 
 # sleep(0.15)
 # p Labor::GitLab.gitlab.create_pipeline('2441', '0.36')

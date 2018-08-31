@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(version: 20180809031253) do
     t.string   "name"
     t.string   "repo_url"
     t.string   "ref"
+    t.string   "project_id"
     t.string   "status"
     t.string   "failure_reason"
     t.datetime "started_at"

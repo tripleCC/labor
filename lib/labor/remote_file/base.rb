@@ -1,3 +1,4 @@
+require 'cocoapods-tdfire-binary'
 require_relative '../git/gitlab'
 
 module Labor

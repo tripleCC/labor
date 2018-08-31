@@ -1,4 +1,5 @@
 require_relative './base'
+require_relative '../remote_file'
 
 module Labor
 	module DeployService
@@ -28,6 +29,11 @@ module Labor
 
 				# 没有遗留的组件，标志此次工程发布成功
 				if left_pod_deploys.empty?
+					logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): update podfile #{deploy.ref}")	
+					# 更新 Podfile
+					podfile = Labor::RemoteFile::Podfile.new(deploy.project_id, deploy.ref)
+					podfile.edit_remote
+
 					logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): deploy success")	
 					deploy.success 
 				end

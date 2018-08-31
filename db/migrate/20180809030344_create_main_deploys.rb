@@ -4,6 +4,7 @@ class CreateMainDeploys < ActiveRecord::Migration
   		t.string :name, presence: true
   		t.string :repo_url, presence: true
   		t.string :ref, presence: true
+      t.string :project_id
   		t.string :status
   		t.string :failure_reason
   		t.datetime :started_at

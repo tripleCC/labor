@@ -16,6 +16,7 @@ gem 'will_paginate', '~> 3.1.0'
 # gem 'cocoapods-external-pod-sorter'
 gem 'member_reminder', '~> 0.1'
 gem 'git', '~> 1.5'
+gem 'cocoapods-tdfire-binary'
 
 group :development do
 	gem 'rake'
