@@ -22,6 +22,7 @@ module Labor
 
 		before do
 	    content_type :json
+	    headers 'Access-Control-Allow-Origin' => '*'
 		end
 
 		configure do 
