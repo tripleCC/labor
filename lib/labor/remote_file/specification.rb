@@ -28,12 +28,14 @@ module Labor
 				end
 			end
 
-			def modify_version(refer_version)
-				modifier = VersionModifier.new(file_contents, refer_version, @path)
+			def edit_remote_version(version = nil) 
+				version ||= @ref.version
+
+				modifier = VersionModifier.new(file_contents, version, @path)
 				if modifier.should_modify? 
-					logger.info("update #{specification.name} podspec version #{specification.version} to #{refer_version}")
+					logger.info("update #{specification.name} podspec version #{specification.version} to #{version}")
 					content = modifier.modify
-					gitlab.edit_file(@project_id, @path, @ref, content, "更正 podspec 版本 #{refer_version}".ci_skip)
+					gitlab.edit_file(@project_id, @path, @ref, content, "更正 podspec 版本 #{version}".ci_skip)
 				end
 			end
 

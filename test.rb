@@ -40,7 +40,7 @@ p podfile.edit_remote
 # pr = Labor::GitLab.gitlab.project('git@git.2dfire-inc.com:qingu/PodE.git')
 # p pr
 
-# error = 
+
 
 
 # Labor::GitLab.gitlab.delete_tag('2441', '0.36')

@@ -8,7 +8,7 @@ module Labor
 	module RemoteFile
 		class Podfile < Base
 			using StringExtension
-
+			
 			PODFILE_NAME = 'Podfile'.freeze
 
 			attr_reader :podfile
@@ -35,7 +35,7 @@ module Labor
 
 			def edit_remote(podfile_string = nil)
 				podfile_string ||= Generator.new(podfile, template.file_contents).generate
-				p gitlab.edit_file(@project_id, @path, @ref, podfile_string, "封板#{ref}".ci_skip)
+				gitlab.edit_file(@project_id, @path, @ref, podfile_string, "封板#{ref}".ci_skip)
 			end
 
 			protected
