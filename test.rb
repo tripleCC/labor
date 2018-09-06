@@ -3,14 +3,17 @@
 
 require 'pp'
 require 'cocoapods-tdfire-binary'
+require_relative './lib/labor/git/gitlab'
 
-require_relative 'lib/labor/remote_file'
-require_relative 'lib/labor/external_pod/sorter'
+Labor::GitLab.gitlab.update_merge_request('2441', '50', { state_event: 'close' })
 
-data_source = ExternalPod::Sorter::DataSource::Remote.new('2444', 'release/0.2.2')
-sorter = ExternalPod::Sorter.new(data_source)
-sorter.sort
-p sorter.grouped_pods
+# require_relative 'lib/labor/remote_file'
+# require_relative 'lib/labor/external_pod/sorter'
+
+# data_source = ExternalPod::Sorter::DataSource::Remote.new('2444', 'release/0.2.2')
+# sorter = ExternalPod::Sorter.new(data_source)
+# sorter.sort
+# p sorter.grouped_pods
 
 # podfile = Labor::RemoteFile::Podfile.new('2441', 'master')
 # s = Labor::RemoteFile::Podfile::Generator.new(podfile, podfile.template.file_contents).generate
