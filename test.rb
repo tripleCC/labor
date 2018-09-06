@@ -1,36 +1,20 @@
 #!/usr/bin/env ruby
-# $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '.'))
-require_relative './lib/labor'
-# require 'state_machines-activerecord'
-# require_relative './app'
-# require_relative './models/pod_deploy'
-# require_relative './models/main_deploy'
-# include Labor
 
- 
-# pod_deploy.merge_request_iids << 1
-# p deploy.pod_deploys.first.merge_request_iids
-# pod_deploy.save
 
-# p pod_deploy.merge_request_iids
-# p deploy
-# p deploy.status
-# deploy.enqueue
-
-# p Deploy.create(name: 'qingmu', repo_url: 'git@git.2dfire-inc.com:qingmu/PodE.git')
-# require 'sinatra'
-
-# get '/' do 
-# 	
-# end
 require 'pp'
 require 'cocoapods-tdfire-binary'
 
 require_relative 'lib/labor/remote_file'
+require_relative 'lib/labor/external_pod/sorter'
 
-podfile = Labor::RemoteFile::Podfile.new('2441', 'master')
+data_source = ExternalPod::Sorter::DataSource::Remote.new('2444', 'release/0.2.2')
+sorter = ExternalPod::Sorter.new(data_source)
+sorter.sort
+p sorter.grouped_pods
+
+# podfile = Labor::RemoteFile::Podfile.new('2441', 'master')
 # s = Labor::RemoteFile::Podfile::Generator.new(podfile, podfile.template.file_contents).generate
-p podfile.edit_remote
+# p podfile.edit_remote
 # podfile_template = Labor::RemoteFile::Podfile::Template.new('2441', 'master')
 # podfile = podfile.podfile
 

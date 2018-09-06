@@ -48,12 +48,16 @@ module Labor
       end
     end
 
-    def process
-      DeployService::ProcessMain.new(self).execute
-    end
-
     def prepare
       DeployService::PrepareMain.new(self).execute
+    end
+
+    def start 
+      DeployService::StartMain.new(self).execute 
+    end
+
+    def process
+      DeployService::ProcessMain.new(self).execute
     end
   end
 end

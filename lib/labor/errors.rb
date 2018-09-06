@@ -6,6 +6,4 @@ module Labor
 
 		
 	end
-
-	# class 
 end

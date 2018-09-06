@@ -12,17 +12,9 @@ module Labor
 
 				# 分析依赖，获取需要发布的组件
 				grouped_pods = sort_grouped_pods
-				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): create pod deploys: #{grouped_pods}")
+				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): prepare main deploy, create pod deploys: #{grouped_pods}")
 
 				deploy.pod_deploys = create_pod_deploys(grouped_pods)
-				deploy.pod_deploys.each(&:enqueue)
-				deploy.deploy
-				# 多线程会出问题
-				# async_each(deploy.pod_deploys, &:enqueue)
-
-				# 这里还没合并 MR ，无法 process
-				# project hook 监听到 MR 执行成功后，即可 process
-				# deploy.process
 			end
 
 			# 创建需要发布的组件

@@ -72,8 +72,17 @@ module Labor
 			@deploy = MainDeploy.find(id)
 			@deploy.enqueue
 
+			@deploy.start if params[:start_directly]
+
 			labor_response @deploy
-		end
+		end		
+
+		post '/deploys/:id/deploy' do |id|
+			@deploy = MainDeploy.find(id)
+			@deploy.start
+
+			labor_response @deploy
+		end		
 
 		post '/deploys/:id/cancel' do |id|
 			@deploy = MainDeploy.find(id)
