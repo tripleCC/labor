@@ -47,6 +47,10 @@ module Labor
 			labor_response @deploy
 		end
 
+		# 处理跨域预检请求
+		options '/deploys/:id' do 
+		end
+
 		post '/deploys/:id/pods/:pid/review' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(reviewed: true)

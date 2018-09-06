@@ -22,7 +22,7 @@ module Labor
 
 		before do
 	    content_type :json
-	    headers 'Access-Control-Allow-Origin' => '*'
+	    headers 'Access-Control-Allow-Origin' => '*', 'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
 		end
 
 		configure do 
