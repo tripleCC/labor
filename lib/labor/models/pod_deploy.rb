@@ -53,15 +53,9 @@ module Labor
         transition any - [:canceled, :success, :failed, :skipped] => :canceled
       end
 
-      after_transition any => :merged do |deploy, transition|
+      after_transition any => [:merged, :success] do |deploy, transition|
         next if transition.loopback?
         # 当组件标识为已合并，则让主发布处理组件 CD
-        deploy.main_deploy.process
-      end
-
-      after_transition any => :success do |deploy, transition|
-        next if transition.loopback?
-        # 当组件标识为已成功，则让主发布处理组件 CD
         deploy.main_deploy.process
       end
 

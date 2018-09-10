@@ -29,7 +29,7 @@ module Labor
 		def load_config 
 			current_path        = File.expand_path(File.dirname(__FILE__))
 	    custom_config_file  = File.expand_path("~/.labor/config.yml")
-	    default_config_file = File.expand_path("#{current_path}/../../config.yml")
+	    default_config_file = File.expand_path("#{current_path}/../../config/config.yml")
 
 	    abort 'labor config file #{default_config_file} is missing.' unless File.exists?(default_config_file)
 	    final_config = YAML.load_file(default_config_file)

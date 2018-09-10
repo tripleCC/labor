@@ -12,7 +12,7 @@ module Labor
       return @logger if @logger
 
       if Labor.config.log_file && Sinatra::Base.settings.production?
-          log_file = File.expand_path('~/.labor/labor.log')
+          log_file = File.expand_path(Labor.config.log_file)
       else
           log_file = STDOUT
       end
@@ -24,6 +24,7 @@ module Labor
       end
 
       @logger = ::Logger.new log_file
+      Sidekiq::Logging.logger = @logger
       @logger.level = ::Logger::INFO
       @logger.formatter = proc do |severity, datetime, progname, msg|
         "[#{datetime} ##{Process.pid}] #{severity}: #{msg}\n"

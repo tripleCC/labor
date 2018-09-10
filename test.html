@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript">
+		
+		let ws = new WebSocket('ws://localhost:8081?id=1')
+    // let ws = new WebSocket('ws://localhost:8081')
+    ws.onmessage = (evt) => {
+        console.log('receive message: ' + evt.data)
+    }
+    ws.onclose = (event) => {
+        console.log("closed - code: " + event.code + ", reason: " + event.reason + ", wasClean: " + event.wasClean)
+    }
+    ws.onopen = () => {
+        console.log("connected...");
+    };
+	</script>
+</head>
+<body>
+
+</body>
+</html>

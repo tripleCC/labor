@@ -1,11 +1,60 @@
 #!/usr/bin/env ruby
 
-
+require 'cgi'
 require 'pp'
-require 'cocoapods-tdfire-binary'
+# require 'cocoapods-tdfire-binary'
 require_relative './lib/labor/git/gitlab'
+require 'em-websocket'
+require 'active_job'
+require 'sidekiq'
 
-Labor::GitLab.gitlab.update_merge_request('2441', '50', { state_event: 'close' })
+module Labor
+	class WebSocketWorker < ActiveJob::Base
+		queue_as :default
+
+		def perform()
+			p Thread.current
+		end
+	end
+end
+
+p Thread.current
+ActiveJob::Base.queue_adapter = :sidekiq
+Labor::WebSocketWorker.perform_later
+Labor::WebSocketWorker.perform_later
+Labor::WebSocketWorker.perform_later
+
+sleep(2)
+# websockets = {}
+
+# EventMachine::WebSocket.start(:host => "0.0.0.0", :port => 8081, :debug => false) do |ws|
+# 	p ws
+#     ws.onopen { |handshake|
+#     	p handshake
+
+#     	query = CGI::parse(handshake.query_string)
+#     	deploy_id = query['id']&.first
+
+#     	websockets[deploy_id] ||= [] 
+#     	websockets[deploy_id] << ws
+
+#     	p deploy_id
+#     	p websockets
+#     }
+
+#     ws.onmessage { |msg|
+#     }
+#     ws.onclose { |event|
+#     	p event
+#     }
+
+#     ws.onerror { |e|
+#       p "status detector error: #{e.message}"
+#     }
+#   end
+
+
+# Labor::GitLab.gitlab.update_merge_request('2441', '50', { state_event: 'close' })
 
 # require_relative 'lib/labor/remote_file'
 # require_relative 'lib/labor/external_pod/sorter'

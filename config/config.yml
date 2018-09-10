@@ -1,8 +1,14 @@
 # port: 9797
 port: 8080
 host: localhost
-log_file: "~/.labor/labor.log"
+
+redis_port: 6380
+redis_db: 15
+
+log_file: '~/.labor/labor.log'
+sidekiq_log_file: '~/.labor/sidekiq.log'
 gitlab_endpoint: 'http://git.2dfire-inc.com/api/v4'
+
 # RestBuild's token
 gitlab_private_token: 'Se79zS8rgUupDZv6JN8G'
 allow_delete_tag_when_already_existed: true

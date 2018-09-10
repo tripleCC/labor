@@ -9,6 +9,8 @@ gem 'gitlab', '~> 4.5.0'
 gem 'cocoapods', '~> 1.5'
 gem 'pg', '~> 0.21.0'
 gem 'sidekiq', '~> 5.2'
+# gem 'delayed_job_active_record'
+# gem 'resque'
 gem 'will_paginate', '~> 3.1.0'
 # kaminari
 
@@ -17,6 +19,8 @@ gem 'will_paginate', '~> 3.1.0'
 gem 'member_reminder', '~> 0.1'
 gem 'git', '~> 1.5'
 gem 'cocoapods-tdfire-binary'
+gem 'em-websocket'
+gem 'activejob', '~> 4.2'
 
 group :development do
 	gem 'rake'

@@ -9,25 +9,38 @@ options = {
 }
 
 pid_file = File.expand_path("#{__FILE__}/../labor.pid")
+redis_pid_file = File.expand_path("#{__FILE__}/../sidekiq.pid")
+
+sidekiq_log_file = Labor.config.sidekiq_log_file
+unless File.exist?(sidekiq_log_file)
+	parent_dir, _separator, _filename = sidekiq_log_file.rpartition('/')
+  FileUtils.mkdir_p(parent_dir)
+  FileUtils.touch(sidekiq_log_file)
+end
+
+# 运行 sidekiq 前，需要手动启动 redis
 
 task :run do 
+	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -d"
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:host]}"
 end
 
 task :deploy do 
 	# 后台运行
-	#  -D   
+	#  -D 
+	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -d -e production"  
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
 	puts "Deployed Labor web server"
 end
 
 task :stop do 
-	if File.exist?(pid_file)
+	[pid_file, redis_pid_file].select { |file| File.exist?(file) } .each do |pid_file|
     pid = File.read(pid_file)
     Process.kill('INT', pid.to_i)
     File.delete(pid_file)
-    puts "Stopped Labor web server"
-  end
+    puts "Stopped by #{pid_file}"
+	end
+	
 end
 
 task :restart do 
@@ -35,6 +48,12 @@ task :restart do
 	system 'rake run'
 end
 
+
+# redis 相关
+# brew install redis
+# brew services start redis （后台）
+# redis-server /usr/local/etc/redis.conf （前台）
+# redis-cli shutdown
 
 # bundle exec ruby test.rb -e production -p 8080
 
