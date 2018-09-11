@@ -24,7 +24,6 @@ module Labor
       end
 
       @logger = ::Logger.new log_file
-      Sidekiq::Logging.logger = @logger
       @logger.level = ::Logger::INFO
       @logger.formatter = proc do |severity, datetime, progname, msg|
         "[#{datetime} ##{Process.pid}] #{severity}: #{msg}\n"

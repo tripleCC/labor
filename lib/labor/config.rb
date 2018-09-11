@@ -25,6 +25,16 @@ module Labor
 			end
 		end
 
+		def sidekiq_log_file
+			sidekiq_log_file = File.expand_path(@config.sidekiq_log_file)
+			unless File.exist?(sidekiq_log_file)
+				parent_dir, _separator, _filename = sidekiq_log_file.rpartition('/')
+			  FileUtils.mkdir_p(parent_dir)
+			  FileUtils.touch(sidekiq_log_file)
+			end
+			sidekiq_log_file
+		end
+
 		private
 		def load_config 
 			current_path        = File.expand_path(File.dirname(__FILE__))

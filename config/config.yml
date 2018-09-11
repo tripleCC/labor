@@ -2,7 +2,7 @@
 port: 8080
 host: localhost
 
-redis_port: 6380
+redis_port: 6379
 redis_db: 15
 
 log_file: '~/.labor/labor.log'
