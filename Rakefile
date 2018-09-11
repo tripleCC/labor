@@ -19,29 +19,34 @@ sidekiq_log_file = Labor.config.sidekiq_log_file
 # redis-server /usr/local/etc/redis.conf （前台）
 # redis-cli shutdown
 
+# 如果在 mac 中遇到 sidekiq -d 执行失败，log 显示 [__NSPlaceholderDictionary initialize] may have been in progress in another thread when fork() was called
+# 则先执行以下语句
+# export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+# https://stackoverflow.com/questions/46591470/unicorn-with-ruby-2-4-1-causing-weird-crash
+
 task :run do 
-	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -d"
+	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d"
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:host]}"
 end
 
 task :deploy do 
 	# 后台运行
 	#  -D 
-	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -d -e production"  
+	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d -e production"  
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
 	puts "Deployed Labor web server"
 end
 
 task :stop do 
-	[pid_file].select { |file| File.exist?(file) }.each do |pid_file|
+	[pid_file, redis_pid_file].select { |file| File.exist?(file) }.each do |pid_file|
     pid = File.read(pid_file)
     Process.kill('INT', pid.to_i)
     File.delete(pid_file)
     puts "Stopped by #{pid_file}"
 	end
 	
-	system "sidekiqctl stop #{redis_pid_file}"
-	File.delete(redis_pid_file) if redis_pid_file
+	# system "sidekiqctl stop #{redis_pid_file}"
+	# File.delete(redis_pid_file) if File.exist?(redis_pid_file)
 end
 
 task :restart do 
