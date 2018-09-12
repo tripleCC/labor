@@ -8,52 +8,75 @@ require 'em-websocket'
 require 'active_job'
 require 'sidekiq'
 
-module Labor
-	class WebSocketWorker < ActiveJob::Base
-		queue_as :default
+# module Labor
+# 	class WebSocketWorker < ActiveJob::Base
+# 		queue_as :default
 
-		def perform()
-			p Thread.current
-		end
-	end
-end
+# 		def perform()
+# 			p Thread.current
+# 		end
+# 	end
+# end
 
-p Thread.current
-ActiveJob::Base.queue_adapter = :sidekiq
-Labor::WebSocketWorker.perform_later
-Labor::WebSocketWorker.perform_later
-Labor::WebSocketWorker.perform_later
+# p Thread.current
+# ActiveJob::Base.queue_adapter = :sidekiq
+# Labor::WebSocketWorker.perform_later
+# Labor::WebSocketWorker.perform_later
+# Labor::WebSocketWorker.perform_later
 
-sleep(2)
-# websockets = {}
+# sleep(2)
 
-# EventMachine::WebSocket.start(:host => "0.0.0.0", :port => 8081, :debug => false) do |ws|
-# 	p ws
-#     ws.onopen { |handshake|
-#     	p handshake
+$websockets = {}
+lock = Mutex.new
 
-#     	query = CGI::parse(handshake.query_string)
-#     	deploy_id = query['id']&.first
-
-#     	websockets[deploy_id] ||= [] 
-#     	websockets[deploy_id] << ws
-
-#     	p deploy_id
-#     	p websockets
-#     }
-
-#     ws.onmessage { |msg|
-#     }
-#     ws.onclose { |event|
-#     	p event
-#     }
-
-#     ws.onerror { |e|
-#       p "status detector error: #{e.message}"
-#     }
-#   end
+# Thread.new do 
+    EventMachine::WebSocket.start(:host => Labor.config.host, :port => Labor.config.websocket_port, :debug => false) do |ws|
+    ws.onopen do |handshake|
+        # Labor::WebSocket.base.route(handshake.path, ws, CGI::parse(handshake.query_string))
 
 
+        query = CGI::parse(handshake.query_string)
+        deploy_id = query['id']&.first
+
+        lock.synchronize {
+            $websockets[deploy_id] ||= [] 
+            $websockets[deploy_id] << ws
+        }
+        p deploy_id
+        # p $websockets
+        ws.send "kkkkkkkk"
+        # logger.info("Open socket #{ws} with deploy id #{deploy_id}")
+    end
+
+    ws.onmessage do |message|
+        p message
+        $websockets['2'].each { |w| w.send "kkkkkkkk".to_json }
+        # logger.debug("Receive message #{message}")
+    end
+
+    ws.onclose do |event|
+        lock.synchronize {
+            $websockets.each do |id, wss|
+                wss.reject! { |w| w == ws }
+            end
+        }
+        
+        # p $websockets
+        # logger.info("Close socket #{event}")
+    end
+
+    ws.onerror do |error|
+        lock.synchronize {
+            $websockets.each do |id, wss|
+                wss.reject! { |w| w == ws }
+            end
+        }
+
+        # p $websockets
+        # logger.error("Error with #{error.message}")
+    end
+  end
+# end
 # Labor::GitLab.gitlab.update_merge_request('2441', '50', { state_event: 'close' })
 
 # require_relative 'lib/labor/remote_file'
