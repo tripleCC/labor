@@ -21,6 +21,7 @@ gem 'git', '~> 1.5'
 gem 'cocoapods-tdfire-binary'
 gem 'em-websocket'
 gem 'activejob', '~> 4.2'
+gem 'puma'
 
 group :development do
 	gem 'rake'

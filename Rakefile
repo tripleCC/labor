@@ -24,6 +24,8 @@ sidekiq_log_file = Labor.config.sidekiq_log_file
 # export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 # https://stackoverflow.com/questions/46591470/unicorn-with-ruby-2-4-1-causing-weird-crash
 
+# 有 puma 的情况下，rack 默认使用 Puma 
+
 task :run do 
 	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d"
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:host]}"
