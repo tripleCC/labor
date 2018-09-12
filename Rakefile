@@ -40,11 +40,15 @@ end
 task :stop do 
 	[pid_file, redis_pid_file].select { |file| File.exist?(file) }.each do |pid_file|
     pid = File.read(pid_file)
-    Process.kill('INT', pid.to_i)
-    File.delete(pid_file)
-    puts "Stopped by #{pid_file}"
+    begin 
+    	Process.kill('INT', pid.to_i)
+	    puts "Stopped by #{pid_file}"
+    rescue => error 
+    	puts "#{error.message} #{pid_file}"
+    ensure 
+    	File.delete(pid_file)
+    end
 	end
-	
 	# system "sidekiqctl stop #{redis_pid_file}"
 	# File.delete(redis_pid_file) if File.exist?(redis_pid_file)
 end
