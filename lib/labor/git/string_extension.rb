@@ -1,7 +1,7 @@
 module StringExtension
 	refine String do 
 		def git_name 
-			match('/(.*).git')[1]
+			match('(.*)/(.*).git')[2]
 		end
 
 		def ci_skip
