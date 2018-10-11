@@ -7,32 +7,83 @@ require_relative './lib/labor/git/gitlab'
 require_relative './lib/labor/external_pod/sorter'
 require 'uri'
 
-include Pod
+require 'thin'
+require 'sinatra/base'
+require 'em-websocket'
 
-specs = Config.instance.sources_manager.default_source.newest_specs
+class App < Sinatra::Base
+    get '/' do
+      erb :index
+    end
+  end
 
-repos = []
+
+sig = nil
+
+trap "SIGINT" do
+	puts '================'
+	EM::stop_server sig
+  exit 130
+end
+
+EventMachine.run do
+
+   @clients = []
+	# EM::WebSocket.stop
+
+  sig = EM::WebSocket.start(:host => '0.0.0.0', :port => '3001') do |ws|
+
+
+    ws.onopen do |handshake|
+      @clients << ws
+      ws.send "Connected to #{handshake.path}."
+    end
+
+    ws.onclose do
+      ws.send "Closed."
+      @clients.delete ws
+    end
+
+    ws.onmessage do |msg|
+      puts "Received Message: #{msg}"
+      @clients.each do |socket|
+        socket.send msg
+      end
+    end
+  end
+  # our WebSockets server logic will go here
+  # EM::stop_server sig
+  App.run!
+  # App.run! :port => 8080
+end
+
+
+# include Pod
+
+# specs = Config.instance.sources_manager.default_source.newest_specs
+
+# repos = []
 
 # spec = specs.first
 
-gitlab = Labor::GitLab.gitlab
-specs.map do |spec|
-	# Thread.new do 
-		begin
-		git = spec.consumer(:ios).source[:git]
-		next unless git
+# gitlab = Labor::GitLab.gitlab
+# specs.map do |spec|
+# 	# Thread.new do 
+# 		begin
+# 		git = spec.consumer(:ios).source[:git]
+# 		next unless git
 
-		repos << spec.name if git.include?('github')
-		# project = gitlab.project(git)	
-		# file_path = gitlab.file_path(project.id, "#{spec.name}.framework", 'master', 1)
-		# repos << spec.name if file_path
-		rescue => err 
-			p err
-		end
-	# end
-end#.each(&:join)
+# 		repos << spec.name if git.include?('github')
+# 		# project = gitlab.project(git)	
+# 		# file_path = gitlab.file_path(project.id, "#{spec.name}.framework", 'master', 1)
+# 		# repos << spec.name if file_path
+# 		rescue => err 
+# 			p err
+# 		end
+# 	# end
+# end#.each(&:join)
 
-p repos
+# p repos
 
 
 
