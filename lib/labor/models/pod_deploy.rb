@@ -3,6 +3,7 @@ require 'state_machines-activerecord'
 require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative '../deploy_service'
+require_relative '../workers'
 
 module Labor
   class PodDeploy < ActiveRecord::Base
@@ -61,7 +62,7 @@ module Labor
 
       after_transition any => :analyzing do |deploy, transition|
         next if transition.loopback?
-        deploy.prepare
+        # deploy.prepare
       end
 
       after_transition any => :deploying do |deploy, transition|
@@ -78,6 +79,13 @@ module Labor
         transition.args.first.try do |reason|
           deploy.failure_reason = reason
         end
+      end
+
+      after_transition any => any do |deploy, transition|
+        next if transition.loopback?
+
+        # DeployMessagerWorker.perform_later(deploy.main_deploy.id, deploy.to_json)
+        Labor::DeployMessager.send(deploy.main_deploy.id, deploy)
       end
     end
 

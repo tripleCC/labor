@@ -27,14 +27,15 @@ sidekiq_log_file = Labor.config.sidekiq_log_file
 # 有 puma 的情况下，rack 默认使用 Puma 
 
 task :run do 
-	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d"
+	# sidekiq 会影响 websocket 服务，不知道为什么
+	# system "bundle exec sidekiq -r ./lib/mainloop_abort_on_exception.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d"
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:host]}"
 end
 
 task :deploy do 
 	# 后台运行
 	#  -D 
-	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d -e production"  
+	# system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d -e production"  
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
 	puts "Deployed Labor web server"
 end

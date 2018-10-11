@@ -1,8 +1,10 @@
 require 'em-websocket'
 require_relative './config'
+require_relative './logger'
 
 module Labor
 	module DeployMessager
+		extend Labor::Logger
 
 		class << self 
 			attr_reader :websockets
@@ -11,10 +13,13 @@ module Labor
 		@websockets = {}
 
 		def self.send(deploy_id, hash = {})
+			deploy_id = deploy_id.to_s if deploy_id.respond_to?(:to_s)
 			wss = websockets[deploy_id]
-			p wss
+			hash = hash.to_json unless hash.is_a?(JSON)
+			logger.info("send ws message to #{deploy_id} with wss: #{wss}, message: #{hash}")
+
 			wss.each do |ws|
-				ws.send(hash.to_json)
+				ws.send(hash)
 			end if wss
 		end
 
@@ -22,6 +27,7 @@ module Labor
 			@ws_lock.synchronize {
 				websockets[deploy_id] ||= [] 
         websockets[deploy_id] << ws
+        logger.info("push ws #{ws} for #{deploy_id}")
     	}
 		end
 
@@ -30,6 +36,7 @@ module Labor
 				websockets.each do |id, wss|
           wss.reject! { |w| w == ws }
         end
+        logger.info("pop ws #{ws} of #{deploy_id}")
       }
 		end
 	end

@@ -30,15 +30,19 @@ module Labor
 
 		post '/deploys' do 
 			begin 
+				request.body.rewind
+				params = JSON.parse(request.body.read)
 				# 可以针对同个仓库，同个分支创建发布
 				@deploy = MainDeploy.create!(params)
 
 				labor_response @deploy
 			rescue ActiveRecord::RecordInvalid => error 
-				logger.error "Failed to create main deploy with error #{error.message}"
+				logger.error "Failed to create main deploy with error #{error.message}, params #{params}"
 
 				halt 400, labor_error(error.message)
 			end
+		end
+		options '/deploys' do 
 		end
 
 		delete '/deploys/:id' do |id|

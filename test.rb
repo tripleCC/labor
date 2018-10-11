@@ -2,11 +2,49 @@
 
 require 'cgi'
 require 'pp'
-# require 'cocoapods-tdfire-binary'
+require 'cocoapods-tdfire-binary'
 require_relative './lib/labor/git/gitlab'
-require 'em-websocket'
-require 'active_job'
-require 'sidekiq'
+require_relative './lib/labor/external_pod/sorter'
+require 'uri'
+
+include Pod
+
+specs = Config.instance.sources_manager.default_source.newest_specs
+
+repos = []
+
+# spec = specs.first
+
+gitlab = Labor::GitLab.gitlab
+specs.map do |spec|
+	# Thread.new do 
+		begin
+		git = spec.consumer(:ios).source[:git]
+		next unless git
+
+		repos << spec.name if git.include?('github')
+		# project = gitlab.project(git)	
+		# file_path = gitlab.file_path(project.id, "#{spec.name}.framework", 'master', 1)
+		# repos << spec.name if file_path
+		rescue => err 
+			p err
+		end
+	# end
+end#.each(&:join)
+
+p repos
+
+
+
+# gitlab.project(spec.)
+# gitlab.file_path(project_id, "#{spec.name}.framework", 'master', 1)
+
+
+
+
+# require 'em-websocket'
+# require 'active_job'
+# require 'sidekiq'
 
 # module Labor
 # 	class WebSocketWorker < ActiveJob::Base
@@ -26,56 +64,56 @@ require 'sidekiq'
 
 # sleep(2)
 
-$websockets = {}
-lock = Mutex.new
+# $websockets = {}
+# lock = Mutex.new
 
-# Thread.new do 
-    EventMachine::WebSocket.start(:host => Labor.config.host, :port => Labor.config.websocket_port, :debug => false) do |ws|
-    ws.onopen do |handshake|
-        # Labor::WebSocket.base.route(handshake.path, ws, CGI::parse(handshake.query_string))
+# # Thread.new do 
+#     EventMachine::WebSocket.start(:host => Labor.config.host, :port => Labor.config.websocket_port, :debug => false) do |ws|
+#     ws.onopen do |handshake|
+#         # Labor::WebSocket.base.route(handshake.path, ws, CGI::parse(handshake.query_string))
 
 
-        query = CGI::parse(handshake.query_string)
-        deploy_id = query['id']&.first
+#         query = CGI::parse(handshake.query_string)
+#         deploy_id = query['id']&.first
 
-        lock.synchronize {
-            $websockets[deploy_id] ||= [] 
-            $websockets[deploy_id] << ws
-        }
-        p deploy_id
-        # p $websockets
-        ws.send "kkkkkkkk"
-        # logger.info("Open socket #{ws} with deploy id #{deploy_id}")
-    end
+#         lock.synchronize {
+#             $websockets[deploy_id] ||= [] 
+#             $websockets[deploy_id] << ws
+#         }
+#         p deploy_id
+#         # p $websockets
+#         ws.send "kkkkkkkk"
+#         # logger.info("Open socket #{ws} with deploy id #{deploy_id}")
+#     end
 
-    ws.onmessage do |message|
-        p message
-        $websockets['2'].each { |w| w.send "kkkkkkkk".to_json }
-        # logger.debug("Receive message #{message}")
-    end
+#     ws.onmessage do |message|
+#         p message
+#         $websockets['2'].each { |w| w.send "kkkkkkkk".to_json }
+#         # logger.debug("Receive message #{message}")
+#     end
 
-    ws.onclose do |event|
-        lock.synchronize {
-            $websockets.each do |id, wss|
-                wss.reject! { |w| w == ws }
-            end
-        }
+#     ws.onclose do |event|
+#         lock.synchronize {
+#             $websockets.each do |id, wss|
+#                 wss.reject! { |w| w == ws }
+#             end
+#         }
         
-        # p $websockets
-        # logger.info("Close socket #{event}")
-    end
+#         # p $websockets
+#         # logger.info("Close socket #{event}")
+#     end
 
-    ws.onerror do |error|
-        lock.synchronize {
-            $websockets.each do |id, wss|
-                wss.reject! { |w| w == ws }
-            end
-        }
+#     ws.onerror do |error|
+#         lock.synchronize {
+#             $websockets.each do |id, wss|
+#                 wss.reject! { |w| w == ws }
+#             end
+#         }
 
-        # p $websockets
-        # logger.error("Error with #{error.message}")
-    end
-  end
+#         # p $websockets
+#         # logger.error("Error with #{error.message}")
+#     end
+#   end
 # end
 # Labor::GitLab.gitlab.update_merge_request('2441', '50', { state_event: 'close' })
 
