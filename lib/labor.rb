@@ -28,7 +28,9 @@ module Labor
 
 		before do
 	    content_type :json
-	    headers 'Access-Control-Allow-Origin' => '*', 'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
+	    headers 'Access-Control-Allow-Origin' => '*', 
+		    'Access-Control-Allow-Headers' => 'Content-Type', 
+		    'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
 		end
 
 		configure do 
@@ -77,6 +79,10 @@ module Labor
 
 	  error Gitlab::Error::Forbidden do |error|
 	  	halt 403, labor_error(error.message)
+	  end
+
+	  error Gitlab::Error::Unprocessable do |error|
+	  	halt 422, labor_error(error.message)
 	  end
 	end
 end
