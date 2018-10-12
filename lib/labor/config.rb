@@ -10,7 +10,7 @@ module Labor
 		def deploy_host 
 			@deploy_host ||= begin 
 				host = @config.host
-				if ['127.0.0.1', 'localhost', '0.0.0.0'].include?(@config.host)
+				if ['127.0.0.1', 'localhost'].include?(@config.host)
 					require 'socket'
 					ip = Socket.ip_address_list.detect{|intf| intf.ipv4_private?}
 					host = ip.ip_address if ip

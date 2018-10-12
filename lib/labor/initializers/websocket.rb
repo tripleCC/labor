@@ -20,7 +20,7 @@ module Labor
       def self.start_websocket_server!
         EM.run do 
           signature = EventMachine::WebSocket.start(
-            :host => Labor.config.host, 
+            :host => '0.0.0.0', 
             :port => Labor.config.websocket_port, 
             :debug => !Sinatra::Base.settings.production?
             ) do |ws|
