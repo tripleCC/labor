@@ -36,7 +36,7 @@ module Labor
 				websockets.each do |id, wss|
           wss.reject! { |w| w == ws }
         end
-        logger.info("pop ws #{ws} of #{deploy_id}")
+        logger.info("pop ws #{ws}")
       }
 		end
 	end

@@ -11,49 +11,40 @@ require 'thin'
 require 'sinatra/base'
 require 'em-websocket'
 
-class App < Sinatra::Base
-    get '/' do
-      erb :index
-    end
-  end
-
-
-sig = nil
-
-trap "SIGINT" do
-	puts '================'
-	EM::stop_server sig
-  exit 130
-end
-
 EventMachine.run do
 
    @clients = []
 	# EM::WebSocket.stop
+	begin
+		
+	  sig = EM::WebSocket.start(:host => '0.0.0.0', :port => '8081') do |ws|
 
-  sig = EM::WebSocket.start(:host => '0.0.0.0', :port => '3001') do |ws|
 
+	    ws.onopen do |handshake|
+	      @clients << ws
+	      # ws.send "Connected to #{handshake.path}."
+	    end
 
-    ws.onopen do |handshake|
-      @clients << ws
-      ws.send "Connected to #{handshake.path}."
-    end
+	    ws.onclose do
+	      # ws.send "Closed."
+	      p asdasds
+	      @clients.delete ws
+	    end
 
-    ws.onclose do
-      ws.send "Closed."
-      @clients.delete ws
-    end
+	    ws.onmessage do |msg|
+	      puts "Received Message: #{msg}"
+	      @clients.each do |socket|
+	        socket.send msg
+	      end
+	    end
+	  end
+	rescue Exception => e
+		p e
+	end
 
-    ws.onmessage do |msg|
-      puts "Received Message: #{msg}"
-      @clients.each do |socket|
-        socket.send msg
-      end
-    end
-  end
   # our WebSockets server logic will go here
   # EM::stop_server sig
-  App.run!
+
   # App.run! :port => 8080
 end
 
