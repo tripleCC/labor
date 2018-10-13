@@ -1,4 +1,5 @@
 require 'active_job'
+require_relative '../hook_event_handler'
 
 module Labor
 	class WebhookWorker < ActiveJob::Base

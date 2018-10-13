@@ -28,7 +28,8 @@ sidekiq_log_file = Labor.config.sidekiq_log_file
 
 task :run do 
 	# Q: sidekiq 会影响 websocket 服务，不知道为什么
-	# A: sidekiq -r 指定 worker 文件，不要乱指定
+	# A: sidekiq -r 指定 worker 文件，不要乱指定，否则会 require 两次，创建两次类
+	# 相当于两个不同的服务，这样 socket 在命令行第一句创建后，命令行第二句就不会创建了，导致共享类错误
 	system "bundle exec sidekiq -r ./lib/labor/workers.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d"
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:host]}"
 end
@@ -36,7 +37,7 @@ end
 task :deploy do 
 	# 后台运行
 	#  -D 
-	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d -e production"  
+	system "bundle exec sidekiq -r ./lib/labor/workers.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d -e production"  
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
 	puts "Deployed Labor web server"
 end
@@ -62,6 +63,8 @@ task :restart do
 	system 'rake run'
 end
 
+
+# RACK_ENV=production xxxx
 
 # bundle exec ruby test.rb -e production -p 8080
 

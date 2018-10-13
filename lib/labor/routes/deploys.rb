@@ -4,10 +4,13 @@ require 'sinatra/param'
 require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative '../models/main_deploy'
+require_relative '../deploy_messager'
+require_relative '../logger'
 
 
 module Labor
 	class App < Sinatra::Base
+		include Labor::Logger
 
 		get '/deploys' do 
 			# page ; per_page

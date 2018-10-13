@@ -16,9 +16,9 @@ module Labor
 			deploy_id = deploy_id.to_s if deploy_id.respond_to?(:to_s)
 			wss = websockets[deploy_id]
 			hash = hash.to_json unless hash.is_a?(JSON)
-			logger.info("send ws message to #{deploy_id}, message: #{hash}")
 
 			wss.each do |ws|
+				logger.info("send ws message to #{deploy_id}, message: #{hash}, ws: #{ws}")
 				ws.send(hash)
 			end if wss
 		end
