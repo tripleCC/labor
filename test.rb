@@ -9,44 +9,62 @@ require 'uri'
 
 require 'thin'
 require 'sinatra/base'
-require 'em-websocket'
+require "addressable/uri"
+# require 'git/remote/parser'
+require 'uri/ssh_git'
 
-EventMachine.run do
+# parser =  Git::Remote::Parser.new
+# p parser.parse "git@github.com:torvalds/linux.git"
 
-   @clients = []
-	# EM::WebSocket.stop
-	begin
+uri = URI::SshGit.parse('git@github.com:packsaddle/ruby-uri-ssh_git.git')
+p uri.path.split('/')&.last.split('.')&.first
+# require 'em-websocket'
+
+uri = URI.parse('https://github.com/shinjukunian/SimpleFurigana.git')
+p uri.component
+p uri.user 
+p uri.host
+p uri.hostname
+p uri.scheme
+p uri.request_uri
+p uri.component.map { |u| uri.send(u) }
+
+# EventMachine.run do
+
+#    @clients = []
+# 	# EM::WebSocket.stop
+# 	begin
 		
-	  sig = EM::WebSocket.start(:host => '0.0.0.0', :port => '8081') do |ws|
+# 	  sig = EM::WebSocket.start(:host => '0.0.0.0', :port => '8081') do |ws|
 
 
-	    ws.onopen do |handshake|
-	      @clients << ws
-	      # ws.send "Connected to #{handshake.path}."
-	    end
+# 	    ws.onopen do |handshake|
+# 	      @clients << ws
+# 	      # ws.send "Connected to #{handshake.path}."
+# 	    end
 
-	    ws.onclose do
-	      # ws.send "Closed."
-	      p asdasds
-	      @clients.delete ws
-	    end
+# 	    ws.onclose do
+# 	      # ws.send "Closed."
+# 	      p asdasds
+# 	      @clients.delete ws
+# 	    end
 
-	    ws.onmessage do |msg|
-	      puts "Received Message: #{msg}"
-	      @clients.each do |socket|
-	        socket.send msg
-	      end
-	    end
-	  end
-	rescue Exception => e
-		p e
-	end
+# 	    ws.onmessage do |msg|
+# 	      puts "Received Message: #{msg}"
+# 	      @clients.each do |socket|
+# 	        socket.send msg
+# 	      end
+# 	    end
+# 	  end
+# 	rescue Exception => e
+# 		p e
+# 	end
 
-  # our WebSockets server logic will go here
-  # EM::stop_server sig
+#   # our WebSockets server logic will go here
+#   # EM::stop_server sig
 
-  # App.run! :port => 8080
-end
+#   # App.run! :port => 8080
+# end
 
 
 # include Pod
@@ -346,7 +364,7 @@ require 'gitlab'
 require 'open3'
 require 'fileutils'
 require 'open-uri'
-require 'git'
+# require 'git'
 require 'logger'
 # require 'cocoapods'
 

@@ -3,6 +3,7 @@ require 'state_machines-activerecord'
 require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative '../deploy_service'
+require_relative '../validations/repo_validator'
 
 module Labor
   class MainDeploy < ActiveRecord::Base
@@ -13,6 +14,7 @@ module Labor
     validates :name, presence: true
     validates :repo_url, presence: true
     validates :ref, presence: true
+    validates_with Labor::RepoValidator
 
   	state_machine :status, :initial => :created do
       event :enqueue do

@@ -10,9 +10,9 @@ websocket_port: 8081
 log_file: '~/.labor/labor.log'
 sidekiq_log_file: '~/.labor/sidekiq.log'
 gitlab_endpoint: 'http://git.2dfire-inc.com/api/v4'
-
 # RestBuild's token
 gitlab_private_token: 'Se79zS8rgUupDZv6JN8G'
+gitlab_http_timeout: 10
 allow_delete_tag_when_already_existed: true
 
 # main_deploy: 

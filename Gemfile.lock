@@ -78,7 +78,6 @@ GEM
     fourflusher (2.0.1)
     fuzzy_match (2.0.4)
     gh_inspector (1.1.3)
-    git (1.5.0)
     gitlab (4.5.0)
       httparty (>= 0.14.0)
       terminal-table (>= 1.5.1)
@@ -161,7 +160,6 @@ DEPENDENCIES
   cocoapods (~> 1.5)
   cocoapods-tdfire-binary
   em-websocket
-  git (~> 1.5)
   gitlab (~> 4.5.0)
   member_reminder (~> 0.1)
   pg (~> 0.21.0)
