@@ -6,9 +6,19 @@ module Labor
 		include Labor::GitLab
 
 		def validate(deploy)
-			project = gitlab.project(deploy.repo_url) 
-		rescue SocketError, Net::OpenTimeout, Labor::Error::NotFound => error
-	    deploy.errors[:repo_url] << "Invalid #{deploy.repo_url} with error #{error}"
+			begin
+				project = gitlab.project(deploy.repo_url) unless deploy.repo_url&.length.zero?
+			rescue Labor::Error::NotFound => error
+		    deploy.errors[:repo_url] << "Invalid #{deploy.repo_url}, , can't find repo with url #{deploy.repo_url}"
+		  end
+
+		  begin 
+		  	branch = gitlab.branch(project.id, deploy.ref) if project&.id	  	
+		  rescue Gitlab::Error::NotFound => error 
+		   	deploy.errors[:ref] << "Invalid #{deploy.ref}, can't find branch #{deploy.ref} of #{deploy.repo_url}"		  	
+		  end
+		rescue SocketError, Net::OpenTimeout => error
+		  deploy.errors[:base] << "Invalid deploy with error <#{error}>"	
 	  end
 	end
 end
