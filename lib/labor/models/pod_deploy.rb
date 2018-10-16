@@ -62,7 +62,7 @@ module Labor
 
       after_transition any => :analyzing do |deploy, transition|
         next if transition.loopback?
-        # deploy.prepare
+        deploy.prepare
       end
 
       after_transition any => :deploying do |deploy, transition|

@@ -84,5 +84,9 @@ module Labor
 	  error Gitlab::Error::Unprocessable do |error|
 	  	halt 422, labor_error(error.message)
 	  end
+
+	  error Labor::Error::VersionInvalid do |error|
+	  	halt 500, labor_error(error.message)
+	  end
 	end
 end

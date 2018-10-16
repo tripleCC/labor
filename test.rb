@@ -9,25 +9,67 @@ require 'uri'
 
 require 'thin'
 require 'sinatra/base'
-require "addressable/uri"
+
+def unit_increase_version(version, type)
+  major = version.major
+  minor = version.minor
+  patch = version.patch
+  case type
+  when 'major'
+    major += 1
+  when 'minor'
+    minor += 1
+  when 'patch'
+    patch += 1
+  else
+  end
+  Pod::Version.new("#{major}.#{minor}.#{patch}")
+end
+
+def update_podspec(path, podspec_content, version = nil)
+	require_variable_prefix = true
+	version_var_name = 'version'
+	variable_prefix = require_variable_prefix ? /\w\./ : //
+	version_regex = /^(?<begin>[^#]*#{variable_prefix}#{version_var_name}\s*=\s*['"])(?<value>(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<patch>[0-9]+))?(?<appendix>(\.[0-9]+)*)?(-(?<prerelease>(.+)))?)(?<end>['"])/i
+
+	version_match = version_regex.match(podspec_content)
+  new_version = version 
+  updated_podspec_content = podspec_content.gsub(version_regex, "#{version_match[:begin]}#{new_version}#{version_match[:end]}")
+
+  File.open(path, "w") { |file| file.puts(updated_podspec_content) } 
+
+  updated_podspec_content
+end
+
+path = Pathname.new('../TDFCore/TDFCore.podspec')
+podspec = Pod::Specification.from_file(Pathname.new('../TDFCore/TDFCore.podspec'))
+podspec_content = File.read(path)
+
+update_podspec(path, podspec_content, unit_increase_version(podspec.version, 'major'))
+p unit_increase_version(podspec.version, 'major')
+# new_version = 
+
+
+# podspec_content.gsub(@version_regex, "#{version_match[:begin]}#{new_version}#{version_match[:end]}")
+# require "addressable/uri"
 # require 'git/remote/parser'
-require 'uri/ssh_git'
+# require 'uri/ssh_git'
 
 # parser =  Git::Remote::Parser.new
 # p parser.parse "git@github.com:torvalds/linux.git"
 
-uri = URI::SshGit.parse('git@github.com:packsaddle/ruby-uri-ssh_git.git')
-p uri.path.split('/')&.last.split('.')&.first
+# uri = URI::SshGit.parse('git@github.com:packsaddle/ruby-uri-ssh_git.git')
+# p uri.path.split('/')&.last.split('.')&.first
 # require 'em-websocket'
 
-uri = URI.parse('https://github.com/shinjukunian/SimpleFurigana.git')
-p uri.component
-p uri.user 
-p uri.host
-p uri.hostname
-p uri.scheme
-p uri.request_uri
-p uri.component.map { |u| uri.send(u) }
+# uri = URI.parse('https://github.com/shinjukunian/SimpleFurigana.git')
+# p uri.component
+# p uri.user 
+# p uri.host
+# p uri.hostname
+# p uri.scheme
+# p uri.request_uri
+# p uri.component.map { |u| uri.send(u) }
 
 # EventMachine.run do
 

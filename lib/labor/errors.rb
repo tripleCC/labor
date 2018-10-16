@@ -4,6 +4,6 @@ module Labor
 
 		class NotFound < Base; end
 
-		
+		class VersionInvalid < Base; end
 	end
 end

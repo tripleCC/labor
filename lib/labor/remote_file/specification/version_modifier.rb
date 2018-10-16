@@ -1,11 +1,11 @@
 require 'cocoapods-core'
 require_relative '../base'
+require_relative '../../errors'
 
 module Labor
 	module RemoteFile
 		class Specification < Base
 			class VersionModifier
-				class VersionInvalidError < ArgumentError; end
 
 				attr_reader :refer_version
 				attr_reader :specification
@@ -36,29 +36,48 @@ module Labor
 
 				def validate!
 					error = []
-					error << "参考版本 #{@refer_version} 小于 podspec 文件中的版本 #{@specification.version}" unless @refer_version >= @specification.version 
+					error << "#{@specification.name} 参考版本 #{@refer_version} 小于 podspec 文件中的版本 #{@specification.version}" unless @refer_version >= @specification.version 
 					# error << "参考版本 #{@refer_version} 小于私有源中最新的版本 #{newest_version}" unless @refer_version >= newest_version
-					raise VersionInvalidError, error.join('; ') if error.any?
+					raise Labor::Error::VersionInvalid, error.join('; ') if error.any?
+				end
+
+
+				def update_podspec_content(podspec_content, version)
+					require_variable_prefix = true
+					version_var_name = 'version'
+					variable_prefix = require_variable_prefix ? /\w\./ : //
+					version_regex = /^(?<begin>[^#]*#{variable_prefix}#{version_var_name}\s*=\s*['"])(?<value>(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<patch>[0-9]+))?(?<appendix>(\.[0-9]+)*)?(-(?<prerelease>(.+)))?)(?<end>['"])/i
+
+					version_match = version_regex.match(podspec_content)
+				  updated_podspec_content = podspec_content.gsub(version_regex, "#{version_match[:begin]}#{version}#{version_match[:end]}")
+				  updated_podspec_content
+				end
+
+				def unit_increase_version(version, type)
+				  major = version.major
+				  minor = version.minor
+				  patch = version.patch
+				  case type
+				  when 'major'
+				    major += 1
+				  when 'minor'
+				    minor += 1
+				  when 'patch'
+				    patch += 1
+				  else
+				  end
+				  Pod::Version.new("#{major}.#{minor}.#{patch}")
 				end
 
 				def synchronize(version, persist)
-					spec = []
-					@specification_string.split("\n").each do |line|  
-		        if line.match('.*\\.version\s*={1}\s*["\'].*["\']')
-		          spec << line.split('.').first + ".version = \"#{version}\"\n"
-		        else
-		          spec << line  
-		        end
-		      end
-
-		      spec_string = spec.join("\n")
+					updated_podspec_content = update_podspec_content(@specification_string, version)
 		      if @path && persist
 			      File.open(@path, "w") do |io|  
-			        io << spec_string
+			        io << updated_podspec_content
 			      end 
 		    	end
 
-		      spec_string
+		      updated_podspec_content
 				end
 			end
 		end
