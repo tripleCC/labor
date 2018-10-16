@@ -54,6 +54,24 @@ module Labor
 			labor_response @deploy
 		end
 
+		options '/deploys/:id/pods/versions' do 
+		end
+
+		post '/deploys/:id/pods/versions' do |id|
+			@deploy = MainDeploy.includes(:pod_deploys).find(id)
+
+			request.body.rewind
+			params = JSON.parse(request.body.read)
+			pids = params.keys.map(&:to_i)
+			pod_deploys = @deploy.pod_deploys.select { |deploy| pids.include?(deploy.id) }
+			pids.each do |pid|
+				pod_deploy = pod_deploys.find { |deploy| deploy.id == pid }
+				pod_deploy.update(:version => params[pid.to_s])
+			end
+
+			labor_response pod_deploys
+		end
+
 		# 处理跨域预检请求
 		options '/deploys/:id' do 
 		end
