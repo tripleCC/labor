@@ -12,6 +12,10 @@ module Labor
 	class App < Sinatra::Base
 		include Labor::Logger
 
+		# {
+		# 	'page' : 1
+		# 	'per_page' : 2
+		# }
 		get '/deploys' do 
 			# page ; per_page
 			@deploys = MainDeploy.paginate(page: params[:page], per_page: params[:per_page]).order('id DESC')
@@ -31,6 +35,11 @@ module Labor
 			labor_response @deploy.pod_deploys
 		end
 
+		# {
+		# 	'name' : xxxx
+		# 	'repo_url' : gitxxx
+		# 	'ref' : releasexxx
+		# }
 		post '/deploys' do 
 			begin 
 				request.body.rewind
@@ -57,6 +66,9 @@ module Labor
 		options '/deploys/:id/pods/versions' do 
 		end
 
+		# {
+		# 	'pid' : version
+		# }
 		post '/deploys/:id/pods/versions' do |id|
 			@deploy = MainDeploy.includes(:pod_deploys).find(id)
 
