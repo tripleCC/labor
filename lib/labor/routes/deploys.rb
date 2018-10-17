@@ -82,21 +82,6 @@ module Labor
 			labor_response pod_deploys
 		end
 
-		options '/deploys/update/pods/check' do 
-		end
-		post '/deploys/pods/versions/check' do 
-			request.body.rewind
-			params = JSON.parse(request.body.read)
-			pids = params.keys.map(&:to_i)
-			pod_deploys = @deploy.pod_deploys.select { |deploy| pids.include?(deploy.id) }
-			pids.each do |pid|
-				pod_deploy = pod_deploys.find { |deploy| deploy.id == pid }
-				pod_deploy.update(:version => params[pid.to_s])
-			end
-
-			labor_response pod_deploys
-		end
-
 		# 处理跨域预检请求
 		options '/deploys/:id' do 
 		end

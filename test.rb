@@ -1,20 +1,37 @@
 #!/usr/bin/env ruby
-require 'rubygems'
-require 'cgi'
-require 'pp'
-require 'cocoapods-tdfire-binary'
-require_relative './lib/labor/git/gitlab'
-require_relative './lib/labor/external_pod/sorter'
-require 'uri'
+# require 'rubygems'
+# require 'cgi'
+# require 'pp'
+# require 'cocoapods-tdfire-binary'
+# require_relative './lib/labor/git/gitlab'
+# require_relative './lib/labor/external_pod/sorter'
+# require 'uri'
 
-require 'thin'
-require 'sinatra/base'
+# require 'thin'
+# require 'sinatra'
 
-name = 'PodA'
-version = '1.2.1 '.strip
-release = 'release/1.1.1'
+# post '/webhook' do 
+# 	hook_string = request.body.read
+	# WebhookWorker.perform_later(hook_string)
+	# hash = JSON.parse(hook_string)
+	# object_kind = hash['object_kind']
+	# p hash
+	# if Labor::HookEventHandler.event_kinds.include?(object_kind)
+	# 	handler = Labor::HookEventHandler.handler(object_kind, hash)
+	# 	handler.handle
+	# end	
+	# labor_response 
+# end
 
-source = Pod::Config.instance.sources_manager.default_source
+# gitlab = Labor::GitLab.gitlab
+
+# project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
+# p gitlab.branch(project.id, 'release/0.2.1').merged
+# name = 'PodA'
+# version = '1.2.1 '.strip
+# release = 'release/1.1.1'
+
+# source = Pod::Config.instance.sources_manager.default_source
 # 5.times.map do 
 # 	Thread.new do
 # 		p source.versions(name).map(&:to_s).tap{|v| p v}.include?(version)
@@ -25,15 +42,15 @@ source = Pod::Config.instance.sources_manager.default_source
 # p source.pods
 # p source.versions(name).map(&:to_s).tap{|v| p v}.include?(version)
 
-refer_version = Gem::Version.new(version)
-release_version = release.split('/').last
+# refer_version = Gem::Version.new(version)
+# release_version = release.split('/').last
 
-unless Gem::Version.correct?(release_version).nil?
-	release_gem_version = Gem::Version.new(release_version) 	
-	refer_version = release_gem_version if release_gem_version > refer_version
-end
+# unless Gem::Version.correct?(release_version).nil?
+# 	release_gem_version = Gem::Version.new(release_version) 	
+# 	refer_version = release_gem_version if release_gem_version > refer_version
+# end
  
-p refer_version
+# p refer_version
 
 # getDefaultVersion(podDeploy) {
 #     if (podDeploy.version) {

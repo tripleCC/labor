@@ -11,17 +11,24 @@ module Labor
 			@deploy_host ||= begin 
 				host = @config.host
 				if ['127.0.0.1', 'localhost'].include?(@config.host)
-					require 'socket'
-					ip = Socket.ip_address_list.detect{|intf| intf.ipv4_private?}
-					host = ip.ip_address if ip
+					host = real_host
 				end 
 				host
 			end
 		end
 
+		def real_host
+			@real_host ||= begin
+				require 'socket'
+				ip = Socket.ip_address_list.detect{|intf| intf.ipv4_private?}
+				host = ip.ip_address if ip
+			end
+		end
+		alias_method :webhook_host, :real_host
+
 		def webhook_url
 			@webhook_url ||= begin
-				"http://#{deploy_host}:#{port}/webhook"
+				"http://#{webhook_host}:#{port}/webhook"
 			end
 		end
 

@@ -34,12 +34,13 @@ module Labor
 					@specification.version
 				end
 
-				def validate!
-					error = []
-					error << "#{@specification.name} 参考版本 #{@refer_version} 小于 podspec 文件中的版本 #{@specification.version}" unless @refer_version >= @specification.version 
+				# 由前端填写，这里就不做限制了
+				# def validate!
+					# error = []
+					# error << "#{@specification.name} 参考版本 #{@refer_version} 小于 podspec 文件中的版本 #{@specification.version}" unless @refer_version >= @specification.version 
 					# error << "参考版本 #{@refer_version} 小于私有源中最新的版本 #{newest_version}" unless @refer_version >= newest_version
-					raise Labor::Error::VersionInvalid, error.join('; ') if error.any?
-				end
+					# raise Labor::Error::VersionInvalid, error.join('; ') if error.any?
+				# end
 
 
 				def update_podspec_content(podspec_content, version)

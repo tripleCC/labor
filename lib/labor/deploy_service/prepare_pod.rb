@@ -23,35 +23,24 @@ module Labor
 				ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new(deploy.project_id, deploy.ref)
 				unless ci_yaml_file.has_deploy_jobs?
 					deploy.skip
-					post_content = "pod deploy (id: #{deploy.id}, name: #{deploy.name}): .gitlab-ci.yaml 文件未包含发布操作，无法自动发布。手动发布后，再勾选发布的的 <已手动发布>"
+					post_content = "pod deploy (id: #{deploy.id}, name: #{deploy.name}): .gitlab-ci.yaml 文件未包含发布操作，无法自动发布。手动发布后，再勾选 <已手动发布>"
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 					return
 				end
 
-				if deploy.ref == 'master'
-					# 发布分支是 master 的情况下，直接标志为可发布
+				# 发布分支是 master || 发布分支已经合并到 master ，直接标志为可发布
+				if deploy.ref == 'master' || gitlab.branch(deploy.project_id, deploy.ref).merged
+					update_spec_version(deploy, 'master')
 					deploy.ready
 				else
-					# 如果发布分支已经合并到 master ，直接标志为可发布
-					if gitlab.branch(deploy.project_id, deploy.ref).merged
-						# TODO
-						# 这里如果网页上可以填写 version 的话，也需要有更新 version 这一步
-						deploy.ready
-						return
-					end
-
-					# TODO
-					# 这里到时候要优化下，更新 version 的条件
-					if deploy.ref.has_version? && deploy.version != deploy.ref.version
-						update_spec_version(deploy.project_id, deploy.ref) 
-						deploy.update(version: deploy.ref.version)
-					end
-
+					update_spec_version(deploy)
 					create_gitflow_merge_requests
 				end
+			end
 
-				# TODO
-				# 如果网页可以设置版本，master这里也应该更新 version
+			def update_spec_version(deploy, ref = nil)
+				specification = RemoteFile::Specification.new(deploy.project_id, ref || deploy.ref)
+				specification.edit_remote_version(deploy.version)
 			end
 
 			def create_gitflow_merge_requests
@@ -78,11 +67,6 @@ module Labor
 
 				# 发送组件合并钉钉消息
 				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
-			end
-
-			def update_spec_version(project_id, ref)
-				specification = RemoteFile::Specification.new(project_id, ref)
-				specification.edit_remote_version#(ref.version)
 			end
 
 			def create_merge_request(project_id, ref, target, assignee_name)

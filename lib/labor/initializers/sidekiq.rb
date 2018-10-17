@@ -1,6 +1,7 @@
 require 'sidekiq'
 require 'active_job'
 require_relative '../config'
+require_relative '../logger'
 
 Sidekiq.configure_server do |config|
   config.redis = { url: "redis://#{Labor.config.host}:#{Labor.config.redis_port}/#{Labor.config.redis_db}" }
@@ -11,3 +12,5 @@ Sidekiq.configure_client do |config|
 end
 
 ActiveJob::Base.queue_adapter = :sidekiq
+
+Sidekiq.logger = Labor::Logger.logger
