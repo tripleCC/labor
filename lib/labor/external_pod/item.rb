@@ -1,4 +1,5 @@
 require 'cocoapods-core'
+require 'rubygems'
 
 module ExternalPod		
 	class Item
@@ -20,7 +21,18 @@ module ExternalPod
 		end
 
 		def version
-			 spec.version.to_s
+			spec.version.to_s
+		end
+
+		def refer_version
+			refer_version = Gem::Version.new(version)
+			release_version = ref.split('/').last
+			
+			unless Gem::Version.correct?(release_version).nil?
+				release_gem_version = Gem::Version.new(release_version) 	
+				refer_version = release_gem_version if release_gem_version > refer_version
+			end
+			refer_version.to_s
 		end
 
 		def to_s

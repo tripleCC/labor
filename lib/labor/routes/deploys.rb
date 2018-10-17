@@ -63,15 +63,28 @@ module Labor
 			labor_response @deploy
 		end
 
-		options '/deploys/:id/pods/versions' do 
-		end
-
+		
 		# {
 		# 	'pid' : version
 		# }
-		post '/deploys/:id/pods/versions' do |id|
-			@deploy = MainDeploy.includes(:pod_deploys).find(id)
+		options '/deploys/pods/versions/update' do 
+		end
+		post '/deploys/pods/versions/update' do
+			request.body.rewind
+			params = JSON.parse(request.body.read)
+			pids = params.keys.map(&:to_i)
+			pod_deploys = pids.map do |pid|
+				pod_deploy = PodDeploy.find(pid)
+				pod_deploy.update(:version => params[pid.to_s])
+				pod_deploy
+			end
 
+			labor_response pod_deploys
+		end
+
+		options '/deploys/update/pods/check' do 
+		end
+		post '/deploys/pods/versions/check' do 
 			request.body.rewind
 			params = JSON.parse(request.body.read)
 			pids = params.keys.map(&:to_i)
@@ -87,7 +100,6 @@ module Labor
 		# 处理跨域预检请求
 		options '/deploys/:id' do 
 		end
-
 		post '/deploys/:id/pods/:pid/review' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(reviewed: true)

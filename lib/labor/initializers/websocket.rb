@@ -22,7 +22,7 @@ module Labor
           signature = EventMachine::WebSocket.start(
             :host => '0.0.0.0', 
             :port => Labor.config.websocket_port, 
-            :debug => !Sinatra::Base.settings.production?
+            :debug => false#!Sinatra::Base.settings.production?
             ) do |ws|
             ws.onopen do |handshake|
               catch_logger do 

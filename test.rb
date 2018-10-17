@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-
+require 'rubygems'
 require 'cgi'
 require 'pp'
 require 'cocoapods-tdfire-binary'
@@ -10,43 +10,82 @@ require 'uri'
 require 'thin'
 require 'sinatra/base'
 
-def unit_increase_version(version, type)
-  major = version.major
-  minor = version.minor
-  patch = version.patch
-  case type
-  when 'major'
-    major += 1
-  when 'minor'
-    minor += 1
-  when 'patch'
-    patch += 1
-  else
-  end
-  Pod::Version.new("#{major}.#{minor}.#{patch}")
+name = 'PodA'
+version = '1.2.1 '.strip
+release = 'release/1.1.1'
+
+source = Pod::Config.instance.sources_manager.default_source
+# 5.times.map do 
+# 	Thread.new do
+# 		p source.versions(name).map(&:to_s).tap{|v| p v}.include?(version)
+# 		# source.update(true)
+# 	end
+# end.each(&:join)
+
+# p source.pods
+# p source.versions(name).map(&:to_s).tap{|v| p v}.include?(version)
+
+refer_version = Gem::Version.new(version)
+release_version = release.split('/').last
+
+unless Gem::Version.correct?(release_version).nil?
+	release_gem_version = Gem::Version.new(release_version) 	
+	refer_version = release_gem_version if release_gem_version > refer_version
 end
+ 
+p refer_version
 
-def update_podspec(path, podspec_content, version = nil)
-	require_variable_prefix = true
-	version_var_name = 'version'
-	variable_prefix = require_variable_prefix ? /\w\./ : //
-	version_regex = /^(?<begin>[^#]*#{variable_prefix}#{version_var_name}\s*=\s*['"])(?<value>(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<patch>[0-9]+))?(?<appendix>(\.[0-9]+)*)?(-(?<prerelease>(.+)))?)(?<end>['"])/i
+# getDefaultVersion(podDeploy) {
+#     if (podDeploy.version) {
+#       return podDeploy.version
+#     }
 
-	version_match = version_regex.match(podspec_content)
-  new_version = version 
-  updated_podspec_content = podspec_content.gsub(version_regex, "#{version_match[:begin]}#{new_version}#{version_match[:end]}")
+#     const refs = podDeploy.ref.split('/', 2);
+#     const version = refs.pop();
+#     if (version.count > 0 && semver.valid(version)) {
+#       return version
+#     } 
+#     return ''
+#   }
 
-  File.open(path, "w") { |file| file.puts(updated_podspec_content) } 
 
-  updated_podspec_content
-end
+# def unit_increase_version(version, type)
+#   major = version.major
+#   minor = version.minor
+#   patch = version.patch
+#   case type
+#   when 'major'
+#     major += 1
+#   when 'minor'
+#     minor += 1
+#   when 'patch'
+#     patch += 1
+#   else
+#   end
+#   Pod::Version.new("#{major}.#{minor}.#{patch}")
+# end
 
-path = Pathname.new('../TDFCore/TDFCore.podspec')
-podspec = Pod::Specification.from_file(Pathname.new('../TDFCore/TDFCore.podspec'))
-podspec_content = File.read(path)
+# def update_podspec(path, podspec_content, version = nil)
+# 	require_variable_prefix = true
+# 	version_var_name = 'version'
+# 	variable_prefix = require_variable_prefix ? /\w\./ : //
+# 	version_regex = /^(?<begin>[^#]*#{variable_prefix}#{version_var_name}\s*=\s*['"])(?<value>(?<major>[0-9]+)(\.(?<minor>[0-9]+))?(\.(?<patch>[0-9]+))?(?<appendix>(\.[0-9]+)*)?(-(?<prerelease>(.+)))?)(?<end>['"])/i
 
-update_podspec(path, podspec_content, unit_increase_version(podspec.version, 'major'))
-p unit_increase_version(podspec.version, 'major')
+# 	version_match = version_regex.match(podspec_content)
+#   new_version = version 
+#   updated_podspec_content = podspec_content.gsub(version_regex, "#{version_match[:begin]}#{new_version}#{version_match[:end]}")
+
+#   File.open(path, "w") { |file| file.puts(updated_podspec_content) } 
+
+#   updated_podspec_content
+# end
+
+# path = Pathname.new('../TDFCore/TDFCore.podspec')
+# podspec = Pod::Specification.from_file(Pathname.new('../TDFCore/TDFCore.podspec'))
+# podspec_content = File.read(path)
+
+# update_podspec(path, podspec_content, unit_increase_version(podspec.version, 'major'))
+# p unit_increase_version(podspec.version, 'major')
 # new_version = 
 
 

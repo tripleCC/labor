@@ -25,7 +25,7 @@ module Labor
 						name: pod.name,
 						repo_url: pod.repo_url,
 						ref: pod.ref,
-						version: pod.version,
+						version: pod.refer_version,
 						external_dependency_names: pod.external_dependency_names
 					}
 					member = bank.member_of_spec(pod.spec)
