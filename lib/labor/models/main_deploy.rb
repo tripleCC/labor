@@ -4,6 +4,7 @@ require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative '../deploy_service'
 require_relative '../validations/repo_validator'
+require_relative '../workers'
 
 module Labor
   class MainDeploy < ActiveRecord::Base
@@ -53,6 +54,10 @@ module Labor
         transition.args.first.try do |reason|
           deploy.failure_reason = reason
         end
+      end
+
+      after_transition any => any do |deploy, transition|
+        Labor::DeployMessager.send(deploy.id, deploy)
       end
     end
 

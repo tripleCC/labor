@@ -40,6 +40,8 @@ module Labor
 		# 	'repo_url' : gitxxx
 		# 	'ref' : releasexxx
 		# }
+		options '/deploys' do 
+		end
 		post '/deploys' do 
 			begin 
 				request.body.rewind
@@ -53,8 +55,6 @@ module Labor
 
 				halt 400, labor_error(error.message)
 			end
-		end
-		options '/deploys' do 
 		end
 
 		delete '/deploys/:id' do |id|
@@ -83,8 +83,6 @@ module Labor
 		end
 
 		# 处理跨域预检请求
-		options '/deploys/:id' do 
-		end
 		post '/deploys/:id/pods/:pid/review' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(reviewed: true)
@@ -113,6 +111,7 @@ module Labor
 
 		post '/deploys/:id/deploy' do |id|
 			@deploy = MainDeploy.find(id)
+
 			@deploy.start
 
 			labor_response @deploy
