@@ -48,6 +48,12 @@ module Labor
 
         deploy.prepare
       end
+
+      before_transition any => :failed do |deploy, transition|
+        transition.args.first.try do |reason|
+          deploy.failure_reason = reason
+        end
+      end
     end
 
     def prepare

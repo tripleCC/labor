@@ -31,11 +31,16 @@ module Labor
 				if left_pod_deploys.empty?
 					logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): update podfile #{deploy.ref}")	
 					# 更新 Podfile
-					podfile = Labor::RemoteFile::Podfile.new(deploy.project_id, deploy.ref)
-					podfile.edit_remote
+					begin
+						podfile = Labor::RemoteFile::Podfile.new(deploy.project_id, deploy.ref)
+						podfile.edit_remote
 
-					logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): deploy success")	
-					deploy.success 
+						logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): deploy success")	
+						deploy.success 
+					rescue Labor::Error::NotFound => error 
+						# 缺失 PodfileTemplate 
+						deploy.drop(error.message)
+					end
 				end
 
 				left_pod_deploys.empty?

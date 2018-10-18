@@ -1,5 +1,6 @@
 require 'active_record'
 require_relative '../git/gitlab'
+require_relative '../remote_file/podfile/template'
 
 module Labor
 	class RepoValidator < ActiveModel::Validator
@@ -16,6 +17,12 @@ module Labor
 		  	branch = gitlab.branch(project.id, deploy.ref) if project&.id	  	
 		  rescue Gitlab::Error::NotFound => error 
 		   	deploy.errors[:ref] << "Invalid #{deploy.ref}, can't find branch #{deploy.ref} of #{deploy.repo_url}"		  	
+		  end
+
+		  begin 
+		  	podfile = Labor::RemoteFile::Podfile.new(deploy.project_id, deploy.ref)
+		  rescue Gitlab::Error::NotFound => error 
+		  	deploy.errors[:base] << "Invalid repo (#{deploy.repo_url}) that being deployed , <PodfileTemplate> file is required on the same path with <Podfile>"
 		  end
 		rescue SocketError, Net::OpenTimeout => error
 		  deploy.errors[:base] << "Invalid deploy with error <#{error}>"	
