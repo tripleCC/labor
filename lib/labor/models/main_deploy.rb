@@ -42,6 +42,9 @@ module Labor
       after_transition any => :deploying do |deploy, transition|
         next if transition.loopback?
         deploy.process
+
+        # 这里去掉了可能会导致下面的 any => any 不执行，很困惑
+        Logger.logger.info("after transition main deploy #{deploy.name} status from #{transition.from} to #{transition.to}")
       end
 
       after_transition any => :analyzing do |deploy, transition|
@@ -57,6 +60,8 @@ module Labor
       end
 
       after_transition any => any do |deploy, transition|
+        next if transition.loopback?
+
         Labor::DeployMessager.send(deploy.id, deploy)
       end
     end

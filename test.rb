@@ -457,13 +457,13 @@
 
 # return 0
 
-require 'pp'
-require 'gitlab'
-require 'open3'
-require 'fileutils'
-require 'open-uri'
+# require 'pp'
+# require 'gitlab'
+# require 'open3'
+# require 'fileutils'
+# require 'open-uri'
 # require 'git'
-require 'logger'
+# require 'logger'
 # require 'cocoapods'
 
 # require_relative './cocoapods/specification'
@@ -474,10 +474,10 @@ require 'logger'
 
 # require 'cocoapods-external-pod-sorter'
 
-require 'yaml'
+# require 'yaml'
 # require_relative './member_reminder'
 # require_relative './labor'
-# require 'state_machine'
+require 'state_machine'
 
 # module HashStatus
 # 	extend ActiveSupport::Concern
@@ -528,66 +528,102 @@ require 'yaml'
 
 # include Labor
 
-# class Deploy
-# 	attr_accessor :failure_reason
-# 	attr_accessor :started_at
-# 	attr_accessor :finished_at
-# 	attr_accessor :repo_url
-# 	attr_accessor :ref
+class Deploy
+	attr_accessor :failure_reason
+	attr_accessor :started_at
+	attr_accessor :finished_at
+	attr_accessor :repo_url
+	attr_accessor :ref
 
-# 	state_machine :status, initial: :created do 
-# 		event :analyze do
-#       transition created: :analyzing
-#     end
+	state_machine :status, :initial => :created do
+      event :enqueue do
+        # transition any - [:analyzing] => :analyzing
+        transition [:created, :canceled, :failed, :success, :skipped] => :analyzing
+      end
 
-# 		event :deploy do 
-# 			transition pending: :deploying
-# 		end
+      event :skip do 
+        transition analyzing: :skipped
+      end
 
-# 		event :success do 
-# 			transition deploying: :success
-# 		end
+      event :pend do
+        transition analyzing: :pending
+      end
 
-# 		event :skip do 
-# 			transition analyzing: :skipped
-# 		end
+      # reviewed 打勾，触发 auto merge (auto merge 如果出错，状态还是 pending) ，（这部分手动合并也可以接盘走后面流程） 监听 MR 状态，后更新 merged
+      event :ready do  
+        transition [:pending, :analyzing] => :merged
+      end
 
-# 		event :enqueue do  
-# 			transition [:created, :skipped, :canceled, :failed, :success] => :analyzing
-# 		end
+      # master 分支不需要 merge
+      event :deploy do 
+        # 失败了重试 PL，视作 deploying
+        transition [:merged, :pending, :failed] => :deploying
+      end
 
-# 	  event :drop do
-#       transition [:created, :analyzing, :pending, :deploying] => :failed
-#     end
+      event :success do 
+        transition deploying: :success
+      end
 
-# 		event :cancel do
-#       transition [:created, :analyzing, :pending, :deploying] => :canceled
-#     end
+      event :drop do
+        transition any - [:failed] => :failed
+      end
 
+      event :cancel do
+        transition any - [:canceled, :success, :failed, :skipped] => :canceled
+      end
 
-#     before_transition [:created, :analyzing, :pending] => :running do |deploy|
-#       deply.started_at = Time.now
-#     end
+      after_transition any => [:merged, :success] do |deploy, transition|
+        next if transition.loopback?
+        # 当组件标识为已合并，则让主发布处理组件 CD
+        # deploy.main_deploy.process
+        p '1'
+        deploy.deploy
+        p 'kkk'
+      end
 
-#     before_transition any => [:success, :failed, :canceled] do |deploy|
-#       deploy.finished_at = Time.now
-#     end
+      after_transition any => :analyzing do |deploy, transition|
+        next if transition.loopback?
+        # deploy.prepare
+        p '2'
+      end
 
-#     before_transition any => :failed do |deploy, transition|
-#     	failure_reason = transition.args.first
-#     	deploy.failure_reason = failure_reason
-#     end
+      after_transition any => :deploying do |deploy, transition|
+        next if transition.loopback?
+        # deploy.process
+        p '3'
+      end
 
-#     after_transition do |deploy, transition|
-#     	next if transition.loopback?
+      before_transition any => :canceled do |deploy, transition|
+        next if transition.loopback?
+        # deploy.cancel_all_operation
+      end
 
-#     	# puts '========================'
-#     	# p status
-#     	# p transition.loopback?
-#     	# puts '========================'
-#     end
-# 	end
-# end
+      before_transition any => :failed do |deploy, transition|
+        transition.args.first.try do |reason|
+          deploy.failure_reason = reason
+        end
+      end
+
+      before_transition any => any do |deploy, transition|
+        # Labor::Logger.logger.info("#{deploy.name}, #{deploy.status}")
+        # p "#{deploy.name}, #{deploy.status}"
+        next if transition.loopback?
+
+        p '================'
+        p transition.to
+        p '================'
+        # DeployMessagerWorker.perform_later(deploy.main_deploy.id, deploy.to_json)
+        # Labor::DeployMessager.send(deploy.main_deploy.id, deploy)
+      end
+    end
+end
+
+d = Deploy.new 
+p d.status
+d.enqueue
+d.ready
+d.deploy
+d.success
 
 # class MainDeploy < Deploy 
 

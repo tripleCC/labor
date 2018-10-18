@@ -4,6 +4,7 @@ require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative '../deploy_service'
 require_relative '../workers'
+require_relative '../logger'
 
 module Labor
   class PodDeploy < ActiveRecord::Base
@@ -58,6 +59,9 @@ module Labor
         next if transition.loopback?
         # 当组件标识为已合并，则让主发布处理组件 CD
         deploy.main_deploy.process
+
+        # 这里去掉了可能会导致下面的 any => any 不执行，很困惑
+        Logger.logger.info("after transition pod deploy #{deploy.name} status from #{transition.from} to #{transition.to}")
       end
 
       after_transition any => :analyzing do |deploy, transition|

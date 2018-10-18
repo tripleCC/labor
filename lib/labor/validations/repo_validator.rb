@@ -7,6 +7,10 @@ module Labor
 		include Labor::GitLab
 
 		def validate(deploy)
+			# 创建时才校验以下信息
+			# 更新 status 时不需要每次都校验
+			return unless deploy.created?
+
 			begin
 				project = gitlab.project(deploy.repo_url) unless deploy.repo_url&.length.zero?
 			rescue Labor::Error::NotFound => error

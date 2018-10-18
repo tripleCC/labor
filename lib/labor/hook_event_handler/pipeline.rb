@@ -48,6 +48,8 @@ module Labor
 					post_content = "pod deploy #{deploy.name} 发布 #{object_attributes.ref} 执行 CD 失败, 地址: #{pipeline_web_url}"
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				when 'success'
+					logger.info("pod deploy #{deploy.name} success with pipeline (id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref})")
+
 					# pod deloy 成功，更新 status
 					deploy.success
 				end

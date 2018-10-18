@@ -57,6 +57,8 @@ module Labor
 			end
 		end
 
+		options '/deploys/:id' do 
+		end
 		delete '/deploys/:id' do |id|
 			@deploy = MainDeploy.find(id).destroy
 
@@ -94,7 +96,7 @@ module Labor
 		post '/deploys/:id/pods/:pid/manual' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(manual: true)
-			@deploy.success
+			@deploy.success！
 			@deploy.cancel_all_operation
 
 			labor_response @deploy
@@ -111,7 +113,6 @@ module Labor
 
 		post '/deploys/:id/deploy' do |id|
 			@deploy = MainDeploy.find(id)
-
 			@deploy.start
 
 			labor_response @deploy
