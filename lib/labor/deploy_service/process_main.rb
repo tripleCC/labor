@@ -36,6 +36,7 @@ module Labor
 						podfile.edit_remote
 
 						logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): deploy success")	
+
 						deploy.success 
 					rescue Labor::Error::NotFound => error 
 						# 缺失 PodfileTemplate 

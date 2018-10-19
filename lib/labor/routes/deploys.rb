@@ -69,6 +69,7 @@ module Labor
 		# {
 		# 	'pid' : version
 		# }
+		# 处理跨域预检请求
 		options '/deploys/pods/versions/update' do 
 		end
 		post '/deploys/pods/versions/update' do
@@ -84,7 +85,6 @@ module Labor
 			labor_response pod_deploys
 		end
 
-		# 处理跨域预检请求
 		post '/deploys/:id/pods/:pid/review' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(reviewed: true)
@@ -127,7 +127,7 @@ module Labor
 
 		post '/deploys/:id/retry' do |id|
 			@deploy = MainDeploy.find(id)
-			@deploy.enqueue
+			@deploy.deploy
 
 			labor_response @deploy
 		end

@@ -10,10 +10,6 @@ module Labor
 				project = gitlab.project(deploy.repo_url)
 				deploy.update(project_id: project.id)
 
-				# 重置 main deploy 的一些属性
-				# TODO, 暂时没有找到更好的方法
-				deploy.update(failure_reason: nil)
-
 				# 分析依赖，获取需要发布的组件
 				grouped_pods = sort_grouped_pods
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): prepare main deploy, create pod deploys: #{grouped_pods}")

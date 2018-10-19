@@ -24,7 +24,7 @@ module Labor
       end
 
       event :deploy do
-        transition analyzing: :deploying
+        transition [:analyzing, :failed] => :deploying
       end
 
       event :success do 
@@ -39,12 +39,10 @@ module Labor
         transition [:created, :analyzing, :deploying] => :canceled
       end
 
+
       after_transition any => :deploying do |deploy, transition|
         next if transition.loopback?
         deploy.process
-
-        # 这里去掉了可能会导致下面的 any => any 不执行，很困惑
-        Logger.logger.info("after transition main deploy #{deploy.name} status from #{transition.from} to #{transition.to}")
       end
 
       after_transition any => :analyzing do |deploy, transition|
@@ -54,15 +52,29 @@ module Labor
       end
 
       before_transition any => :failed do |deploy, transition|
+        next if transition.loopback?
+
         transition.args.first.try do |reason|
           deploy.failure_reason = reason
         end
       end
 
-      after_transition any => any do |deploy, transition|
+      before_transition :failed => any do |deploy, transition| 
         next if transition.loopback?
+        
+        # 重置 main deploy 的一些属性
+        deploy.update(failure_reason: nil)
+      end
 
-        Labor::DeployMessager.send(deploy.id, deploy)
+      around_transition do |deploy, transition, block|
+        next if transition.loopback?
+        # 1
+        Logger.logger.info("transition main deploy #{deploy.name} status from #{transition.from} to #{transition.to}")
+        # before
+        block.call
+        # 2
+        Labor::DeployMessager.send(deploy.id, deploy)        
+        # after
       end
     end
 

@@ -581,6 +581,19 @@ class Deploy
         p 'kkk'
       end
 
+      around_transition do |vehicle, transition, block|
+      	p 'Zzzzz'
+      	block.call
+      	p vehicle.status
+      	p 'KkKKKK'
+      end
+
+      before_transition any => :analyzing do |deploy, transition|
+        next if transition.loopback?
+        # deploy.prepare
+        p '1'
+      end
+
       after_transition any => :analyzing do |deploy, transition|
         next if transition.loopback?
         # deploy.prepare
@@ -619,11 +632,11 @@ class Deploy
 end
 
 d = Deploy.new 
-p d.status
+# d.status
 d.enqueue
-d.ready
-d.deploy
-d.success
+# d.ready
+# d.deploy
+# d.success
 
 # class MainDeploy < Deploy 
 

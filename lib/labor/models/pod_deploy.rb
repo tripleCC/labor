@@ -59,9 +59,6 @@ module Labor
         next if transition.loopback?
         # 当组件标识为已合并，则让主发布处理组件 CD
         deploy.main_deploy.process
-
-        # 这里去掉了可能会导致下面的 any => any 不执行，很困惑
-        Logger.logger.info("after transition pod deploy #{deploy.name} status from #{transition.from} to #{transition.to}")
       end
 
       after_transition any => :analyzing do |deploy, transition|
@@ -85,11 +82,16 @@ module Labor
         end
       end
 
-      after_transition any => any do |deploy, transition|
+      around_transition do |deploy, transition, block|
         next if transition.loopback?
-
+        # 1
+        Logger.logger.info("transition pod deploy #{deploy.name} status from #{transition.from} to #{transition.to}")
+        # before
+        block.call
+        # 2
         # DeployMessagerWorker.perform_later(deploy.main_deploy.id, deploy.to_json)
-        Labor::DeployMessager.send(deploy.main_deploy.id, deploy)
+        Labor::DeployMessager.send(deploy.main_deploy.id, deploy)     
+        # after
       end
     end
 
