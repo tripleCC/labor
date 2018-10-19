@@ -30,12 +30,6 @@ module Labor
 			}
 		end
 
-		get '/deploys/size' do 
-			@size = MainDeploy.size
-
-			labor_response @size
-		end
-
 		get '/deploys/:id' do |id|
 			@deploy = MainDeploy.includes(:pod_deploys).find(id)
 
