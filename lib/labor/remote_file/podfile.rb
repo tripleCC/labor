@@ -15,7 +15,6 @@ module Labor
 
 			def initialize(project_id, ref, path = nil)
 				path ||= gitlab.file_path(project_id, podfile_name, ref)
-
 				super project_id, ref, path
 			end
 

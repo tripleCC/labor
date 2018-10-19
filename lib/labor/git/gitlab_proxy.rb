@@ -42,7 +42,7 @@ module Labor
 		end
 
 		def find_file_path(project_id, ref = 'master', depth = 5, path = '', &matcher)
-			tree = client.tree(project_id, {path: path, ref_name: ref})
+			tree = client.tree(project_id, {path: path, ref: ref})
 			target = tree.find do |tr|
 				yield tr.name if block_given?
 			end
