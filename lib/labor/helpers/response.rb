@@ -1,6 +1,9 @@
 module Labor
 	module Response
-		def labor_response(data = {}, includes = [], errors = nil, meta = nil) 
+		def labor_response(data = {}, options = {}) 
+			includes = options[:includes] || []
+			errors = options[:errors]
+			meta = options[:meta]
 			{
 				data: data,
 				errors: errors,
@@ -9,7 +12,9 @@ module Labor
 		end
 
 		def labor_error(error)
-			labor_response(nil, [], Array(error)) 
+			labor_response(nil, {
+				errors: Array(error)
+				}) 
 		end
 	end
 end

@@ -19,14 +19,29 @@ module Labor
 		get '/deploys' do 
 			# page ; per_page
 			@deploys = MainDeploy.paginate(page: params[:page], per_page: params[:per_page]).order('id DESC')
+			@size = MainDeploy.all.size
+			@per_page = params[:per_page] || MainDeploy.per_page
 
-			labor_response @deploys
+			labor_response @deploys, {
+				meta: {
+					total_count: @size,
+					per_page: @per_page
+				}
+			}
+		end
+
+		get '/deploys/size' do 
+			@size = MainDeploy.size
+
+			labor_response @size
 		end
 
 		get '/deploys/:id' do |id|
 			@deploy = MainDeploy.includes(:pod_deploys).find(id)
 
-			labor_response @deploy, [:pod_deploys]
+			labor_response @deploy, {
+				includes: [:pod_deploys]
+			}
 		end
 
 		get '/deploys/:id/pods' do |id|
