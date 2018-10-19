@@ -31,6 +31,7 @@ task :run do
 	# A: sidekiq -r 指定 worker 文件，不要乱指定，否则会 require 两次，创建两次类
 	# 相当于两个不同的服务，这样 socket 在命令行第一句创建后，命令行第二句就不会创建了，导致共享类错误
 	# 起 sidekiq 相当于跑另外一个服务，代码要重新执行一遍，无法共享 ws，放弃了
+	# 要用的话，需要起一个 websocket server ，然后用 redis 和 web server 通信，sidekiq 直接操作 redis
 	# system "bundle exec sidekiq -r ./lib/labor/workers.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d"
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:host]}"
 end

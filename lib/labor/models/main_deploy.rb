@@ -78,6 +78,10 @@ module Labor
       end
     end
 
+    def retry 
+      deploy
+    end
+
     def prepare
       DeployService::PrepareMain.new(self).execute
     end

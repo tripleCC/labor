@@ -96,8 +96,17 @@ module Labor
 		post '/deploys/:id/pods/:pid/manual' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(manual: true)
-			@deploy.success！
+			@deploy.success
 			@deploy.cancel_all_operation
+
+			labor_response @deploy
+		end
+
+		post '/deploys/:id/pods/:pid/retry' do |_, pid|
+			@deploy = PodDeploy.find(pid)
+			@deploy.cancel_all_operation
+			# 和 main deploy 不同，这里 retry 走的是 enqueue，重新更新 spec，发起 MR
+			@deploy.retry
 
 			labor_response @deploy
 		end
@@ -126,8 +135,16 @@ module Labor
 		end
 
 		post '/deploys/:id/retry' do |id|
-			@deploy = MainDeploy.find(id)
-			@deploy.deploy
+			@deploy = MainDeploy.includes(:pod_deploys).find(id)
+
+			failed_pod_deploys = @deploy.pod_deploys.select(&:failed?)
+			if failed_pod_deploys.any?
+				failed_pod_deploys.each(&:retry)
+			else 
+				# 和 pod deploy 不同，这里 retry 走的是 deloy，不重新分析，否则所有的 pod deploy 会回归 created 状态
+				@deploy.retry
+			end
+			# if @deploy.pod_deploys
 
 			labor_response @deploy
 		end

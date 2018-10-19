@@ -23,10 +23,10 @@ require_relative './lib/labor'
 	# labor_response 
 # end
 
-gitlab = Labor::GitLab.gitlab
+# gitlab = Labor::GitLab.gitlab
 
-project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodD.git')
-p gitlab.file_path(project.id, 'PodfileTemplate', 'release/0.2.2')
+# project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodD.git')
+# p gitlab.file_path(project.id, 'PodfileTemplate', 'release/0.2.2')
 # p gitlab.branch(project.id, 'release/0.2.1').merged
 # name = 'PodA'
 # version = '1.2.1 '.strip
@@ -634,7 +634,8 @@ end
 
 d = Deploy.new 
 # d.status
-d.enqueue
+p d.failed?
+
 # d.ready
 # d.deploy
 # d.success

@@ -95,6 +95,10 @@ module Labor
       end
     end
 
+    def retry 
+      enqueue
+    end
+
     def cancel_all_operation
       DeployService::CancelPod.new(self).execute 
     end
