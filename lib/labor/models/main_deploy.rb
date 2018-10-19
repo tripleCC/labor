@@ -10,7 +10,7 @@ module Labor
   class MainDeploy < ActiveRecord::Base
   	has_many :pod_deploys, dependent: :destroy
 
-    self.per_page = 20
+    self.per_page = 15
 
     validates :name, presence: true
     validates :repo_url, presence: true
