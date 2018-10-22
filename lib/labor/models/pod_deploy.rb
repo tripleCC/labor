@@ -44,7 +44,8 @@ module Labor
       end
 
       event :success do 
-        transition deploying: :success
+        # transition deploying: :success
+        transition any - [:success] => :success
       end
 
       event :drop do
