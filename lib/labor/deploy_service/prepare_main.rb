@@ -15,6 +15,9 @@ module Labor
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): prepare main deploy, create pod deploys: #{grouped_pods}")
 
 				deploy.pod_deploys = create_pod_deploys(grouped_pods)
+
+				# 没有可发布组件直接标志成功
+				deploy.success unless deploy.pod_deploys.any?
 			end
 
 			# 创建需要发布的组件

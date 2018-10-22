@@ -71,7 +71,7 @@ module Labor
 		delete '/deploys/:id' do |id|
 			@deploy = MainDeploy.find(id).destroy
 			@deploy.cancel
-			
+
 			labor_response @deploy
 		end
 
@@ -136,7 +136,8 @@ module Labor
 
 		post '/deploys/:id/enqueue' do |id|
 			@deploy = MainDeploy.find(id)
-			@deploy.enqueue
+			@deploy.reset
+			@deploy.enqueue!
 
 			@deploy.start if params[:start_directly]
 

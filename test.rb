@@ -539,7 +539,7 @@ class Deploy
 	state_machine :status, :initial => :created do
       event :enqueue do
         # transition any - [:analyzing] => :analyzing
-        transition [:created, :canceled, :failed, :success, :skipped] => :analyzing
+        transition any => :analyzing
       end
 
       event :skip do 
@@ -573,68 +573,73 @@ class Deploy
         transition any - [:canceled, :success, :failed, :skipped] => :canceled
       end
 
-      after_transition any => [:merged, :success] do |deploy, transition|
-        next if transition.loopback?
-        # 当组件标识为已合并，则让主发布处理组件 CD
-        # deploy.main_deploy.process
-        p '1'
-        deploy.deploy
-        p 'kkk'
+      before_transition do |deploy, transition|
+      	p transition.to == 'analyzing'
       end
 
-      around_transition do |vehicle, transition, block|
-      	p 'Zzzzz'
-      	block.call
-      	p vehicle.status
-      	p 'KkKKKK'
-      end
+      # after_transition any => [:merged, :success] do |deploy, transition|
+      #   next if transition.loopback?
+      #   # 当组件标识为已合并，则让主发布处理组件 CD
+      #   # deploy.main_deploy.process
+      #   p '1'
+      #   deploy.deploy
+      #   p 'kkk'
+      # end
 
-      before_transition any => :analyzing do |deploy, transition|
-        next if transition.loopback?
-        # deploy.prepare
-        p '1'
-      end
+      # around_transition do |vehicle, transition, block|
+      # 	p 'Zzzzz'
+      # 	block.call
+      # 	p vehicle.status
+      # 	p 'KkKKKK'
+      # end
 
-      after_transition any => :analyzing do |deploy, transition|
-        next if transition.loopback?
-        # deploy.prepare
-        p '2'
-      end
+      # before_transition any => :analyzing do |deploy, transition|
+      #   next if transition.loopback?
+      #   # deploy.prepare
+      #   p '1'
+      # end
 
-      after_transition any => :deploying do |deploy, transition|
-        next if transition.loopback?
-        # deploy.process
-        p '3'
-      end
+      # after_transition any => :analyzing do |deploy, transition|
+      #   next if transition.loopback?
+      #   # deploy.prepare
+      #   p '2'
+      # end
 
-      before_transition any => :canceled do |deploy, transition|
-        next if transition.loopback?
-        # deploy.cancel_all_operation
-      end
+      # after_transition any => :deploying do |deploy, transition|
+      #   next if transition.loopback?
+      #   # deploy.process
+      #   p '3'
+      # end
 
-      before_transition any => :failed do |deploy, transition|
-        transition.args.first.try do |reason|
-          deploy.failure_reason = reason
-        end
-      end
+      # before_transition any => :canceled do |deploy, transition|
+      #   next if transition.loopback?
+      #   # deploy.cancel_all_operation
+      # end
 
-      before_transition any => any do |deploy, transition|
-        # Labor::Logger.logger.info("#{deploy.name}, #{deploy.status}")
-        # p "#{deploy.name}, #{deploy.status}"
-        next if transition.loopback?
+      # before_transition any => :failed do |deploy, transition|
+      #   transition.args.first.try do |reason|
+      #     deploy.failure_reason = reason
+      #   end
+      # end
 
-        p '================'
-        p transition.to
-        p '================'
-        # DeployMessagerWorker.perform_later(deploy.main_deploy.id, deploy.to_json)
-        # Labor::DeployMessager.send(deploy.main_deploy.id, deploy)
-      end
+      # before_transition any => any do |deploy, transition|
+      #   # Labor::Logger.logger.info("#{deploy.name}, #{deploy.status}")
+      #   # p "#{deploy.name}, #{deploy.status}"
+      #   next if transition.loopback?
+
+      #   p '================'
+      #   p transition.to
+      #   p '================'
+      #   # DeployMessagerWorker.perform_later(deploy.main_deploy.id, deploy.to_json)
+      #   # Labor::DeployMessager.send(deploy.main_deploy.id, deploy)
+      # end
     end
 end
 
 d = Deploy.new 
 # d.status
-p d.failed?
+p d.enqueue
+p d.enqueue
 
 # d.ready
 # d.deploy

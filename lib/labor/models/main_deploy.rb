@@ -18,7 +18,12 @@ module Labor
     validates_with Labor::RepoValidator
 
   	state_machine :status, :initial => :created do
+      event :reset do 
+        transition any => :created
+      end
+
       event :enqueue do
+        # transition any => :analyzing
         transition any - [:analyzing] => :analyzing
         # transition [:created, :canceled, :failed, :success] => :analyzing
       end
@@ -28,7 +33,7 @@ module Labor
       end
 
       event :success do 
-        transition deploying: :success
+        transition [:analyzing, :deploying] => :success
       end
 
       event :drop do
@@ -59,16 +64,16 @@ module Labor
         end
       end
 
-      before_transition :failed => any do |deploy, transition| 
+      before_transition do |deploy, transition| 
         next if transition.loopback?
         
         # 重置 main deploy 的一些属性
-        deploy.update(failure_reason: nil)
+        deploy.update(failure_reason: nil) unless transition.to == 'failed'
       end
 
       before_transition any => :canceled do |deploy, transition|
         next if transition.loopback?
-        
+
         deploy.pod_deploys.each(&:cancel_all_operation)
       end
 
@@ -76,6 +81,7 @@ module Labor
         next if transition.loopback?
         # 1
         Logger.logger.info("transition main deploy #{deploy.name} status from #{transition.from} to #{transition.to}")
+
         # before
         block.call
         # 2
