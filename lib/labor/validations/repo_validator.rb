@@ -24,7 +24,7 @@ module Labor
 		  end
 
 		  begin 
-		  	podfile = Labor::RemoteFile::Podfile.new(deploy.project_id, deploy.ref)
+		  	podfile = Labor::RemoteFile::Podfile::Template.new(project.id, deploy.ref) if project&.id	  	
 		  rescue Gitlab::Error::NotFound => error 
 		  	deploy.errors[:base] << "Invalid repo (#{deploy.repo_url}) that being deployed , <PodfileTemplate> file is required on the same path with <Podfile>"
 		  end
