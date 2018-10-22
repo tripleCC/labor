@@ -69,8 +69,9 @@ module Labor
 		options '/deploys/:id' do 
 		end
 		delete '/deploys/:id' do |id|
-			@deploy = MainDeploy.find(id).destroy
+			@deploy = MainDeploy.find(id)
 			@deploy.cancel
+			@deploy.destroy
 
 			labor_response @deploy
 		end
