@@ -36,9 +36,11 @@ module Labor
 		end
 
 		def file_path(project_id, file_name, ref = 'master', depth = 5)
-			find_file_path(project_id, ref, depth) do |name|
+			file_path = find_file_path(project_id, ref, depth) do |name|
 				file_name == name
 			end
+			raise Labor::Error::NotFound, "Can't find #{file_name} on #{client.project(project_id).name} (id: #{project_id}, ref: #{ref})" unless file_path
+			file_path
 		end
 
 		def find_file_path(project_id, ref = 'master', depth = 5, path = '', &matcher)
@@ -57,6 +59,8 @@ module Labor
 				break if finded_path
 			end
 			finded_path
+		rescue Gitlab::Error::NotFound => error 
+			raise Labor::Error::NotFound, "Can't find tree on #{client.project(project_id).name} (id: #{project_id}, ref: #{ref}) with gitlab error #{error}"
 		end
 
 		# get_file 中获取的content是base64编码的，需要使用Base64.decode64解码

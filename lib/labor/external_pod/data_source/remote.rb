@@ -1,6 +1,7 @@
 require_relative './base'
 require_relative '../../logger'
 require_relative '../../remote_file'
+require_relative '../../errors'
 
 module ExternalPod
 	class Sorter
@@ -55,7 +56,11 @@ module ExternalPod
 							logger.error("fail to get specification with error #{error}, update private source and try again.")
 
 							default_source.update(false)
-							tagged_spec(dep)
+							begin
+								tagged_spec(dep)
+							rescue ArgumentError => error
+								raise Labor::Error::VersionInvalid, "Fail to find version for #{dep} with error #{error}"
+							end
 						end
 					end
 					tagged_specs
