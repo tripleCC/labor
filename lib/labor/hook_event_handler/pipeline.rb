@@ -23,7 +23,8 @@ module Labor
  			def handle_merge_request_pipeline
 				deploy = PodDeploy.find_by(project_id: object.project.id, mr_pipeline_id: object_attributes.id, ref: object_attributes.ref)
 				# 成功了会走 MergeRequst 流程，这里不用管，失败了推送钉钉消息
-				return unless deploy 
+				return if deploy.nil? || deploy.canceled?
+				
 				logger.info("handle deploy #{deploy.name} pipeline with status #{object_attributes.status}")
 
 				if object_attributes.status == 'failed'
@@ -35,7 +36,7 @@ module Labor
 
 			def handle_deploy_pipeline
 				deploy = PodDeploy.find_by(project_id: object.project.id, cd_pipeline_id: object_attributes.id, version: object_attributes.ref)
-				return unless deploy
+				return if deploy.nil? || deploy.canceled? 
 
 				case object_attributes.status
 				when 'running', 'pending'		

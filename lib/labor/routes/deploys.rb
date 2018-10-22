@@ -70,10 +70,17 @@ module Labor
 		end
 		delete '/deploys/:id' do |id|
 			@deploy = MainDeploy.find(id).destroy
-
+			@deploy.cancel
+			
 			labor_response @deploy
 		end
 
+		post '/deploys/:id/cancel' do |id|
+			@deploy = MainDeploy.find(id)
+			@deploy.cancel
+
+			labor_response @deploy
+		end
 		
 		# {
 		# 	'pid' : version
@@ -113,9 +120,16 @@ module Labor
 
 		post '/deploys/:id/pods/:pid/retry' do |_, pid|
 			@deploy = PodDeploy.find(pid)
-			@deploy.cancel_all_operation
+			@deploy.cancel
 			# 和 main deploy 不同，这里 retry 走的是 enqueue，重新更新 spec，发起 MR
 			@deploy.retry
+
+			labor_response @deploy
+		end
+
+		post '/deploys/:id/pods/:pid/cancel' do |_, pid|
+			@deploy = PodDeploy.find(pid)
+			@deploy.cancel
 
 			labor_response @deploy
 		end

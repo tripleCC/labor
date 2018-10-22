@@ -66,6 +66,12 @@ module Labor
         deploy.update(failure_reason: nil)
       end
 
+      before_transition any => :canceled do |deploy, transition|
+        next if transition.loopback?
+        
+        deploy.pod_deploys.each(&:cancel_all_operation)
+      end
+
       around_transition do |deploy, transition, block|
         next if transition.loopback?
         # 1
