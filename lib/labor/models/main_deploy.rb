@@ -74,7 +74,7 @@ module Labor
       before_transition any => :canceled do |deploy, transition|
         next if transition.loopback?
 
-        deploy.pod_deploys.each(&:cancel_all_operation)
+        deploy.pod_deploys.each(&:cancel)
       end
 
       around_transition do |deploy, transition, block|
