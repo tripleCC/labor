@@ -100,6 +100,10 @@ module Labor
       enqueue
     end
 
+    def should_retry?
+      failed? || canceled? || skipped?
+    end
+
     def cancel_all_operation
       DeployService::CancelPod.new(self).execute 
     end

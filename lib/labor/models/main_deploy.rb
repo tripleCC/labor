@@ -29,7 +29,7 @@ module Labor
       end
 
       event :deploy do
-        transition [:analyzing, :failed] => :deploying
+        transition [:analyzing, :failed, :canceled] => :deploying
       end
 
       event :success do 
@@ -91,6 +91,9 @@ module Labor
     end
 
     def retry 
+      retry_pod_deploys = pod_deploys.select(&:should_retry?)
+      retry_pod_deploys.each(&:retry) if retry_pod_deploys.any?
+
       deploy
     end
 

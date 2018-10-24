@@ -162,13 +162,8 @@ module Labor
 		post '/deploys/:id/retry' do |id|
 			@deploy = MainDeploy.includes(:pod_deploys).find(id)
 
-			failed_pod_deploys = @deploy.pod_deploys.select(&:failed?)
-			if failed_pod_deploys.any?
-				failed_pod_deploys.each(&:retry)
-			else 
-				# 和 pod deploy 不同，这里 retry 走的是 deloy，不重新分析，否则所有的 pod deploy 会回归 created 状态
-				@deploy.retry
-			end
+			# 和 pod deploy 不同，这里 retry 走的是 deloy，不重新分析，否则所有的 pod deploy 会回归 created 状态
+			@deploy.retry
 			# if @deploy.pod_deploys
 
 			labor_response @deploy

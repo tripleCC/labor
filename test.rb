@@ -638,8 +638,9 @@ end
 
 d = Deploy.new 
 # d.status
+p d.analyzing?
 p d.enqueue
-p d.enqueue
+p d.analyzing?
 
 # d.ready
 # d.deploy
