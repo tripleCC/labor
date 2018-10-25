@@ -100,7 +100,7 @@ module Labor
       enqueue
     end
 
-    def should_retry?
+    def need_retry?
       failed? || canceled? || skipped?
     end
 

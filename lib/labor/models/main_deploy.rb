@@ -91,7 +91,7 @@ module Labor
     end
 
     def retry 
-      retry_pod_deploys = pod_deploys.select(&:should_retry?)
+      retry_pod_deploys = pod_deploys.select(&:need_retry?)
       retry_pod_deploys.each(&:retry) if retry_pod_deploys.any?
 
       deploy
