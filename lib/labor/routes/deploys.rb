@@ -54,7 +54,8 @@ module Labor
 		post '/deploys' do 
 			begin 
 				request.body.rewind
-				params = JSON.parse(request.body.read)
+				body = request.body.read
+				params = JSON.parse(body) unless body.to_s.empty?
 				# 可以针对同个仓库，同个分支创建发布
 				@deploy = MainDeploy.create!(params)
 
@@ -91,7 +92,8 @@ module Labor
 		end
 		post '/deploys/pods/versions/update' do
 			request.body.rewind
-			params = JSON.parse(request.body.read)
+			body = request.body.read
+			params = JSON.parse(body) unless body.to_s.empty?
 			pids = params.keys.map(&:to_i)
 			pod_deploys = pids.map do |pid|
 				pod_deploy = PodDeploy.find(pid)

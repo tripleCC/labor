@@ -12,7 +12,7 @@ module Labor
 			return unless deploy.created?
 
 			begin
-				project = gitlab.project(deploy.repo_url) unless deploy.repo_url&.length.zero?
+				project = gitlab.project(deploy.repo_url) if deploy.repo_url
 			rescue Labor::Error::NotFound => error
 		    deploy.errors[:repo_url] << "Invalid #{deploy.repo_url}, , can't find repo with url #{deploy.repo_url}"
 		  end
