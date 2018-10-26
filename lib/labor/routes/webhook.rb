@@ -1,6 +1,7 @@
 require "sinatra/base"
 require_relative '../hook_event_handler'
 require_relative '../workers'
+require_relative '../external_pod/sorter'
 
 module Labor
 	class App < Sinatra::Base
@@ -14,6 +15,11 @@ module Labor
 				handler.handle
 			end	
 			labor_response 
+		end
+
+		post '/webhook/cocoapods' do 
+			Labor::Source::Updater.update
+			labor_response
 		end
 	end
 end

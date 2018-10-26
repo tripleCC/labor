@@ -23,7 +23,11 @@ require_relative './lib/labor'
 	# labor_response 
 # end
 
+
+
 # gitlab = Labor::GitLab.gitlab
+# project = gitlab.project('git@git.2dfire-inc.com:ios/cocoapods-spec.git')
+# bytes = gitlab.repo_archive(project.id).to_hash[:data].read
 
 # project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodD.git')
 # p gitlab.file_path(project.id, 'PodfileTemplate', 'release/0.2.2')

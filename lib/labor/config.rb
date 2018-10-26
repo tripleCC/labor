@@ -28,7 +28,13 @@ module Labor
 
 		def webhook_url
 			@webhook_url ||= begin
-				"http://#{webhook_host}:#{port}/webhook"
+				generate_webhook_url('webhook')
+			end
+		end
+
+		def cocoapods_webhook_url
+			@cocoapods_webhook_url ||= begin
+				generate_webhook_url('webhook/cocoapods')
 			end
 		end
 
@@ -43,6 +49,11 @@ module Labor
 		end
 
 		private
+
+		def generate_webhook_url(path) 
+			"http://#{webhook_host}:#{port}/#{path}"
+		end
+
 		def load_config 
 			current_path        = File.expand_path(File.dirname(__FILE__))
 	    custom_config_file  = File.expand_path("~/.labor/config.yml")

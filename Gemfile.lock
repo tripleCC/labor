@@ -88,7 +88,7 @@ GEM
       multi_xml (>= 0.5.2)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    member_reminder (0.1.6)
+    member_reminder (0.1.9)
       chinese_pinyin
     minitest (5.11.3)
     molinillo (0.6.6)
