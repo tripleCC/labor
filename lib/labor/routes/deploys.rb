@@ -107,7 +107,9 @@ module Labor
 		post '/deploys/:id/pods/:pid/review' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(reviewed: true)
-			@deploy.auto_merge 
+				
+			@deploy.main_deploy.process
+			# @deploy.auto_merge 
 
 			labor_response @deploy			
 		end

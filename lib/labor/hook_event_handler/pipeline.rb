@@ -30,8 +30,11 @@ module Labor
 				# 标志为 reviewed 的情况下，才通知负责人
 				if object_attributes.status == 'failed' && deploy.reviewed
 					# 这里不 drop，继续 pending ，直到负责人来解决
-					post_content = "main deploy #{deploy.main_deploy_id} 中 pod deploy #{deploy.name} 合并 MR (#{object_attributes.ref}) 必须通过的 CI 执行失败, 地址: #{pipeline_web_url}"
+					post_content = "main deploy #{deploy.main_deploy_id} 中 pod deploy #{deploy.name} 合并 MR (#{object_attributes.ref}) 的 CI 执行失败, 地址: #{pipeline_web_url}"
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+				elsif object_attributes.status == 'success'
+					# 成功后执行 auto merge
+					deploy.main_deploy.process
 				end
 			end
 

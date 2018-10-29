@@ -87,6 +87,7 @@ module Labor
 
 	  error Labor::Error::VersionInvalid,
 	  			StateMachines::InvalidTransition,
+	  			SocketError,
 	  			RangeError do |error|
 	  	halt 500, labor_error(error.message)
 	  end

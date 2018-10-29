@@ -1,3 +1,4 @@
+require 'member_reminder'
 require_relative './base'
 
 module Labor
@@ -9,10 +10,11 @@ module Labor
 		# 1.2.1、重启/创建 MR 对应源分支的 PL （合并请求需要活动的 PL，已让 merge_when_pipeline_succeeds 参数有效，否则会直接合并）
 		# 1.2.2、发起合并请求，携带 PL 成功后合并参数
 		class AutoMergePod < Base 
+			include MemberReminder::DingTalk
 
 			def execute
 				@deploy = PodDeploy.find(deploy.id)
-				
+
 				if deploy.merge_request_iids.any?
 					deploy.merge_request_iids.map do |mr_iid|
 						thread = Thread.new do 
@@ -35,6 +37,14 @@ module Labor
 									# 发起合并请求，必须是 PL 成功后才合并
 									gitlab.accept_merge_request(deploy.project_id, mr_iid)
 								rescue Gitlab::Error::MethodNotAllowed => error
+									# 这里不 drop，继续 pending ，直到负责人来解决
+
+									# pipeline 已经成功了，但是合并冲突，会直接走这里
+									if deploy.reviewed?
+										post_content = "main deploy #{deploy.main_deploy_id} 中 pod deploy #{deploy.name} 合并 MR (iid: #{mr_iid}, ref: #{deploy.ref}) 失败, 原因: #{error}"
+										post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+									end
+
 									logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to accept #{deploy.name}'s MR(#{mr_iid}) with error: #{error}")
 								end
 							end
@@ -42,7 +52,11 @@ module Labor
 						thread
 					end.each(&:join)
 				else 
-					deploy.main_deploy.process
+					# 如果没有 mr 了，这里假设已经合并成功
+					deploy.ready 
+					
+					# 执行下一句会死循环
+					# deploy.main_deploy.process
 				end
 			end
 
