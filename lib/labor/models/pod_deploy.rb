@@ -58,6 +58,7 @@ module Labor
 
       after_transition any => [:merged, :success] do |deploy, transition|
         next if transition.loopback?
+
         # 当组件标识为已合并，则让主发布处理组件 CD
         deploy.main_deploy.process
       end
@@ -78,9 +79,20 @@ module Labor
       end
 
       before_transition any => :failed do |deploy, transition|
+        next if transition.loopback?
         transition.args.first.try do |reason|
           deploy.failure_reason = reason
         end
+      end
+
+      after_transition any => :failed do |deploy, transition|
+        next if transition.loopback?
+        deploy.main_deploy.drop([deploy.main_deploy.failure_reason, deploy.failure_reason].compact.join(', '))
+      end
+
+      before_transition do |deploy, transition| 
+        next if transition.loopback?
+        deploy.update(failure_reason: nil) unless transition.to == 'failed'
       end
 
       around_transition do |deploy, transition, block|
@@ -97,6 +109,7 @@ module Labor
     end
 
     def retry 
+      main_deploy.deploy
       enqueue
     end
 

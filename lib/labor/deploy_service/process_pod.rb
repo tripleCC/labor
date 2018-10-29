@@ -14,6 +14,8 @@ module Labor
 			include Labor::RetryRescue
 
 			def execute
+				@deploy = PodDeploy.find(deploy.id)
+
 				name = deploy.version
 
 				delete_tag(name) if Labor.config.allow_delete_tag_when_already_existed
@@ -26,7 +28,7 @@ module Labor
 
 			def drop_deploy(error) 
 				logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): failed to process pod deploy with error #{error.message}")
-				deploy.drop(error.message)
+				deploy.drop!(error.message)
 
 				post_content = "发版进程[id: #{deploy.main_deploy.id}, name: #{deploy.main_deploy.name}]:  #{deploy.name} 组件发版失败，错误信息：#{error.message}." 
 				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner

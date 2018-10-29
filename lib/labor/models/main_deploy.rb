@@ -8,7 +8,7 @@ require_relative '../workers'
 
 module Labor
   class MainDeploy < ActiveRecord::Base
-  	has_many :pod_deploys, dependent: :destroy
+  	has_many :pod_deploys, -> { order :id }, dependent: :destroy
 
     self.per_page = 15
 
@@ -38,6 +38,7 @@ module Labor
 
       event :drop do
         transition [:created, :analyzing, :deploying] => :failed
+        # transition any => :failed
       end
 
       event :cancel do
@@ -91,10 +92,9 @@ module Labor
     end
 
     def retry 
+      deploy
       retry_pod_deploys = pod_deploys.select(&:need_retry?)
       retry_pod_deploys.each(&:retry) if retry_pod_deploys.any?
-
-      deploy
     end
 
     def prepare

@@ -5,6 +5,8 @@ module Labor
 		class CancelPod < Base 
 
 			def execute
+				@deploy = PodDeploy.find(deploy.id)
+				
 				cancel_pipelines
 			end
 

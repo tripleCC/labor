@@ -27,9 +27,10 @@ module Labor
 				
 				logger.info("handle deploy #{deploy.name} pipeline with status #{object_attributes.status}")
 
-				if object_attributes.status == 'failed'
+				# 标志为 reviewed 的情况下，才通知负责人
+				if object_attributes.status == 'failed' && deploy.reviewed
 					# 这里不 drop，继续 pending ，直到负责人来解决
-					post_content = "pod deploy #{deploy.name} 合并 MR (#{object_attributes.ref}) 必须通过的 CI 执行失败, 地址: #{pipeline_web_url}"
+					post_content = "main deploy #{deploy.main_deploy_id} 中 pod deploy #{deploy.name} 合并 MR (#{object_attributes.ref}) 必须通过的 CI 执行失败, 地址: #{pipeline_web_url}"
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				end
 			end
@@ -46,7 +47,7 @@ module Labor
 					# 凡是外界干预没有执行完全 CD pipeline，均视为失败
 					# pod deloy 失败，更新 status
 					deploy.drop()
-					post_content = "pod deploy #{deploy.name} 发布 #{object_attributes.ref} 执行 CD 失败, 地址: #{pipeline_web_url}"
+					post_content = "main deploy #{deploy.main_deploy_id} 中 pod deploy #{deploy.name} 发布 #{object_attributes.ref} 执行 CD 失败, 地址: #{pipeline_web_url}"
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				when 'success'
 					logger.info("pod deploy #{deploy.name} success with pipeline (id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref})")
