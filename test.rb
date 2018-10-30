@@ -26,8 +26,10 @@ require_relative './lib/labor'
 
 
 gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire-inc.com:ios/TDFHealthCheckModule.git')
-p gitlab.merge_request(project.id, 1)
+project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
+# p gitlab.branch(project.id, 'develop')
+p gitlab.compare(project.id, 'develop', 'release/0.2.3')
+# p gitlab.merge_request(project.id, 1)
 # bytes = gitlab.repo_archive(project.id).to_hash[:data].read
 
 # project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodD.git')

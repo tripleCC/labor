@@ -36,6 +36,7 @@ module Labor
 				# 标志为 reviewed 的情况下，才通知负责人
 				if object_attributes.status == 'failed' && deploy.reviewed
 					# 这里不 drop，继续 pending, 钉钉通知合并 PL 出错, 直到负责人来解决
+					# GET /projects/:id/merge_requests/:merge_request_iid/pipelines | 10.5.0
 					deploy.merge_request_iids.map do |mr_iid|
 						thread = Thread.new do 
 							mr = gitlab.merge_requests(deploy.project_id, mr_iid.to_s).first

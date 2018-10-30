@@ -29,12 +29,13 @@ module Labor
 				end
 
 				# 发布分支是 master || 发布分支已经合并到 master ，直接标志为可发布
-				if deploy.ref == 'master' || gitlab.branch(deploy.project_id, deploy.ref).merged
+				ref_branch = gitlab.branch(deploy.project_id, deploy.ref)
+				if deploy.ref == 'master' || ref_branch.merged
 					update_spec_version(deploy, 'master')
 					deploy.ready
 				else
 					update_spec_version(deploy)
-					create_gitflow_merge_requests
+					create_gitflow_merge_requests(ref_branch)
 				end
 			end
 
@@ -43,7 +44,7 @@ module Labor
 				specification.edit_remote_version(deploy.version)
 			end
 
-			def create_gitflow_merge_requests
+			def create_gitflow_merge_requests(ref_branch)
 				post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】组件发版合并，请及时进行 CodeReview 保证 CI 通过，并到发布平台标志组件为已审查." 
 
 				# gitflow 工作流需要合并至 master 和 develop
@@ -53,10 +54,14 @@ module Labor
 
 				# develop 分支可能没有，这里不抛出错误
 				begin 
-					unless deploy.ref == 'develop' || gitlab.branch(deploy.project_id, 'develop').nil?
-						mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
-						deploy.merge_request_iids << mr.iid
-						post_content << content
+					unless deploy.ref == 'develop'
+						compare_result = gitlab.compare(deploy.project_id, 'develop', deploy.ref)
+						# 发布分支领先 develop 的情况下才创建 mr
+						unless compare_result.diffs.empty? 
+							mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
+							deploy.merge_request_iids << mr.iid
+							post_content << content
+						end
 					end
 				rescue Gitlab::Error::NotFound => error
 					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): can't find develop branch.")
