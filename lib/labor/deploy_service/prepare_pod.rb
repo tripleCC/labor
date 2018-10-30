@@ -44,7 +44,7 @@ module Labor
 			end
 
 			def create_gitflow_merge_requests
-				post_content = "发版进程[id: #{deploy.main_deploy.id}, name: #{deploy.main_deploy.name}]:#{deploy.name} 组件发版合并，请及时进行 CodeReview 并处理 MergeReqeust." 
+				post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】组件发版合并，请及时进行 CodeReview 保证 CI 通过，并到发布平台标志组件为已审查." 
 
 				# gitflow 工作流需要合并至 master 和 develop
 				mr, content = create_merge_request(deploy.project_id, deploy.ref, 'master', deploy.owner)

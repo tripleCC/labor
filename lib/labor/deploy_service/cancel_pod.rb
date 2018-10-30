@@ -6,7 +6,7 @@ module Labor
 
 			def execute
 				@deploy = PodDeploy.find(deploy.id)
-				
+
 				cancel_pipelines
 			end
 

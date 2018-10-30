@@ -41,7 +41,7 @@ module Labor
 
 									# pipeline 已经成功了，但是合并冲突，会直接走这里
 									if deploy.reviewed?
-										post_content = "main deploy #{deploy.main_deploy_id} 中 pod deploy #{deploy.name} 合并 MR (iid: #{mr_iid}, ref: #{deploy.ref}) 失败, 原因: #{error}"
+										post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR (iid: #{mr_iid}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url}) 失败, 请确认合并是否出现冲突, 原因: #{error}"
 										post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 									end
 
@@ -54,7 +54,7 @@ module Labor
 				else 
 					# 如果没有 mr 了，这里假设已经合并成功
 					deploy.ready 
-					
+
 					# 执行下一句会死循环
 					# deploy.main_deploy.process
 				end

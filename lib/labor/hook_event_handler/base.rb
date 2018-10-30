@@ -1,10 +1,12 @@
 require 'gitlab'
 require_relative '../logger'
+require_relative '../git/gitlab'
 require_relative '../models/pod_deploy'
 
 module Labor
 	module HookEventHandler
 		class Base
+			include GitLab
 			include Labor::Logger
 			
 			attr_reader :object
