@@ -1,8 +1,11 @@
 require "sinatra/base"
 require 'http'
+require_relative '../models/user'
+require_relative '../errors'
 
 module Labor
 	class App < Sinatra::Base
+
 		get '/oauth/resource/user' do 
 		  query_message = ['redirect_uri', 'code', 'client_id', 'client_secret']
 		  	.map { |key| "#{key}=#{params[key]}" }
@@ -16,7 +19,16 @@ module Labor
 		  	result = JSON.parse(result) 
 		  	result = HTTP.auth("bearer #{result['access_token']}").get("#{host}/oauth/user")
 		  	if result.code == 200
-		  		labor_response result.parse
+		  		user_hash = result.parse
+
+		  		# 每次登录，更新用户信息
+		  		user = User.find_or_create_by(sub: user_hash['sub']) 
+		  		['nickname', 'email', 'phone_number', 'picture'].each do |key|
+		  			user.send("#{key}=", user_hash[key]) 
+		  		end
+	  			user.save 
+
+		  		labor_response user
 		  	else 
 		  		labor_error "Fail to get user with error #{result.to_s}"
 		  	end

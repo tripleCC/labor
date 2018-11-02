@@ -4,6 +4,7 @@ require 'sinatra/param'
 require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative '../models/main_deploy'
+require_relative '../models/user'
 require_relative '../deploy_messager'
 require_relative '../logger'
 
@@ -31,10 +32,11 @@ module Labor
 		end
 
 		get '/deploys/:id' do |id|
-			@deploy = MainDeploy.includes(:pod_deploys).find(id)
+			includes = [:pod_deploys, :user]
+			@deploy = MainDeploy.includes(includes).find(id)
 
 			labor_response @deploy, {
-				includes: [:pod_deploys]
+				includes: includes
 			}
 		end
 
@@ -48,6 +50,7 @@ module Labor
 		# 	'name' : xxxx
 		# 	'repo_url' : gitxxx
 		# 	'ref' : releasexxx
+		#   'user_id' : xxxx
 		# }
 		options '/deploys' do 
 		end
@@ -56,8 +59,10 @@ module Labor
 				request.body.rewind
 				body = request.body.read
 				params = JSON.parse(body) unless body.to_s.empty?
+
 				# 可以针对同个仓库，同个分支创建发布
-				@deploy = MainDeploy.create!(params)
+				user = User.find(params['user_id'])
+				@deploy = MainDeploy.create!({ name: params['name'], repo_url: params['repo_url'],  ref: params['ref'],  user: user })
 
 				labor_response @deploy
 			rescue ActiveRecord::RecordInvalid => error 
@@ -107,7 +112,7 @@ module Labor
 		post '/deploys/:id/pods/:pid/review' do |_, pid|
 			@deploy = PodDeploy.find(pid)
 			@deploy.update(reviewed: true)
-				
+
 			@deploy.main_deploy.process
 			# @deploy.auto_merge 
 

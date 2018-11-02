@@ -1,6 +1,7 @@
 class CreateMainDeploys < ActiveRecord::Migration
   def change
   	create_table :main_deploys do |t|
+      t.belongs_to :user, index: true
   		t.string :name, presence: true
   		t.string :repo_url, presence: true
   		t.string :ref, presence: true

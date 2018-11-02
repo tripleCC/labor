@@ -5,5 +5,7 @@ module Labor
 		class NotFound < Base; end
 
 		class VersionInvalid < Base; end
+
+		class Oauth < Base; end
 	end
 end
