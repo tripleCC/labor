@@ -23,6 +23,7 @@ gem 'cocoapods-tdfire-binary'
 gem 'em-websocket'
 gem 'activejob', '~> 4.2'
 gem 'puma'
+gem 'http'
 
 group :development do
 	gem 'rake'

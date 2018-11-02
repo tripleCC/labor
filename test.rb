@@ -4,7 +4,7 @@
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
 # require_relative './lib/labor/git/gitlab'
-require_relative './lib/labor'
+# require_relative './lib/labor'
 # require 'uri'
 
 # require 'thin'
@@ -25,10 +25,53 @@ require_relative './lib/labor'
 
 
 
-gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
-# p gitlab.branch(project.id, 'develop')
-p gitlab.compare(project.id, 'develop', 'release/0.2.3')
+# gitlab = Labor::GitLab.gitlab
+# project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
+# # p gitlab.branch(project.id, 'develop')
+# p gitlab.compare(project.id, 'develop', 'release/0.2.3')
+
+require 'sinatra'
+require "http"
+require 'jwt'
+require 'net/http'
+
+
+get '/auth2/user' do 
+  headers 'Access-Control-Allow-Origin' => '*', 
+        'Access-Control-Allow-Headers' => 'Content-Type', 
+        'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
+
+  redirect_uri = params['redirect_uri']
+  code = params['code'] 
+  client_id = params['client_id'] 
+  client_secret = params['client_secret'] 
+
+  host = 'https://o2.2dfire.net/o2'
+
+  query = "client_id=#{client_id}&client_secret=#{client_secret}&grant_type=authorization_code&redirect_uri=#{redirect_uri}&code=#{code}"
+  
+  post_url = "#{host}/oauth/token?#{query}"
+  response = HTTP.post(post_url)
+  response = JSON.parse(response)
+  p response['access_token']
+
+  r = HTTP.auth("bearer #{response['access_token']}").get("#{host}/oauth/user")
+  p r.parse
+  # HTTP.post(post_url)
+end
+
+# p HTTP.get('http://localhost:8080/deploys').to_s
+# params = {
+#   client_id: '6f16adcc6ddf93f1',
+#   client_secret: '8a396e96ff5d4ea000d31meUjJeosFrxPNG6obQK6us',
+#   grant_type: 'authorization_code',
+#   redirect_uri: 'http://localhost:3000/oauth/callback',
+#   code: ''
+# }
+# host = 'https://o2.2dfire-daily.com/o2'
+# response = HTTP.post("#{host}/oauth/token", json: params)
+
+
 # p gitlab.merge_request(project.id, 1)
 # bytes = gitlab.repo_archive(project.id).to_hash[:data].read
 
@@ -643,11 +686,11 @@ class Deploy
     end
 end
 
-d = Deploy.new 
-# d.status
-p d.analyzing?
-p d.enqueue
-p d.analyzing?
+# d = Deploy.new 
+# # d.status
+# p d.analyzing?
+# p d.enqueue
+# p d.analyzing?
 
 # d.ready
 # d.deploy
