@@ -113,7 +113,7 @@ module Labor
 			params = body_params(request)
 			permission_require(deploy, params['user_id'], :update_versions)
 
-			pids = params.keys.map(&:to_i)
+			pids = params['versions'].keys.map(&:to_i)
 			pod_deploys = pids.map do |pid|
 				pod_deploy = PodDeploy.find(pid)
 				pod_deploy.update(:version => params[pid.to_s])
