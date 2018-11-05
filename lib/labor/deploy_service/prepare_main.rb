@@ -16,6 +16,7 @@ module Labor
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): prepare main deploy, create pod deploys: #{grouped_pods}")
 
 				deploy.pod_deploys = create_pod_deploys(grouped_pods)
+				deploy.save!
 
 				# 没有可发布组件直接标志成功
 				deploy.success unless deploy.pod_deploys.any?
@@ -39,8 +40,16 @@ module Labor
 						owner_ding_token: member.team.ding_token
 					}) if member 
 
+					if member.name
+						user = User.find_or_create_by({
+							nickname: member.name, 
+							phone_number: member.mobile
+						}) 
+						deploy_hash.merge!({
+							user: user
+						})
+					end
 					pod_deploy = PodDeploy.create!(deploy_hash)
-					pod_deploy.user = User.find_or_create_by(nickname: member.name) if member.name
 					pod_deploy
 				end
 				pod_deploys
