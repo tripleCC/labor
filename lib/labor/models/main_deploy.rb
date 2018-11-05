@@ -9,8 +9,9 @@ require_relative '../workers'
 module Labor
   class MainDeploy < ActiveRecord::Base
   	has_many :pod_deploys, -> { order :id }, dependent: :destroy
+    has_many :operations, -> { order :id }
     belongs_to :user 
-    
+
     self.per_page = 15
 
     validates :name, presence: true

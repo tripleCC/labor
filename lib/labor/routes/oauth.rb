@@ -22,8 +22,8 @@ module Labor
 		  		user_hash = result.parse
 
 		  		# 每次登录，更新用户信息
-		  		user = User.find_or_create_by(sub: user_hash['sub']) 
-		  		['nickname', 'email', 'phone_number', 'picture'].each do |key|
+		  		user = User.find_or_create_by(nickname: user_hash['nickname']) 
+		  		['sub', 'email', 'phone_number', 'picture'].each do |key|
 		  			user.send("#{key}=", user_hash[key]) 
 		  		end
 	  			user.save 

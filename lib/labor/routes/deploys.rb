@@ -5,6 +5,7 @@ require 'will_paginate'
 require 'will_paginate/active_record'
 require_relative '../models/main_deploy'
 require_relative '../models/user'
+require_relative '../models/operation'
 require_relative '../deploy_messager'
 require_relative '../logger'
 
@@ -19,7 +20,7 @@ module Labor
 		# }
 		get '/deploys' do 
 			# page ; per_page
-			@deploys = MainDeploy.paginate(page: params[:page], per_page: params[:per_page]).order('id DESC')
+			@deploys = MainDeploy.paginate(page: params['page'], per_page: params['per_page']).order('id DESC')
 			@size = MainDeploy.all.size
 			@per_page = params[:per_page] || MainDeploy.per_page
 
@@ -31,19 +32,26 @@ module Labor
 			}
 		end
 
+		# get 'deploys/:id/operations' do |id|
+		# 	deploy = MainDeploy.includes(:operations).find(id)
+
+		# 	labor_response deploy.operations
+		# end
+
+
 		get '/deploys/:id' do |id|
-			includes = [:pod_deploys, :user]
-			@deploy = MainDeploy.includes(includes).find(id)
+			@deploy = MainDeploy.includes(:user, :pod_deploys => :user).find(id)
 
 			labor_response @deploy, {
-				includes: includes
+				includes: [
+					:user,
+					{ 
+						pod_deploys: {
+							include: :user
+						}
+					}
+				]
 			}
-		end
-
-		get '/deploys/:id/pods' do |id|
-			@deploy = MainDeploy.includes(:pod_deploys).find(id)
-
-			labor_response @deploy.pod_deploys
 		end
 
 		# {
@@ -56,9 +64,7 @@ module Labor
 		end
 		post '/deploys' do 
 			begin 
-				request.body.rewind
-				body = request.body.read
-				params = JSON.parse(body) unless body.to_s.empty?
+				params = body_params(request)
 
 				# 可以针对同个仓库，同个分支创建发布
 				user = User.find(params['user_id'])
@@ -75,30 +81,38 @@ module Labor
 		options '/deploys/:id' do 
 		end
 		delete '/deploys/:id' do |id|
-			@deploy = MainDeploy.find(id)
-			@deploy.cancel
-			@deploy.destroy
+			deploy = MainDeploy.find(id)
+
+			permission_require(deploy, body_params(request)['user_id'], :delete)
+
+			deploy.cancel
+			deploy.destroy
 
 			labor_response @deploy
 		end
 
 		post '/deploys/:id/cancel' do |id|
-			@deploy = MainDeploy.find(id)
-			@deploy.cancel
+			deploy = MainDeploy.find(id)
 
-			labor_response @deploy
+			permission_require(deploy, body_params(request)['user_id'], :cancel)
+
+			deploy.cancel
+
+			labor_response deploy
 		end
 		
 		# {
 		# 	'pid' : version
 		# }
 		# 处理跨域预检请求
-		options '/deploys/pods/versions/update' do 
+		options '/deploys/:id/pods/versions/update' do 
 		end
-		post '/deploys/pods/versions/update' do
-			request.body.rewind
-			body = request.body.read
-			params = JSON.parse(body) unless body.to_s.empty?
+		post '/deploys/:id/pods/versions/update' do |id|
+			deploy = MainDeploy.find(id)
+
+			params = body_params(request)
+			permission_require(deploy, params['user_id'], :update_versions)
+
 			pids = params.keys.map(&:to_i)
 			pod_deploys = pids.map do |pid|
 				pod_deploy = PodDeploy.find(pid)
@@ -109,73 +123,112 @@ module Labor
 			labor_response pod_deploys
 		end
 
+		options '/deploys/:id/pods/:pid/review' do 
+		end
 		post '/deploys/:id/pods/:pid/review' do |_, pid|
-			@deploy = PodDeploy.find(pid)
-			@deploy.update(reviewed: true)
+			deploy = PodDeploy.find(pid)
 
-			@deploy.main_deploy.process
+			permission_require(deploy, body_params(request)['user_id'], :review)
+
+			deploy.update(reviewed: true)
+
+			deploy.main_deploy.process
 			# @deploy.auto_merge 
 
 			labor_response @deploy			
 		end
 
+		options '/deploys/:id/pods/:pid/manual' do 
+		end
 		post '/deploys/:id/pods/:pid/manual' do |_, pid|
-			@deploy = PodDeploy.find(pid)
-			@deploy.update(manual: true)
-			@deploy.success
-			@deploy.cancel_all_operation
+			deploy = PodDeploy.find(pid)
+
+			permission_require(deploy, body_params(request)['user_id'], :manual)
+
+			deploy.update(manual: true)
+			deploy.success
+			deploy.cancel_all_operation
 
 			labor_response @deploy
 		end
 
+		options '/deploys/:id/pods/:pid/retry' do 
+		end
 		post '/deploys/:id/pods/:pid/retry' do |_, pid|
-			@deploy = PodDeploy.find(pid)
-			@deploy.cancel
+			deploy = PodDeploy.find(pid)
+
+			permission_require(deploy, body_params(request)['user_id'], :retry)
+
+			deploy.cancel
 			# 和 main deploy 不同，这里 retry 走的是 enqueue，重新更新 spec，发起 MR
-			@deploy.retry
+			deploy.retry
 
 			labor_response @deploy
 		end
 
+		options '/deploys/:id/pods/:pid/cancel' do 
+		end
 		post '/deploys/:id/pods/:pid/cancel' do |_, pid|
-			@deploy = PodDeploy.find(pid)
-			@deploy.cancel
+			deploy = PodDeploy.find(pid)
 
-			labor_response @deploy
+			permission_require(deploy, body_params(request)['user_id'], :cancel)
+
+			deploy.cancel
+
+			labor_response deploy
 		end
 
+		options '/deploys/:id/enqueue' do 
+		end
 		post '/deploys/:id/enqueue' do |id|
-			@deploy = MainDeploy.find(id)
-			@deploy.reset
-			@deploy.enqueue
+			deploy = MainDeploy.find(id)
 
-			@deploy.start if params[:start_directly]
+			permission_require(deploy, body_params(request)['user_id'], :enqueue)
 
-			labor_response @deploy
+			deploy.reset
+			deploy.enqueue
+
+			deploy.start if params[:start_directly]
+
+			labor_response deploy
 		end		
 
+		options '/deploys/:id/deploy' do 
+		end
 		post '/deploys/:id/deploy' do |id|
-			@deploy = MainDeploy.find(id)
-			@deploy.start
+			deploy = MainDeploy.find(id)
 
-			labor_response @deploy
+			permission_require(deploy, body_params(request)['user_id'], :deploy)
+
+			deploy.start
+
+			labor_response deploy
 		end		
 
+		options '/deploys/:id/cancel' do 
+		end
 		post '/deploys/:id/cancel' do |id|
-			@deploy = MainDeploy.find(id)
-			@deploy.cancel
+			deploy = MainDeploy.find(id)
 
-			labor_response @deploy
+			permission_require(deploy, body_params(request)['user_id'], :cancel)
+
+			deploy.cancel
+
+			labor_response deploy
 		end
 
+		options '/deploys/:id/retry' do 
+		end
 		post '/deploys/:id/retry' do |id|
-			@deploy = MainDeploy.includes(:pod_deploys).find(id)
+			deploy = MainDeploy.includes(:pod_deploys).find(id)
+
+			permission_require(deploy, body_params(request)['user_id'], :retry)
 
 			# 和 pod deploy 不同，这里 retry 走的是 deloy，不重新分析，否则所有的 pod deploy 会回归 created 状态
-			@deploy.retry
+			deploy.retry
 			# if @deploy.pod_deploys
 
-			labor_response @deploy
+			labor_response deploy
 		end
 	end
 end

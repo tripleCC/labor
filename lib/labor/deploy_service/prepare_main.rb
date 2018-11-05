@@ -2,6 +2,7 @@ require_relative './base'
 require_relative '../external_pod/sorter'
 require_relative '../git/string_extension'
 require_relative '../remote_file'
+require_relative '../models/user'
 
 module Labor
 	module DeployService
@@ -39,6 +40,7 @@ module Labor
 					}) if member 
 
 					pod_deploy = PodDeploy.create!(deploy_hash)
+					pod_deploy.user = User.find_or_create_by(nickname: member.name) if member.name
 					pod_deploy
 				end
 				pod_deploys

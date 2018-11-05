@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+
+
 # require 'rubygems'
 # require 'cgi'
 # require 'pp'
@@ -30,35 +32,36 @@
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
-require 'sinatra'
-require "http"
-require 'jwt'
-require 'net/http'
+# require 'sinatra'
+# require "http"
+# require 'jwt'
+# require 'net/http'
 
 
-get '/auth2/user' do 
-  headers 'Access-Control-Allow-Origin' => '*', 
-        'Access-Control-Allow-Headers' => 'Content-Type', 
-        'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
 
-  redirect_uri = params['redirect_uri']
-  code = params['code'] 
-  client_id = params['client_id'] 
-  client_secret = params['client_secret'] 
+# get '/auth2/user' do 
+#   headers 'Access-Control-Allow-Origin' => '*', 
+#         'Access-Control-Allow-Headers' => 'Content-Type', 
+#         'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
 
-  host = 'https://o2.2dfire.net/o2'
+#   redirect_uri = params['redirect_uri']
+#   code = params['code'] 
+#   client_id = params['client_id'] 
+#   client_secret = params['client_secret'] 
 
-  query = "client_id=#{client_id}&client_secret=#{client_secret}&grant_type=authorization_code&redirect_uri=#{redirect_uri}&code=#{code}"
+#   host = 'https://o2.2dfire.net/o2'
+
+#   query = "client_id=#{client_id}&client_secret=#{client_secret}&grant_type=authorization_code&redirect_uri=#{redirect_uri}&code=#{code}"
   
-  post_url = "#{host}/oauth/token?#{query}"
-  response = HTTP.post(post_url)
-  response = JSON.parse(response)
-  p response['access_token']
+#   post_url = "#{host}/oauth/token?#{query}"
+#   response = HTTP.post(post_url)
+#   response = JSON.parse(response)
+#   p response['access_token']
 
-  r = HTTP.auth("bearer #{response['access_token']}").get("#{host}/oauth/user")
-  p r.parse
-  # HTTP.post(post_url)
-end
+#   r = HTTP.auth("bearer #{response['access_token']}").get("#{host}/oauth/user")
+#   p r.parse
+#   # HTTP.post(post_url)
+# end
 
 # p HTTP.get('http://localhost:8080/deploys').to_s
 # params = {

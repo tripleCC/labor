@@ -25,6 +25,7 @@ module Labor
 
 		helpers Sinatra::Param
 		helpers Labor::Response
+		helpers Labor::Permission
 
 		before do
 	    content_type :json
@@ -77,12 +78,17 @@ module Labor
     	halt 404, labor_error(error.message)
 	  end
 
-	  error Gitlab::Error::Forbidden do |error|
+	  error Gitlab::Error::Forbidden,
+	  			Labor::Error::PermissionReject do |error|
 	  	halt 403, labor_error(error.message)
 	  end
 
 	  error Gitlab::Error::Unprocessable do |error|
 	  	halt 422, labor_error(error.message)
+	  end
+
+	  error Labor::Error::BadRequest do |error|
+	  	halt 400, labor_error(error.message)
 	  end
 
 	  error Labor::Error::VersionInvalid,

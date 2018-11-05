@@ -1,6 +1,7 @@
 class CreatePodDeploys < ActiveRecord::Migration
   def change
   	create_table :pod_deploys do |t|
+      t.belongs_to :user, index: true
   		t.belongs_to :main_deploy, index: true
   		t.string :name
   		t.string :project_id

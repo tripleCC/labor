@@ -8,7 +8,9 @@ require_relative '../logger'
 
 module Labor
   class PodDeploy < ActiveRecord::Base
+    has_many :operations, -> { order :id }
   	belongs_to :main_deploy
+    belongs_to :user
 
     # sqlite3 不支持 array 类型
     # serialize :merge_request_iids

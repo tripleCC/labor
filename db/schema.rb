@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181102043735) do
+ActiveRecord::Schema.define(version: 20181105025925) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,7 +32,21 @@ ActiveRecord::Schema.define(version: 20181102043735) do
 
   add_index "main_deploys", ["user_id"], name: "index_main_deploys_on_user_id", using: :btree
 
+  create_table "operations", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "pod_deploy_id"
+    t.integer  "main_deploy_id"
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "operations", ["main_deploy_id"], name: "index_operations_on_main_deploy_id", using: :btree
+  add_index "operations", ["pod_deploy_id"], name: "index_operations_on_pod_deploy_id", using: :btree
+  add_index "operations", ["user_id"], name: "index_operations_on_user_id", using: :btree
+
   create_table "pod_deploys", force: :cascade do |t|
+    t.integer  "user_id"
     t.integer  "main_deploy_id"
     t.string   "name"
     t.string   "project_id"
@@ -57,6 +71,7 @@ ActiveRecord::Schema.define(version: 20181102043735) do
   end
 
   add_index "pod_deploys", ["main_deploy_id"], name: "index_pod_deploys_on_main_deploy_id", using: :btree
+  add_index "pod_deploys", ["user_id"], name: "index_pod_deploys_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "sub"
@@ -64,6 +79,7 @@ ActiveRecord::Schema.define(version: 20181102043735) do
     t.string   "email"
     t.string   "phone_number"
     t.string   "picture"
+    t.boolean  "superman"
     t.text     "unofficial_names", default: [], array: true
     t.datetime "created_at"
     t.datetime "updated_at"
