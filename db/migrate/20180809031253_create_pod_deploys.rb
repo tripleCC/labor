@@ -7,7 +7,7 @@ class CreatePodDeploys < ActiveRecord::Migration
   		t.string :project_id
   		t.string :repo_url, presence: true
   		t.string :ref, default: 'master'
-  		t.string :version
+  		t.string :version, null: false
   		# t.string :external_dependency_names, default: ''
       t.text :external_dependency_names, array: true, default: []
   		t.string :mr_pipeline_id
