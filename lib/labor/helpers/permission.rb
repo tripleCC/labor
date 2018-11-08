@@ -3,14 +3,22 @@ require_relative '../models/operation'
 
 module Labor
 	module Permission
-		def permission_require(deploy, user_id, operate)
-			# 400
-			raise Labor::Error::BadRequest, "user_id is required when operate #{deploy.name} with operation #{operate}" if user_id.nil?
+		def auth_user_id
+			auth = Rack::Auth::Basic::Request.new(request.env)
+	    user_id = auth.credentials.last if auth.provided? && auth.basic?
+	    if user_id.nil?
+				raise Labor::Error::Unauthorized, "Not authorized, user_id is required" 
+			end
+			user_id.to_i
+		end
+
+		def permission_require(deploy, operate)
+	    user_id = auth_user_id
 
 			user = User.find(user_id)
 			return if user.superman
 
-			unless deploy.user_id == user_id || deploy.main_deploy.user_id == user_id
+			unless deploy.user_id == user_id || deploy.try(:main_deploy)&.user_id == user_id
 				# 外层拦截，转成 403
 				raise Labor::Error::PermissionReject, "User #{user.nickname} doesn't have permission to operate #{deploy.name} with operation #{operate}"
 			end

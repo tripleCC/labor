@@ -67,7 +67,9 @@ module ExternalPod
 				end 
 
 				def tagged_spec(dep)
-					version = default_source.versions(dep.root_name).sort.reverse.find do |v|
+					versions = default_source.versions(dep.root_name) || []
+
+					version = versions.sort.reverse.find do |v|
 						dep.requirement.satisfied_by?(v)
 					end
 					spec = default_source.specification(dep.root_name, version)

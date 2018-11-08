@@ -38,7 +38,8 @@ module Labor
 		# 	labor_response deploy.operations
 		# end
 
-
+		options '/deploys/:id' do 
+		end
 		get '/deploys/:id' do |id|
 			@deploy = MainDeploy.includes(:user, :pod_deploys => :user).find(id)
 
@@ -67,7 +68,7 @@ module Labor
 				params = body_params(request)
 
 				# 可以针对同个仓库，同个分支创建发布
-				user = User.find(params['user_id'])
+				user = User.find(auth_user_id)
 				@deploy = MainDeploy.create!({ name: params['name'], repo_url: params['repo_url'],  ref: params['ref'],  user: user })
 
 				labor_response @deploy
@@ -83,7 +84,7 @@ module Labor
 		post '/deploys/:id/delete' do |id|
 			deploy = MainDeploy.find(id)
 
-			permission_require(deploy, body_params(request)['user_id'], :delete)
+			permission_require(deploy, :delete)
 
 			deploy.cancel
 			deploy.destroy
@@ -91,10 +92,12 @@ module Labor
 			labor_response @deploy
 		end
 
+		options '/deploys/:id/cancel' do 
+		end
 		post '/deploys/:id/cancel' do |id|
 			deploy = MainDeploy.find(id)
 
-			permission_require(deploy, body_params(request)['user_id'], :cancel)
+			permission_require(deploy, :cancel)
 
 			deploy.cancel
 
@@ -110,10 +113,9 @@ module Labor
 		post '/deploys/:id/pods/versions/update' do |id|
 			deploy = MainDeploy.find(id)
 
-			params = body_params(request)
-			permission_require(deploy, params['user_id'], :update_versions)
+			permission_require(deploy, :update_versions)
 
-			versions = params['versions']
+			versions = body_params
 			pids = versions.keys.map(&:to_i)
 			pod_deploys = pids.map do |pid|
 				pod_deploy = PodDeploy.find(pid)
@@ -129,7 +131,7 @@ module Labor
 		post '/deploys/:id/pods/:pid/review' do |_, pid|
 			deploy = PodDeploy.find(pid)
 
-			permission_require(deploy, body_params(request)['user_id'], :review)
+			permission_require(deploy, :review)
 
 			deploy.update(reviewed: true)
 
@@ -144,7 +146,7 @@ module Labor
 		post '/deploys/:id/pods/:pid/manual' do |_, pid|
 			deploy = PodDeploy.find(pid)
 
-			permission_require(deploy, body_params(request)['user_id'], :manual)
+			permission_require(deploy, :manual)
 
 			deploy.update(manual: true)
 			deploy.success
@@ -158,7 +160,7 @@ module Labor
 		post '/deploys/:id/pods/:pid/retry' do |_, pid|
 			deploy = PodDeploy.find(pid)
 
-			permission_require(deploy, body_params(request)['user_id'], :retry)
+			permission_require(deploy, :retry)
 
 			deploy.cancel
 			# 和 main deploy 不同，这里 retry 走的是 enqueue，重新更新 spec，发起 MR
@@ -172,7 +174,7 @@ module Labor
 		post '/deploys/:id/pods/:pid/cancel' do |_, pid|
 			deploy = PodDeploy.find(pid)
 
-			permission_require(deploy, body_params(request)['user_id'], :cancel)
+			permission_require(deploy, :cancel)
 
 			deploy.cancel
 
@@ -184,7 +186,7 @@ module Labor
 		post '/deploys/:id/enqueue' do |id|
 			deploy = MainDeploy.find(id)
 
-			permission_require(deploy, body_params(request)['user_id'], :enqueue)
+			permission_require(deploy, :enqueue)
 
 			deploy.reset
 			deploy.enqueue
@@ -199,7 +201,7 @@ module Labor
 		post '/deploys/:id/deploy' do |id|
 			deploy = MainDeploy.find(id)
 
-			permission_require(deploy, body_params(request)['user_id'], :deploy)
+			permission_require(deploy, :deploy)
 
 			deploy.start
 
@@ -211,7 +213,7 @@ module Labor
 		post '/deploys/:id/cancel' do |id|
 			deploy = MainDeploy.find(id)
 
-			permission_require(deploy, body_params(request)['user_id'], :cancel)
+			permission_require(deploy, :cancel)
 
 			deploy.cancel
 
@@ -223,7 +225,7 @@ module Labor
 		post '/deploys/:id/retry' do |id|
 			deploy = MainDeploy.includes(:pod_deploys).find(id)
 
-			permission_require(deploy, body_params(request)['user_id'], :retry)
+			permission_require(deploy, :retry)
 
 			# 和 pod deploy 不同，这里 retry 走的是 deloy，不重新分析，否则所有的 pod deploy 会回归 created 状态
 			deploy.retry

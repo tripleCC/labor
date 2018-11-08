@@ -32,8 +32,31 @@
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
-# require 'sinatra'
-require "http"
+require 'sinatra'
+
+helpers do
+  def protected!
+    return if authorized?
+    headers['WWW-Authenticate'] = 'Basic realm="Restricted Area"'
+    halt 401, "Not authorized\n"
+  end
+
+  def authorized?
+    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+    p @auth.to_s
+    @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == ['admin', 'admin']
+  end
+end
+
+
+get '/deploys' do
+  headers 'Access-Control-Allow-Origin' => '*', 
+        'Access-Control-Allow-Headers' => 'Content-Type', 
+        'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
+  protected!
+  "Welcome, authenticated client"
+end
+# require "http"
 
 
 # require 'jwt'

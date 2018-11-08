@@ -32,8 +32,8 @@ module Labor
 				end 
 			end
 
-			def edit_remote(podfile_string = nil)
-				podfile_string ||= Generator.new(podfile, template.file_contents).generate
+			def edit_remote(versions = [])
+				podfile_string = Generator.new(podfile, template.file_contents, versions).generate
 				gitlab.edit_file(@project_id, @path, @ref, podfile_string, "封板#{ref}".ci_skip) unless file_contents == podfile_string
 			end
 

@@ -1,12 +1,5 @@
 module Labor
 	module Response
-		def body_params(request) 
-			request.body.rewind
-			body = request.body.read
-			params = JSON.parse(body) unless body.to_s.empty?
-			params || {}
-		end
-
 		def labor_response(data = {}, options = {}) 
 			includes = options[:includes] || []
 			errors = options[:errors]

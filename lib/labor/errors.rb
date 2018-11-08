@@ -9,6 +9,8 @@ module Labor
 		class Oauth < Base; end
 
 		class PermissionReject < Base; end
+		
+		class Unauthorized < Base; end 
 
 		class BadRequest < Base; end
 	end

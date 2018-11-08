@@ -9,8 +9,10 @@ module Labor
 
 				attr_reader :podfile_string
 
-				def initialize(podfile, podfile_template_string) 
+				def initialize(podfile, podfile_template_string, versions = []) 
+					# TODO: 传入 versions 来设置版本，而不是通过 branch
 					@podfile = podfile
+					@versions = versions
 					@podfile_template_string = podfile_template_string
 				end
 
@@ -20,11 +22,18 @@ module Labor
 					@podfile_template_string.split("\n").each do |line|
 						if line.strip.match(DEFAULT_LABEL)
 							@podfile.dependencies.each do |dep|
-								@podfile_string << "  pod '#{dep.name}'"
-								@podfile_string << ", '#{dep.requirement.to_s}'" unless dep.requirement.none?
+								# 本地依赖直接跳过
+								next if dep.external? && dep.external_source[:path]
 
-								if dep.external? && dep.external_source[:branch]
-									@podfile_string << ", '= #{dep.external_source[:branch].split('/').last}'" if dep.external_source[:branch].start_with?('release/')
+								@podfile_string << "  pod '#{dep.name}'"
+								if !dep.requirement.none?
+									# 原来依赖版本的
+									@podfile_string << ", '#{dep.requirement.to_s}'"
+								elsif dep.external?
+									# 需要发布的
+									version = @versions[dep.name] || 
+										(dep.external_source[:branch]&.start_with?('release/') && dep.external_source[:branch].split('/').last)
+									@podfile_string << ", '= #{version}'" if version
 								end
 
 								@podfile_string << "\n"

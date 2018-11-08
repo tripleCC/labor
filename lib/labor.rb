@@ -25,12 +25,13 @@ module Labor
 
 		helpers Sinatra::Param
 		helpers Labor::Response
+		helpers Labor::Request
 		helpers Labor::Permission
 
 		before do
 	    content_type :json
 	    headers 'Access-Control-Allow-Origin' => '*', 
-		    'Access-Control-Allow-Headers' => 'Content-Type', 
+		    'Access-Control-Allow-Headers' => 'Content-Type, Authorization', 
 		    'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
 		end
 
@@ -85,6 +86,10 @@ module Labor
 
 	  error Gitlab::Error::Unprocessable do |error|
 	  	halt 422, labor_error(error.message)
+	  end
+
+		error Gitlab::Error::Unauthorized do |error|
+	  	halt 401, labor_error(error.message)
 	  end
 
 	  error Labor::Error::BadRequest do |error|

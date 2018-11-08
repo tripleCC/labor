@@ -52,9 +52,10 @@ module Labor
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): update podfile #{deploy.ref}")	
 				# 更新 Podfile
 				podfile = Labor::RemoteFile::Podfile.new(deploy.project_id, deploy.ref)
-				podfile.edit_remote
+				versions = deploy.pod_deploys.map { |pod_deploy| [pod_deploy.name, pod_deploy.version] }.to_h
+				podfile.edit_remote(versions)
 
-				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): deploy success")	
+				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): deploy success with pod_deploy versions #{versions}")	
 
 				deploy.success 
 			rescue Labor::Error::NotFound => error 
