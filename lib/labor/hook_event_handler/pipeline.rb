@@ -67,9 +67,9 @@ module Labor
 				when 'failed', 'canceled'#, 'skipped'
 					# 凡是外界干预没有执行完全 CD pipeline，均视为失败
 					# pod deloy 失败，更新 status
-
-					deploy.drop()
 					post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】发布 #{object_attributes.ref} 执行 CD 失败, 地址: #{pipeline_web_url}"
+					deploy.drop(post_content)
+					
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				when 'success'
 					logger.info("pod deploy #{deploy.name} success with pipeline (id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref})")

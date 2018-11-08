@@ -31,8 +31,8 @@ module Labor
 						deploy.ready
 					end
 				when 'failed'
-					deploy.drop
 					post_content = "pod deploy #{deploy.name} 合并  #{object_attributes.source_branch} 至 #{object_attributes.target_branch} 失败，地址: #{object_attributes.url}"
+					deploy.drop(post_content)
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				end
 			end
