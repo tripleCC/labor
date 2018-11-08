@@ -33,7 +33,9 @@
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
 # require 'sinatra'
-# require "http"
+require "http"
+
+
 # require 'jwt'
 # require 'net/http'
 

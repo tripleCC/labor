@@ -78,9 +78,9 @@ module Labor
 			end
 		end
 
-		options '/deploys/:id' do 
+		options '/deploys/:id/delete' do 
 		end
-		delete '/deploys/:id' do |id|
+		post '/deploys/:id/delete' do |id|
 			deploy = MainDeploy.find(id)
 
 			permission_require(deploy, body_params(request)['user_id'], :delete)
@@ -136,7 +136,7 @@ module Labor
 			deploy.main_deploy.process
 			# @deploy.auto_merge 
 
-			labor_response @deploy			
+			labor_response deploy			
 		end
 
 		options '/deploys/:id/pods/:pid/manual' do 

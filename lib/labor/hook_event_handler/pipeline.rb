@@ -7,7 +7,7 @@ module Labor
 			include MemberReminder::DingTalk
 
 			def handle 
-				logger.debug("receive project(#{object.project.name}) pipeline(id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref}")
+				logger.info("receive project(#{object.project.name}) pipeline(id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref}")
 
 				if object_attributes.tag
 				# 组件 CD 流程 
@@ -64,9 +64,10 @@ module Labor
 				when 'running', 'pending'		
 					# 考虑到 pod deloy 失败后，CD pipeline 可能被手动启动，这里再设置一遍 deploy 状态
 					deploy.deploy
-				when 'failed', 'canceled', 'skipped'
+				when 'failed', 'canceled'#, 'skipped'
 					# 凡是外界干预没有执行完全 CD pipeline，均视为失败
 					# pod deloy 失败，更新 status
+
 					deploy.drop()
 					post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】发布 #{object_attributes.ref} 执行 CD 失败, 地址: #{pipeline_web_url}"
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner

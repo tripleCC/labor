@@ -14,6 +14,7 @@ module Labor
 		  	.join('&')
 		  host = params['host'] 
 
+
 		  result = HTTP.post("#{host}/oauth/token?#{query_message}")
 		  if result.code == 200
 		  	result = JSON.parse(result) 
