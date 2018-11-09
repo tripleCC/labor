@@ -35,6 +35,9 @@ module Labor
       end
 
       # reviewed 打勾，触发 auto merge (auto merge 如果出错，状态还是 pending) ，（这部分手动合并也可以接盘走后面流程） 监听 MR 状态，后更新 merged
+      # 这里 ready 之后，如果想直接发布，需要手动调用 deploy.main_deploy.process
+      # 否则直接在 ready after_transition 里面执行 deploy.main_deploy.process ，会让后面的 deploy 重复执行 auto_merge
+      # 程序卡死
       event :ready do  
         transition [:pending, :analyzing] => :merged
       end
@@ -51,28 +54,24 @@ module Labor
       end
 
       event :drop do
-        transition any - [:failed] => :failed
+        # 成功后，不能立刻失败
+        # 网页标志以打包，success；之后 cancel ，pl 会返回 canceled，导致执行 drop
+        transition any - [:failed, :success] => :failed
       end
 
       event :cancel do
         transition any - [:canceled, :success, :failed, :skipped] => :canceled
       end
 
-      after_transition any => [:merged, :success] do |deploy, transition|
+      after_transition any => [:success] do |deploy, transition|
         next if transition.loopback?
-
-        # 当组件标识为已合并，则让主发布处理组件 CD
+        # 让主发布轮询处理下个组件
         deploy.main_deploy.process
       end
 
       after_transition any => :analyzing do |deploy, transition|
         next if transition.loopback?
         deploy.prepare
-      end
-
-      after_transition any => :deploying do |deploy, transition|
-        next if transition.loopback?
-        deploy.process
       end
 
       before_transition any => :canceled do |deploy, transition|
@@ -128,6 +127,7 @@ module Labor
     end
 
     def process
+      deploy
       DeployService::ProcessPod.new(self).execute
     end
 

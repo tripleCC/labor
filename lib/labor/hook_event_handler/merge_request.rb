@@ -29,6 +29,7 @@ module Labor
 					if object_attributes.target_branch == 'master'
 						# 如果是已合并到 master，则触发主发布处理 CD
 						deploy.ready
+						deploy.main_deploy.process
 					end
 				when 'failed'
 					post_content = "pod deploy #{deploy.name} 合并  #{object_attributes.source_branch} 至 #{object_attributes.target_branch} 失败，地址: #{object_attributes.url}"

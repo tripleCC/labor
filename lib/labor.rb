@@ -73,8 +73,7 @@ module Labor
 
     # 这里如果是 webhook 阶段抛出的错误
     # 设置 error 就没用了，因为是返回给 gitlab 接口
-    error ActiveRecord::RecordNotFound, 
-    			Labor::Error::NotFound,
+    error Labor::Error::NotFound,
     			Gitlab::Error::NotFound do |error|
     	halt 404, labor_error(error.message)
 	  end
@@ -92,7 +91,8 @@ module Labor
 	  	halt 401, labor_error(error.message)
 	  end
 
-	  error Labor::Error::BadRequest do |error|
+	  error Labor::Error::BadRequest,
+	  			ActiveRecord::RecordNotFound do |error|
 	  	halt 400, labor_error(error.message)
 	  end
 

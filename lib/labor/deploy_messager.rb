@@ -18,7 +18,8 @@ module Labor
 			hash = hash.to_json unless hash.is_a?(JSON)
 
 			wss.each do |ws|
-				logger.info("send ws message to #{deploy_id}, message: #{hash}, ws: #{ws}")
+				logger.info("send ws message to #{deploy_id}")
+				# logger.info("send ws message to #{deploy_id}, message: #{hash}, ws: #{ws}")
 				ws.send(hash)
 			end if wss
 		end

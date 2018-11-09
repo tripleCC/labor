@@ -660,7 +660,7 @@ class Deploy
       end
 
       before_transition do |deploy, transition|
-      	p transition.to == 'analyzing'
+      	# p transition.to == 'analyzing'
       end
 
       # after_transition any => [:merged, :success] do |deploy, transition|
@@ -672,12 +672,12 @@ class Deploy
       #   p 'kkk'
       # end
 
-      # around_transition do |vehicle, transition, block|
-      # 	p 'Zzzzz'
-      # 	block.call
-      # 	p vehicle.status
-      # 	p 'KkKKKK'
-      # end
+      around_transition do |vehicle, transition, block|
+      	p 'Zzzzz'
+      	block.call
+      	# p vehicle.status
+        false
+      end
 
       # before_transition any => :analyzing do |deploy, transition|
       #   next if transition.loopback?
@@ -722,10 +722,10 @@ class Deploy
     end
 end
 
-# d = Deploy.new 
+d = Deploy.new 
 # # d.status
 # p d.analyzing?
-# p d.enqueue
+p d.enqueue
 # p d.analyzing?
 
 # d.ready
