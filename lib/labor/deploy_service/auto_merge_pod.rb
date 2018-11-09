@@ -13,8 +13,6 @@ module Labor
 			include MemberReminder::DingTalk
 
 			def execute
-				@deploy = PodDeploy.find(deploy.id)
-
 				if deploy.merge_request_iids.any?
 					deploy.merge_request_iids.map do |mr_iid|
 						thread = Thread.new do 

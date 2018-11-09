@@ -45,7 +45,7 @@ module Labor
 				pending_reviewed_pod_deploys -= next_pod_deploys_after_auto_merge
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): pending reviewed pod deploys #{pending_reviewed_pod_deploys.map(&:name)}")
 
-				# 执行 auto_merge 后，有些组件时 merged, 则将其加入 deploy 数组
+				# 执行 auto_merge 后，有些组件是 merged, 则将其加入 deploy 数组
 				next_pod_deploys += next_pod_deploys_after_auto_merge
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): next pod deploys #{next_pod_deploys.map(&:name)}")
 

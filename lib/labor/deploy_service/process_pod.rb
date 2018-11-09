@@ -14,8 +14,6 @@ module Labor
 			include Labor::RetryRescue
 
 			def execute
-				@deploy = PodDeploy.find(deploy.id)
-
 				name = deploy.version
 
 				delete_tag(name) if Labor.config.allow_delete_tag_when_already_existed
