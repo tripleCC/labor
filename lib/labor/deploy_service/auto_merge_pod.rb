@@ -18,7 +18,10 @@ module Labor
 				if deploy.merge_request_iids.any?
 					deploy.merge_request_iids.map do |mr_iid|
 						thread = Thread.new do 
+							# Fix:
+							# SocketError Failed to open TCP connection to git.2dfire-inc.com:80 这里概率出现这个错误
 							mr = gitlab.merge_requests(deploy.project_id, mr_iid.to_s).first
+
 							# 已合并，直接走 process 流程
 							# 已合并时，prepare 阶段不会提 mr，也就是 merge_request_iids 为空
 							# 这里主要考虑了 prepare 阶段创建了 mr ，开发者手动合并的情况
@@ -31,6 +34,9 @@ module Labor
 
 								# 记录 MR 对应的 PL id ，失败了去 hook event handler 中的 Pipeline 提醒开发者
 								deploy.update(mr_pipeline_id: pipeline.id)
+
+								# 已经设置成 pl 成功后合并，则不执行 accept_merge_request
+								next if mr.merge_when_pipeline_succeeds
 
 								begin
 									logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{deploy.name}'s MR(#{mr_iid}) when pipeline success")
