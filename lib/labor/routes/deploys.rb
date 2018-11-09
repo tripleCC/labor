@@ -65,7 +65,7 @@ module Labor
 		end
 		post '/deploys' do 
 			begin 
-				params = body_params(request)
+				params = body_params
 
 				# 可以针对同个仓库，同个分支创建发布
 				user = User.find(auth_user_id)
