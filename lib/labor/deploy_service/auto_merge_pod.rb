@@ -20,7 +20,7 @@ module Labor
 						thread = Thread.new do 
 							# Fix:
 							# SocketError Failed to open TCP connection to git.2dfire-inc.com:80 这里概率出现这个错误
-							mr = gitlab.merge_requests(deploy.project_id, mr_iid.to_s).first
+							mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
 
 							# 已合并，直接走 process 流程
 							# 已合并时，prepare 阶段不会提 mr，也就是 merge_request_iids 为空
@@ -46,7 +46,7 @@ module Labor
 									# 这里不 drop，继续 pending ，直到负责人来解决
 
 									# TODO: 这里再查一下是否 mr close 了才出现的这个错误，时间差问题
-									mr = gitlab.merge_requests(deploy.project_id, mr_iid.to_s).first
+									mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
 
 									# pipeline 已经成功了，但是合并冲突 && 没有对应 mr，会直接走这里
 									if deploy.reviewed?

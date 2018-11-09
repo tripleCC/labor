@@ -1,19 +1,19 @@
 #!/usr/bin/env ruby
 
-begin
-  a = 1
-  raise StandardError
-rescue Exception => e
-  p a
-  return 
-end
-p 2
+# begin
+#   a = 1
+#   raise StandardError
+# rescue Exception => e
+#   p a
+#   return 
+# end
+# p 2
 
 # require 'rubygems'
 # require 'cgi'
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
-# require_relative './lib/labor/git/gitlab'
+require_relative './lib/labor/git/gitlab'
 # require_relative './lib/labor'
 # require 'uri'
 
@@ -33,10 +33,11 @@ p 2
 	# labor_response 
 # end
 
+require 'pp'
 
-
-# gitlab = Labor::GitLab.gitlab
-# project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
+gitlab = Labor::GitLab.gitlab
+project = gitlab.project('git@git.2dfire-inc.com:ios/TDFLogin.git')
+pp gitlab.merge_request(project.id, '5')
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
