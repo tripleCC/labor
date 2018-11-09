@@ -3,6 +3,7 @@ require_relative '../external_pod/sorter'
 require_relative '../git/string_extension'
 require_relative '../remote_file'
 require_relative '../models/user'
+require_relative '../config'
 
 module Labor
 	module DeployService
@@ -49,6 +50,11 @@ module Labor
 							user: user
 						})
 					end
+
+					deploy_hash.merge!({
+						reviewed: true 
+					}) if Labor.config.reviewed_merge_request_when_created
+
 					pod_deploy = PodDeploy.create!(deploy_hash)
 					pod_deploy
 				end
