@@ -1,5 +1,6 @@
 require_relative './base'
 require_relative '../remote_file'
+require_relative '../utils/async'
 
 module Labor
 	module DeployService
@@ -8,6 +9,8 @@ module Labor
 		# 2、过滤出可发布的组件
 		# 3、执行组件发布
 		class ProcessMain < Base
+			include Labor::Async
+
 			def execute
 				# 从 pod_deploy 调用 main_deploy，其属性 pod_deploys 未更新到最新 state
 				# 走到 state_machine after callback，数据库实际已经更新了，这里从数据库再获取一次
@@ -17,7 +20,12 @@ module Labor
 				left_pod_deploys = deploy.pod_deploys.reject(&:success?)
 				left_pod_deploy_names = left_pod_deploys.map(&:name)
 
+				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): left pod deploys #{left_pod_deploy_names}")
+				# 启动未分析的发布
+				left_pod_deploys.select(&:created?).each(&:enqueue)
+
 				running_deploy_names = deploy.pod_deploys.select(&:deploying?).map(&:name)
+				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): running deploys #{running_deploy_names}")
 
 				free_pod_deploys = left_pod_deploys.select do |pod_deploy|
 					(pod_deploy.external_dependency_names & left_pod_deploy_names).empty?
@@ -35,12 +43,18 @@ module Labor
 					pod_deploy.pending? && pod_deploy.reviewed
 				end
 
-				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): left pod deploys #{left_pod_deploy_names}, pending reviewed pod deploys #{pending_reviewed_pod_deploys.map(&:name)}, running deploys #{running_deploy_names}, start next pod deploys #{next_pod_deploys.map(&:name)}")
-				
-				pending_reviewed_pod_deploys.each(&:auto_merge)
+				async_each(pending_reviewed_pod_deploys, &:auto_merge)
+				next_pod_deploys_after_auto_merge = pending_reviewed_pod_deploys.select(&:merged?)
+				pending_reviewed_pod_deploys -= next_pod_deploys_after_auto_merge
+				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): pending reviewed pod deploys #{pending_reviewed_pod_deploys.map(&:name)}")
+
+				# 执行 auto_merge 后，有些组件是 merged, 则将其加入 deploy 数组
+				next_pod_deploys += next_pod_deploys_after_auto_merge
+				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): next pod deploys #{next_pod_deploys.map(&:name)}")
 
 				# 执行下一阶段的 deploy
-				next_pod_deploys.each(&:deploy)
+				# next_pod_deploys.each(&:deploy)
+				async_each(next_pod_deploys, &:process)
 
 				# 没有遗留的组件，标志此次工程发布成功
 				release_deploy(deploy) if left_pod_deploys.empty?

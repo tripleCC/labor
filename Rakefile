@@ -48,8 +48,9 @@ task :stop do
 	[pid_file, redis_pid_file].select { |file| File.exist?(file) }.each do |pid_file|
     pid = File.read(pid_file)
     begin 
+    	# `kill -9 #{pid.to_i}`
     	Process.kill('INT', pid.to_i)
-	    puts "Stopped by #{pid_file}"
+	    puts "Stopped by pid #{pid} and file #{pid_file}"
     rescue => error 
     	puts "#{error.message} #{pid_file}"
     ensure 

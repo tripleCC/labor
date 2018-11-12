@@ -8,6 +8,7 @@ require_relative '../models/user'
 require_relative '../models/operation'
 require_relative '../deploy_messager'
 require_relative '../logger'
+require_relative '../remote_file'
 
 
 module Labor
@@ -65,7 +66,7 @@ module Labor
 		end
 		post '/deploys' do 
 			begin 
-				params = body_params(request)
+				params = body_params
 
 				# 可以针对同个仓库，同个分支创建发布
 				user = User.find(auth_user_id)
@@ -79,6 +80,20 @@ module Labor
 			end
 		end
 
+		options '/deploys/:id/podfile/update' do 
+		end
+		post '/deploys/:id/podfile/update' do
+			deploy = MainDeploy.find(id)
+
+			permission_require(deploy, :update_podfile)
+
+			podfile = Labor::RemoteFile::Podfile.new(deploy.project_id, deploy.ref)
+			versions = deploy.pod_deploys.map { |pod_deploy| [pod_deploy.name, pod_deploy.version] }.to_h
+			podfile.edit_remote(versions)
+
+			labor_response versions
+		end
+
 		options '/deploys/:id/delete' do 
 		end
 		post '/deploys/:id/delete' do |id|
@@ -89,7 +104,7 @@ module Labor
 			deploy.cancel
 			deploy.destroy
 
-			labor_response @deploy
+			labor_response deploy
 		end
 
 		options '/deploys/:id/cancel' do 

@@ -10,7 +10,6 @@ module Labor
 				attr_reader :podfile_string
 
 				def initialize(podfile, podfile_template_string, versions = []) 
-					# TODO: 传入 versions 来设置版本，而不是通过 branch
 					@podfile = podfile
 					@versions = versions
 					@podfile_template_string = podfile_template_string

@@ -31,7 +31,7 @@ module Labor
 				# 成功了会走 MergeRequst 流程，这里不用管，失败了推送钉钉消息
 				return if deploy.nil? || deploy.canceled?
 				
-				logger.info("handle deploy #{deploy.name} pipeline with status #{object_attributes.status}")
+				logger.info("handle #{deploy.name} merge request pipeline with status #{object_attributes.status}")
 
 				# 标志为 reviewed 的情况下，才通知负责人
 				if object_attributes.status == 'failed' && deploy.reviewed
@@ -39,9 +39,9 @@ module Labor
 					# GET /projects/:id/merge_requests/:merge_request_iid/pipelines | 10.5.0
 					deploy.merge_request_iids.map do |mr_iid|
 						thread = Thread.new do 
-							mr = gitlab.merge_requests(deploy.project_id, mr_iid.to_s).first
-							if mr && object_attributes.id == mr.pipeline.id 
-								post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR (iid: #{mr_iid}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url}) 失败, 请尽快解决"
+							mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
+							if mr && object_attributes.id == mr.pipeline&.id 
+								post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR ( iid: #{mr_iid}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url} ) 失败, 请尽快解决"
 								post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 							end
 						end

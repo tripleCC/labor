@@ -1,11 +1,20 @@
 #!/usr/bin/env ruby
 
+# begin
+#   a = 1
+#   raise StandardError
+# rescue Exception => e
+#   p a
+#   return 
+# end
+# p 2
 
 # require 'rubygems'
 # require 'cgi'
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
-# require_relative './lib/labor/git/gitlab'
+require_relative './lib/labor/git/gitlab'
+require_relative './lib/labor/utils/async'
 # require_relative './lib/labor'
 # require 'uri'
 
@@ -25,37 +34,52 @@
 	# labor_response 
 # end
 
+require 'pp'
 
+include Labor::Async
+
+k = 0
+
+async_each(10.times) do |i|
+  gitlab = Labor::GitLab.gitlab
+  project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
+  p gitlab.merge_request(project.id, '1')  
+  p i
+  k += 1
+end
+
+p k
 
 # gitlab = Labor::GitLab.gitlab
-# project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodA.git')
+# project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
+# pp gitlab.merge_request(project.id, '1')
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
-require 'sinatra'
+# require 'sinatra'
 
-helpers do
-  def protected!
-    return if authorized?
-    headers['WWW-Authenticate'] = 'Basic realm="Restricted Area"'
-    halt 401, "Not authorized\n"
-  end
+# helpers do
+#   def protected!
+#     return if authorized?
+#     headers['WWW-Authenticate'] = 'Basic realm="Restricted Area"'
+#     halt 401, "Not authorized\n"
+#   end
 
-  def authorized?
-    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-    p @auth.to_s
-    @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == ['admin', 'admin']
-  end
-end
+#   def authorized?
+#     @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+#     p @auth.to_s
+#     @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == ['admin', 'admin']
+#   end
+# end
 
 
-get '/deploys' do
-  headers 'Access-Control-Allow-Origin' => '*', 
-        'Access-Control-Allow-Headers' => 'Content-Type', 
-        'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
-  protected!
-  "Welcome, authenticated client"
-end
+# get '/deploys' do
+#   headers 'Access-Control-Allow-Origin' => '*', 
+#         'Access-Control-Allow-Headers' => 'Content-Type', 
+#         'Access-Control-Allow-Methods' => 'GET, POST, DELETE'
+#   protected!
+#   "Welcome, authenticated client"
+# end
 # require "http"
 
 
@@ -652,7 +676,7 @@ class Deploy
       end
 
       before_transition do |deploy, transition|
-      	p transition.to == 'analyzing'
+      	# p transition.to == 'analyzing'
       end
 
       # after_transition any => [:merged, :success] do |deploy, transition|
@@ -664,12 +688,12 @@ class Deploy
       #   p 'kkk'
       # end
 
-      # around_transition do |vehicle, transition, block|
-      # 	p 'Zzzzz'
-      # 	block.call
-      # 	p vehicle.status
-      # 	p 'KkKKKK'
-      # end
+      around_transition do |vehicle, transition, block|
+      	p 'Zzzzz'
+      	block.call
+      	# p vehicle.status
+        false
+      end
 
       # before_transition any => :analyzing do |deploy, transition|
       #   next if transition.loopback?
@@ -714,10 +738,10 @@ class Deploy
     end
 end
 
-# d = Deploy.new 
+d = Deploy.new 
 # # d.status
 # p d.analyzing?
-# p d.enqueue
+p d.enqueue
 # p d.analyzing?
 
 # d.ready
