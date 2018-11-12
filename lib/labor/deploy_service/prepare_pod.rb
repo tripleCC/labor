@@ -77,7 +77,7 @@ module Labor
 				deploy.pend
 
 				# 发送组件合并钉钉消息
-				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner && Labor.config.remind_owner_when_merge_request_created
 			end
 
 			def create_merge_request(project_id, ref, target, assignee_name)

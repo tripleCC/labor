@@ -21,6 +21,9 @@ allow_delete_tag_when_already_existed: false
 # 不需要负责人在 mr 上进行 code review 时设置成 true
 reviewed_merge_request_when_created: true
 
+# 创建 mr 时是否需要通知 owner
+remind_owner_when_merge_request_created: false
+
 # 私有源 ssh
 cocoapods_private_source_url: 'git@git.2dfire-inc.com:ios/cocoapods-spec.git'
 # main_deploy: 

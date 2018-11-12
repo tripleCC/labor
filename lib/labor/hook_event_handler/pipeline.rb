@@ -41,7 +41,7 @@ module Labor
 						thread = Thread.new do 
 							mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
 							if mr && object_attributes.id == mr.pipeline&.id 
-								post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR (iid: #{mr_iid}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url}) 失败, 请尽快解决"
+								post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR ( iid: #{mr_iid}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url} ) 失败, 请尽快解决"
 								post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 							end
 						end

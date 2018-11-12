@@ -36,8 +36,8 @@ require_relative './lib/labor/git/gitlab'
 require 'pp'
 
 gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire-inc.com:ios/TDFLogin.git')
-pp gitlab.merge_request(project.id, '5')
+project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
+pp gitlab.merge_request(project.id, '1')
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
