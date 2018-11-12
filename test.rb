@@ -36,23 +36,43 @@ require_relative './lib/labor/utils/async'
 
 require 'pp'
 
-include Labor::Async
 
-k = 0
+# class A
+#   attr_reader :a 
+#   def initialize
+#     @a = 1
+#   end
 
-async_each(10.times) do |i|
-  gitlab = Labor::GitLab.gitlab
-  project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
-  p gitlab.merge_request(project.id, '1')  
-  p i
-  k += 1
-end
+#   def exec
+#     @a = 2
 
-p k
+#     p a
+#   end
+# end
 
-# gitlab = Labor::GitLab.gitlab
-# project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
-# pp gitlab.merge_request(project.id, '1')
+# A.new.exec
+# include Labor::Async
+
+# log = <<~EOF
+#   aaa
+# EOF
+# p log
+
+# k = 0
+
+# async_each(10.times) do |i|
+#   gitlab = Labor::GitLab.gitlab
+#   project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
+#   p gitlab.merge_request(project.id, '1')  
+#   p i
+#   k += 1
+# end
+
+# p k
+
+gitlab = Labor::GitLab.gitlab
+project = gitlab.project('git@git.2dfire-inc.com:ios/TDFIssueCenterModule.git')
+pp gitlab.merge_request(project.id, '2')
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 

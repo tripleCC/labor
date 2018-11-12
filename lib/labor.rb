@@ -7,6 +7,7 @@ require 'sinatra/activerecord'
 require 'sinatra/param'
 require 'will_paginate'
 require 'will_paginate/active_record'
+require 'cocoapods-core'
 require "gitlab"
 require_relative './labor/logger'
 require_relative './labor/config'
@@ -92,7 +93,8 @@ module Labor
 	  end
 
 	  error Labor::Error::BadRequest,
-	  			ActiveRecord::RecordNotFound do |error|
+	  			ActiveRecord::RecordNotFound,
+	  			Pod::DSLError do |error|
 	  	halt 400, labor_error(error.message)
 	  end
 

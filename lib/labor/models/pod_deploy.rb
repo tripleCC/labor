@@ -110,8 +110,12 @@ module Labor
     end
 
     def retry 
-      main_deploy.deploy
       enqueue
+      if main_deploy.can_deploy? 
+        main_deploy.deploy
+      else
+        main_deploy.process 
+      end
     end
 
     def need_retry?

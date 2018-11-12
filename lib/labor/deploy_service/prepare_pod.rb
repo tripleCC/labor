@@ -36,7 +36,7 @@ module Labor
 				if deploy.ref == 'master' || ref_branch.merged
 					update_spec_version(deploy, 'master')
 					deploy.ready
-					deploy.main_deploy.process
+					# deploy.main_deploy.process
 				else
 					update_spec_version(deploy)
 					create_gitflow_merge_requests(ref_branch)

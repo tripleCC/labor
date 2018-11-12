@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181105025925) do
+ActiveRecord::Schema.define(version: 20181112115705) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -68,6 +68,7 @@ ActiveRecord::Schema.define(version: 20181105025925) do
     t.datetime "finished_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "created_tags",              default: [],                    array: true
   end
 
   add_index "pod_deploys", ["main_deploy_id"], name: "index_pod_deploys_on_main_deploy_id", using: :btree
