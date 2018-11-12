@@ -41,7 +41,7 @@ module Labor
 					pod_deploy.pending? && pod_deploy.reviewed
 				end
 
-				async_each(pending_reviewed_pod_deploys, &:auto_merge)
+				pending_reviewed_pod_deploys.each(&:auto_merge)
 				next_pod_deploys_after_auto_merge = pending_reviewed_pod_deploys.select(&:merged?)
 				pending_reviewed_pod_deploys -= next_pod_deploys_after_auto_merge
 
@@ -61,7 +61,7 @@ module Labor
 
 				# 执行下一阶段的 deploy
 				# next_pod_deploys.each(&:deploy)
-				async_each(next_pod_deploys, &:process)
+				next_pod_deploys.each(&:process)
 
 				# 没有遗留的组件，标志此次工程发布成功
 				release_deploy(deploy) if left_pod_deploys.empty?

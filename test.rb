@@ -37,20 +37,20 @@ require_relative './lib/labor/utils/async'
 require 'pp'
 
 
-class A
-  attr_reader :a 
-  def initialize
-    @a = 1
-  end
+# class A
+#   attr_reader :a 
+#   def initialize
+#     @a = 1
+#   end
 
-  def exec
-    @a = 2
+#   def exec
+#     @a = 2
 
-    p a
-  end
-end
+#     p a
+#   end
+# end
 
-A.new.exec
+# A.new.exec
 # include Labor::Async
 
 # log = <<~EOF
@@ -70,9 +70,9 @@ A.new.exec
 
 # p k
 
-# gitlab = Labor::GitLab.gitlab
-# project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
-# pp gitlab.merge_request(project.id, '1')
+gitlab = Labor::GitLab.gitlab
+project = gitlab.project('git@git.2dfire-inc.com:ios/TDFIssueCenterModule.git')
+pp gitlab.merge_request(project.id, '2')
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
