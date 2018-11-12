@@ -11,8 +11,8 @@ module Labor
 				
 				# 分析依赖，获取需要发布的组件
 				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): start main deploy")
-				deploy.deploy
 				deploy.pod_deploys.each(&:enqueue)
+				deploy.deploy
 
 				# 多线程会出问题
 				# async_each(deploy.pod_deploys, &:enqueue)

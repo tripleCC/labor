@@ -47,7 +47,13 @@ module Labor
 						end
 						thread
 					end.each(&:join)
+
+					#TODO
+					# 如果没有依赖正在发布的组件，设置为 mr_pipeline_failed
 				elsif object_attributes.status == 'success'
+					#TODO
+					# 设置为 mr_pipeline_success
+
 					# 成功后执行 auto merge
 					deploy.main_deploy.process
 				end

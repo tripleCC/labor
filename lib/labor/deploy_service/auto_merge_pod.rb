@@ -14,8 +14,8 @@ module Labor
 
 			def execute
 				if deploy.merge_request_iids.any?
-					deploy.merge_request_iids.map do |mr_iid|
-						thread = Thread.new do 
+					deploy.merge_request_iids.each do |mr_iid|
+						# thread = Thread.new do 
 							# Fix:
 							# SocketError Failed to open TCP connection to git.2dfire-inc.com:80 这里概率出现这个错误
 							mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
@@ -55,9 +55,9 @@ module Labor
 									logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to accept #{deploy.name}'s MR(iid: #{mr_iid}, state: #{mr.state}) with error: #{error}")
 								end
 							end
-						end
-						thread
-					end.each(&:join)
+						# end
+						# thread
+					end#.each(&:join)
 				else 
 					# 如果没有 mr 了，这里假设已经合并成功
 					deploy.ready 

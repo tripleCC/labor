@@ -11,13 +11,13 @@ module Labor
 			# 2.1 merged 则 设置 pod_deploy 发布为 merged
 			# 2.2 main_deploy 执行 process ，发布满足条件的 deploy (merged ，并且没有需要发布的依赖)
 			def handle 
-				logger.debug("receive project(#{object.project.name}) MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
+				logger.info("receive project(#{object.project.name}) MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
 
 				deploys = PodDeploy.where(project_id: object.project.id, ref: object_attributes.source_branch)
 				deploy = deploys.find { |deploy| deploy.merge_request_iids.include?(object_attributes.iid.to_s) }
 
 				return unless deploy
-				logger.info("handle pod deploy #{deploy.name}(#{deploy.id}) with MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
+				logger.info("handle pod deploy merge request #{deploy.name}(#{deploy.id}) with MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
 
 				case object_attributes.state
 				when 'merged' 
