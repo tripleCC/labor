@@ -16,12 +16,22 @@ module Labor
 			def execute
 				name = deploy.version
 
-				delete_tag(name) if Labor.config.allow_delete_tag_when_already_existed
+				delete_tag(name) if can_delete_tag?(name)
 				create_tag(name)
+				deploy.update(created_tags: deploy.created_tags << name) unless include_tag?(name)
+
 				pipeline = create_pipeline(name)
 				deploy.update(cd_pipeline_id: pipeline.id)
 			rescue Gitlab::Error::BadRequest => error
 				drop_deploy(error)
+			end
+
+			def include_tag?(name)
+				deploy.created_tags.include?(name)
+			end
+
+			def can_delete_tag?(name)
+				Labor.config.allow_delete_tag_when_already_existed || include_tag?(name)
 			end
 
 			def drop_deploy(error) 
