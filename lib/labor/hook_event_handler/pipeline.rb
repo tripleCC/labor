@@ -7,7 +7,7 @@ module Labor
 			include MemberReminder::DingTalk
 
 			def handle 
-				logger.info("receive project(#{object.project.name}) pipeline(id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref}")
+				logger.info("receive project(#{object.project.name}) pipeline(id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref})")
 
 				if object_attributes.tag
 				# 组件 CD 流程 
@@ -59,6 +59,8 @@ module Labor
 				# 手动启动 PL， cd_pipeline_id 会对不上，这里去除这个查询条件
 				# deploy = PodDeploy.find_by(project_id: object.project.id, cd_pipeline_id: object_attributes.id, version: object_attributes.ref)
 				return if deploy.nil? || deploy.canceled? 
+
+				logger.info("handle #{deploy.name} deploy pipeline with status #{object_attributes.status}")
 
 				case object_attributes.status
 				when 'running', 'pending'		

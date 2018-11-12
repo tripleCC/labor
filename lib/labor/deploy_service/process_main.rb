@@ -20,12 +20,10 @@ module Labor
 				left_pod_deploys = deploy.pod_deploys.reject(&:success?)
 				left_pod_deploy_names = left_pod_deploys.map(&:name)
 
-				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): left pod deploys #{left_pod_deploy_names}")
 				# 启动未分析的发布
 				left_pod_deploys.select(&:created?).each(&:enqueue)
 
 				running_deploy_names = deploy.pod_deploys.select(&:deploying?).map(&:name)
-				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): running deploys #{running_deploy_names}")
 
 				free_pod_deploys = left_pod_deploys.select do |pod_deploy|
 					(pod_deploy.external_dependency_names & left_pod_deploy_names).empty?
@@ -46,11 +44,20 @@ module Labor
 				async_each(pending_reviewed_pod_deploys, &:auto_merge)
 				next_pod_deploys_after_auto_merge = pending_reviewed_pod_deploys.select(&:merged?)
 				pending_reviewed_pod_deploys -= next_pod_deploys_after_auto_merge
-				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): pending reviewed pod deploys #{pending_reviewed_pod_deploys.map(&:name)}")
 
 				# 执行 auto_merge 后，有些组件是 merged, 则将其加入 deploy 数组
 				next_pod_deploys += next_pod_deploys_after_auto_merge
-				logger.info("main deploy (id: #{deploy.id}, name: #{deploy.name}): next pod deploys #{next_pod_deploys.map(&:name)}")
+
+				logger.info(
+					<<~EOF 
+					main deploy (id: #{deploy.id}, name: #{deploy.name})
+					---> left pod deploys #{left_pod_deploy_names}
+					---> free pod deploys #{free_pod_deploys.map(&:name)}
+					---> pending reviewed pod deploys #{pending_reviewed_pod_deploys.map(&:name)}
+					---> processing deploys #{running_deploy_names}
+					---> next process pod deploys #{next_pod_deploys.map(&:name)}
+					EOF
+				)
 
 				# 执行下一阶段的 deploy
 				# next_pod_deploys.each(&:deploy)
