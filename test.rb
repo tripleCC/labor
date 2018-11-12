@@ -14,6 +14,7 @@
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
 require_relative './lib/labor/git/gitlab'
+require_relative './lib/labor/utils/async'
 # require_relative './lib/labor'
 # require 'uri'
 
@@ -35,9 +36,23 @@ require_relative './lib/labor/git/gitlab'
 
 require 'pp'
 
-gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
-pp gitlab.merge_request(project.id, '1')
+include Labor::Async
+
+k = 0
+
+async_each(10.times) do |i|
+  gitlab = Labor::GitLab.gitlab
+  project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
+  p gitlab.merge_request(project.id, '1')  
+  p i
+  k += 1
+end
+
+p k
+
+# gitlab = Labor::GitLab.gitlab
+# project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
+# pp gitlab.merge_request(project.id, '1')
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
