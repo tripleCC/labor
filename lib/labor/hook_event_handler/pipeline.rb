@@ -42,9 +42,12 @@ module Labor
 					deploy.merge_request_iids.map do |mr_iid|
 						thread = Thread.new do 
 							mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
-							if mr && object_attributes.id == mr.pipeline&.id 
+
+							# 这里 mr 获取到的 pipeline 可能是 nil 
+							# 有点蛋疼
+							# if object_attributes.id == mr&.pipeline&.id 
 								post_content << "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR ( iid: #{mr_iid}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url} ) 失败, 请尽快解决\n"
-							end
+							# end
 						end
 						thread
 					end.each(&:join)

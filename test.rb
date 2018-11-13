@@ -71,8 +71,8 @@ require 'pp'
 # p k
 
 gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire-inc.com:ios/TDFIssueCenterModule.git')
-pp gitlab.merge_request(project.id, '2')
+project = gitlab.project('git@git.2dfire-inc.com:qiandaojiang/a.git')
+pp gitlab.merge_request(project.id, '12').to_hash
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 
