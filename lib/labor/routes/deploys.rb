@@ -123,19 +123,34 @@ module Labor
 		# 	'pid' : version
 		# }
 		# 处理跨域预检请求
-		options '/deploys/:id/pods/versions/update' do 
+		# options '/deploys/:id/pods/versions/update' do 
+		# end
+		# post '/deploys/:id/pods/versions/update' do |id|
+		# 	deploy = MainDeploy.find(id)
+
+		# 	permission_require(deploy, :update_versions)
+
+		# 	versions = body_params
+		# 	pids = versions.keys.map(&:to_i)
+		# 	pod_deploys = pids.map do |pid|
+		# 		pod_deploy = PodDeploy.find(pid)
+		# 		pod_deploy.update(:version => versions[pid.to_s])
+		# 		pod_deploy
+		# 	end
+
+		# 	labor_response pod_deploys
+		# end
+
+		options '/deploys/pods/versions/update' do 
 		end
-		post '/deploys/:id/pods/versions/update' do |id|
-			deploy = MainDeploy.find(id)
-
-			permission_require(deploy, :update_versions)
-
+		post '/deploys/pods/versions/update' do
 			versions = body_params
 			pids = versions.keys.map(&:to_i)
-			pod_deploys = pids.map do |pid|
-				pod_deploy = PodDeploy.find(pid)
-				pod_deploy.update(:version => versions[pid.to_s])
-				pod_deploy
+			pod_deploys = pids.map { |pid| PodDeploy.find(pid) }
+			pod_deploys.each { |deploy| permission_require(deploy, :update_version) }
+
+			pod_deploys.each do |pod_deploy|
+				pod_deploy.update(:version => versions[pod_deploy.id.to_s])
 			end
 
 			labor_response pod_deploys

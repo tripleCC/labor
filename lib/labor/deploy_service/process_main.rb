@@ -18,6 +18,7 @@ module Labor
 				
 				deploy.with_lock do 
 					logger.info("process main deploy #{deploy.name} #{deploy.id}")
+
 					# 计算还未发布的 pod
 					left_pod_deploys = deploy.pod_deploys.reject(&:success?)
 					left_pod_deploy_names = left_pod_deploys.map(&:name)

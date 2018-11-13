@@ -18,3 +18,4 @@ production:
   database: labor_production
   username: postgres
   password: daimao
+  host: localhost

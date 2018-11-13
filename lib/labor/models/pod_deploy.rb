@@ -86,10 +86,11 @@ module Labor
         end
       end
 
-      after_transition any => :failed do |deploy, transition|
-        next if transition.loopback?
-        deploy.main_deploy.drop([deploy.main_deploy.failure_reason, deploy.failure_reason].compact.join(', '))
-      end
+      # pod deploy 失败和 main deploy 拆开
+      # after_transition any => :failed do |deploy, transition|
+      #   next if transition.loopback?
+      #   deploy.main_deploy.drop([deploy.main_deploy.failure_reason, deploy.failure_reason].compact.join(', '))
+      # end
 
       before_transition do |deploy, transition| 
         next if transition.loopback?
@@ -111,11 +112,13 @@ module Labor
 
     def retry 
       enqueue
-      if main_deploy.can_deploy? 
-        main_deploy.deploy
-      else
-        main_deploy.process 
-      end
+      # pod deploy 重试，main deploy 不展示 deploying 了
+      # 因为 pod deploy 失败和 main deploy 拆开了
+      # if main_deploy.can_deploy? 
+      #   main_deploy.deploy
+      # else
+      main_deploy.process 
+      # end
     end
 
     def need_retry?
