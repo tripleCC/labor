@@ -13,7 +13,7 @@ module Labor
 			def handle 
 				logger.info("receive project(#{object.project.name}) MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
 
-				deploys = PodDeploy.where(project_id: object.project.id, ref: object_attributes.source_branch)
+				deploys = PodDeploy.where(project_id: object.project.id, ref: object_attributes.source_branch, status: :pending)
 				deploy = deploys.find { |deploy| deploy.merge_request_iids.include?(object_attributes.iid.to_s) }
 
 				return unless deploy

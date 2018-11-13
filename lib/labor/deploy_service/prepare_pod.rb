@@ -55,7 +55,8 @@ module Labor
 
 				# gitflow 工作流需要合并至 master 和 develop
 				mr, content = create_merge_request(deploy.project_id, deploy.ref, 'master', deploy.owner)
-				deploy.merge_request_iids << mr.iid
+				deploy.merge_request_iids = deploy.merge_request_iids.uniq
+				deploy.merge_request_iids << mr.iid unless deploy.merge_request_iids.include?(mr.iid.to_s)
 				post_content << content
 
 				# develop 分支可能没有，这里不抛出错误
@@ -65,7 +66,7 @@ module Labor
 						# 发布分支领先 develop 的情况下才创建 mr
 						unless compare_result.diffs.empty? 
 							mr, content = create_merge_request(deploy.project_id, deploy.ref, 'develop', deploy.owner) 
-							deploy.merge_request_iids << mr.iid
+							deploy.merge_request_iids << mr.iid unless deploy.merge_request_iids.include?(mr.iid.to_s)
 							post_content << content
 						end
 					end
