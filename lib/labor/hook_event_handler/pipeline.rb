@@ -39,8 +39,8 @@ module Labor
 					# GET /projects/:id/merge_requests/:merge_request_iid/pipelines | 10.5.0
 					# UPDATE: 这里直接 drop 先 (issue 19、14)
 					post_content = ''
-					deploy.merge_request_iids.map do |mr_iid|
-						thread = Thread.new do 
+					deploy.merge_request_iids.each do |mr_iid|
+						# thread = Thread.new do 
 							mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
 
 							# 这里 mr 获取到的 pipeline 可能是 nil 
@@ -48,9 +48,9 @@ module Labor
 							# if object_attributes.id == mr&.pipeline&.id 
 								post_content << "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR ( iid: #{mr_iid}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url} ) 失败, 请尽快解决\n"
 							# end
-						end
-						thread
-					end.each(&:join)
+						# end
+						# thread
+					end#.each(&:join)
 
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner && !post_content.length.zero?
 
