@@ -5,13 +5,13 @@ require 'active_job'
 require "sinatra/base"
 require 'sinatra/activerecord'
 require 'sinatra/param'
+require "sinatra/namespace"
 require 'will_paginate'
 require 'will_paginate/active_record'
 require 'cocoapods-core'
 require "gitlab"
 require_relative './labor/logger'
 require_relative './labor/config'
-require_relative './labor/routes'
 require_relative './labor/helpers'
 require_relative './labor/errors'
 require_relative './labor/initializers'
@@ -21,8 +21,10 @@ module Labor
 	class App < Sinatra::Base
 		include Labor::Logger
 
+		register Sinatra::Namespace
 		register Sinatra::ActiveRecordExtension
 		register WillPaginate::Sinatra
+		register Labor::CleanOptionsRoute
 
 		helpers Sinatra::Param
 		helpers Labor::Response
@@ -44,6 +46,7 @@ module Labor
 		end
 
 		configure :production do 
+			# set :logger, Labor::Logger.logger
 			set :raise_sinatra_param_exceptions, true
 			# disable :dump_errors
       error Sinatra::Param::InvalidParameterError do
@@ -106,3 +109,5 @@ module Labor
 	  end
 	end
 end
+
+require_relative './labor/routes'

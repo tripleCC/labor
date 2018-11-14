@@ -39,8 +39,6 @@ module Labor
 		# 	labor_response deploy.operations
 		# end
 
-		options '/deploys/:id' do 
-		end
 		get '/deploys/:id' do |id|
 			@deploy = MainDeploy.includes(:user, :pod_deploys => :user).find(id)
 
@@ -62,9 +60,7 @@ module Labor
 		# 	'ref' : releasexxx
 		#   'user_id' : xxxx
 		# }
-		options '/deploys' do 
-		end
-		post '/deploys' do 
+		clean_options_post '/deploys' do 
 			begin 
 				params = body_params
 
@@ -80,9 +76,7 @@ module Labor
 			end
 		end
 
-		options '/deploys/:id/podfile/update' do 
-		end
-		post '/deploys/:id/podfile/update' do
+		clean_options_post '/deploys/:id/podfile/update' do
 			deploy = MainDeploy.find(id)
 
 			permission_require(deploy, :update_podfile)
@@ -94,9 +88,7 @@ module Labor
 			labor_response versions
 		end
 
-		options '/deploys/:id/delete' do 
-		end
-		post '/deploys/:id/delete' do |id|
+		clean_options_post '/deploys/:id/delete' do |id|
 			deploy = MainDeploy.find(id)
 
 			permission_require(deploy, :delete)
@@ -107,9 +99,7 @@ module Labor
 			labor_response deploy
 		end
 
-		options '/deploys/:id/cancel' do 
-		end
-		post '/deploys/:id/cancel' do |id|
+		clean_options_post '/deploys/:id/cancel' do |id|
 			deploy = MainDeploy.find(id)
 
 			permission_require(deploy, :cancel)
@@ -141,9 +131,7 @@ module Labor
 		# 	labor_response pod_deploys
 		# end
 
-		options '/deploys/pods/versions/update' do 
-		end
-		post '/deploys/pods/versions/update' do
+		clean_options_post '/deploys/pods/versions/update' do
 			versions = body_params
 			pids = versions.keys.map(&:to_i)
 			pod_deploys = pids.map { |pid| PodDeploy.find(pid) }
@@ -156,9 +144,7 @@ module Labor
 			labor_response pod_deploys
 		end
 
-		options '/deploys/:id/pods/:pid/review' do 
-		end
-		post '/deploys/:id/pods/:pid/review' do |_, pid|
+		clean_options_post '/deploys/:id/pods/:pid/review' do |_, pid|
 			deploy = PodDeploy.find(pid)
 
 			permission_require(deploy, :review)
@@ -171,9 +157,7 @@ module Labor
 			labor_response deploy			
 		end
 
-		options '/deploys/:id/pods/:pid/manual' do 
-		end
-		post '/deploys/:id/pods/:pid/manual' do |_, pid|
+		clean_options_post '/deploys/:id/pods/:pid/manual' do |_, pid|
 			deploy = PodDeploy.find(pid)
 
 			permission_require(deploy, :manual)
@@ -185,9 +169,7 @@ module Labor
 			labor_response @deploy
 		end
 
-		options '/deploys/:id/pods/:pid/retry' do 
-		end
-		post '/deploys/:id/pods/:pid/retry' do |_, pid|
+		clean_options_post '/deploys/:id/pods/:pid/retry' do |_, pid|
 			deploy = PodDeploy.find(pid)
 
 			permission_require(deploy, :retry)
@@ -199,9 +181,7 @@ module Labor
 			labor_response @deploy
 		end
 
-		options '/deploys/:id/pods/:pid/cancel' do 
-		end
-		post '/deploys/:id/pods/:pid/cancel' do |_, pid|
+		clean_options_post '/deploys/:id/pods/:pid/cancel' do |_, pid|
 			deploy = PodDeploy.find(pid)
 
 			permission_require(deploy, :cancel)
@@ -211,9 +191,7 @@ module Labor
 			labor_response deploy
 		end
 
-		options '/deploys/:id/enqueue' do 
-		end
-		post '/deploys/:id/enqueue' do |id|
+		clean_options_post '/deploys/:id/enqueue' do |id|
 			deploy = MainDeploy.find(id)
 
 			permission_require(deploy, :enqueue)
@@ -226,9 +204,7 @@ module Labor
 			labor_response deploy
 		end		
 
-		options '/deploys/:id/deploy' do 
-		end
-		post '/deploys/:id/deploy' do |id|
+		clean_options_post '/deploys/:id/deploy' do |id|
 			deploy = MainDeploy.find(id)
 
 			permission_require(deploy, :deploy)
@@ -238,9 +214,7 @@ module Labor
 			labor_response deploy
 		end		
 
-		options '/deploys/:id/cancel' do 
-		end
-		post '/deploys/:id/cancel' do |id|
+		clean_options_post '/deploys/:id/cancel' do |id|
 			deploy = MainDeploy.find(id)
 
 			permission_require(deploy, :cancel)
@@ -250,9 +224,7 @@ module Labor
 			labor_response deploy
 		end
 
-		options '/deploys/:id/retry' do 
-		end
-		post '/deploys/:id/retry' do |id|
+		clean_options_post '/deploys/:id/retry' do |id|
 			deploy = MainDeploy.includes(:pod_deploys).find(id)
 
 			permission_require(deploy, :retry)
