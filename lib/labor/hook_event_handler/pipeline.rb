@@ -38,6 +38,11 @@ module Labor
 					# 这里不 drop，继续 pending, 钉钉通知合并 PL 出错, 直到负责人来解决
 					# GET /projects/:id/merge_requests/:merge_request_iid/pipelines | 10.5.0
 					# UPDATE: 这里直接 drop 先 (issue 19、14)
+
+					# 如果还有依赖的组件没有发布，这里 mr 的 pl 就不算错
+					# 可能因为依赖组件而 lint 不过
+					return if deploy.any_dependencies_unpublished?
+
 					post_content = ''
 					deploy.merge_request_iids.each do |mr_iid|
 						# thread = Thread.new do 

@@ -121,6 +121,11 @@ module Labor
       # end
     end
 
+    def any_dependencies_unpublished?
+      left_pod_deploy_names = main_deploy.pod_deploys.reject(&:success?).map(&:name)
+      (external_dependency_names & left_pod_deploy_names).any?
+    end
+
     def need_retry?
       failed? || canceled? || skipped?
     end
