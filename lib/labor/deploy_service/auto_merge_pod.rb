@@ -44,18 +44,23 @@ module Labor
 											 Gitlab::Error::BadRequest => error
 									# 这里不 drop，继续 pending ，直到负责人来解决
 									# New: 直接 drop，算失败
-									deploy.drop(error.message)
 
-									# TODO: 这里再查一下是否 mr close 了才出现的这个错误，时间差问题
 									mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
 
-									# pipeline 已经成功了，但是合并冲突 && 没有对应 mr，会直接走这里
-									if deploy.reviewed?
+									post_content = error.message
+									if mr.state == 'closed' 
+										# 这里 mr closed 后，移除 merge_request_iid，然后 drop
+										deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
+										post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】MR #{object_attributes.iid} 已被关闭，地址: #{mr.web_url}"
+									elsif deploy.reviewed?
+										# pipeline 已经成功了，但是合并冲突 || 没有对应 mr，会直接走这里
 										post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR (iid: #{mr_iid}, state: #{mr.state}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url}) 失败, 请确认合并是否出现冲突, 原因: #{error}"
-										post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 									end
 
-									logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to accept #{deploy.name}'s MR(iid: #{mr_iid}, state: #{mr.state}) with error: #{error}")
+									deploy.drop(post_content)
+									post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner 
+
+									logger.error("【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】fail to accept #{deploy.name}'s MR(iid: #{mr_iid}, state: #{mr.state}) with error: #{error}")
 								end
 							end
 						# end

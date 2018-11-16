@@ -22,15 +22,20 @@ module Labor
 				case object_attributes.state
 				when 'merged' 
 					# 已合并，更新 mr_iids ，删除合并的 mr_iid
-					merge_request_iids = deploy.merge_request_iids
-					merge_request_iids.delete(object_attributes.iid.to_s)
-					deploy.update(merge_request_iids: merge_request_iids)
+					deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
 
 					if object_attributes.target_branch == 'master'
 						# 如果是已合并到 master，则触发主发布处理 CD
 						deploy.ready
 						deploy.main_deploy.process
 					end
+				# 这里 closed 后，移除 merge_request_iid，然后 drop
+				when 'closed'
+					deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
+					post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】MR #{object_attributes.iid} 已被关闭，地址: #{object_attributes.url}"
+					deploy.drop(post_content)
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+					logger.error(post_content)
 				when 'failed'
 					post_content = "pod deploy #{deploy.name} 合并  #{object_attributes.source_branch} 至 #{object_attributes.target_branch} 失败，地址: #{object_attributes.url}"
 					deploy.drop(post_content)
