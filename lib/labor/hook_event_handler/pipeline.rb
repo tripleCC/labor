@@ -97,11 +97,12 @@ module Labor
 
 					# pod deloy 成功，更新 status
 					deploy.success
+					deploy.main_deploy.process
 				end
 			end
 
 			def pipeline_web_url
-				"#{object_attributes.project.web_url}/pipelines/#{object_attributes.id}"
+				"#{project.web_url}/pipelines/#{object_attributes.id}"
 			end
 		end
 	end
