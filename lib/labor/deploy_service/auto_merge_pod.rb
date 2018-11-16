@@ -28,20 +28,23 @@ module Labor
 							else
 								# accept_merge_request 的 merge_when_pipeline_succeeds 参数需要有活动的 PL 才会生效
 								# 这里处理完 PL 之后，才请求自动合并
-								pipeline = activate_pipeline(mr)
-
-								# 记录 MR 对应的 PL id ，失败了去 hook event handler 中的 Pipeline 提醒开发者
-								deploy.update(mr_pipeline_id: pipeline.id)
-
-								# 已经设置成 pl 成功后合并，则不执行 accept_merge_request
-								next if mr.merge_when_pipeline_succeeds
-
 								begin
+									pipeline = activate_pipeline(mr)
+
+									# 记录 MR 对应的 PL id ，失败了去 hook event handler 中的 Pipeline 提醒开发者
+									deploy.update(mr_pipeline_id: pipeline.id)
+
+									# 已经设置成 pl 成功后合并，则不执行 accept_merge_request
+									next if mr.merge_when_pipeline_succeeds
+
 									logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{deploy.name}'s MR(#{mr_iid}) when pipeline success")
 									# 发起合并请求，必须是 PL 成功后才合并
 									gitlab.accept_merge_request(deploy.project_id, mr_iid)
-								rescue Gitlab::Error::MethodNotAllowed => error
+								rescue Gitlab::Error::MethodNotAllowed, 
+											 Gitlab::Error::BadRequest => error
 									# 这里不 drop，继续 pending ，直到负责人来解决
+									# New: 直接 drop，算失败
+									deploy.drop(error.message)
 
 									# TODO: 这里再查一下是否 mr close 了才出现的这个错误，时间差问题
 									mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
@@ -69,6 +72,8 @@ module Labor
 
 			private
 
+			# 这里可能出现 Gitlab::Error::BadRequest
+			# 目标无法触发 pl 的情况下
 			def activate_pipeline(mr)
 				pipelines = pipelines(mr)
 				# 没有 active 的 PL ，才做后续操作
@@ -83,8 +88,8 @@ module Labor
 						active_pipeline = gitlab.retry_pipeline(mr.project_id, retry_pipeline_id) 
 					else
 						# 如果没有活动的 PL ，则手动创建一个，这个 PL 会忽略 [ci skip]
-						logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create project(#{mr.project_id}) pipeline(#{pipelines.first.id}) for MR(#{mr.iid})")
 						active_pipeline = gitlab.create_pipeline(mr.project_id, mr.source_branch)
+						logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create project(#{mr.project_id}) pipeline(#{active_pipeline.id}) for MR(#{mr.iid})")
 					end
 				end
 				active_pipeline
