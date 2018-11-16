@@ -63,11 +63,11 @@ module Labor
         transition any - [:canceled, :success, :failed, :skipped] => :canceled
       end
 
-      after_transition any => [:success] do |deploy, transition|
-        next if transition.loopback?
-        # 让主发布轮询处理下个组件
-        deploy.main_deploy.process
-      end
+      # after_transition any => [:success] do |deploy, transition|
+      #   next if transition.loopback?
+      #   # 让主发布轮询处理下个组件
+      #   deploy.main_deploy.process
+      # end
 
       after_transition any => :analyzing do |deploy, transition|
         next if transition.loopback?

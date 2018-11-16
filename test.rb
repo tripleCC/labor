@@ -9,12 +9,26 @@
 # end
 # p 2
 
+
+# require 'jenkins_api_client'
+
+# c = JenkinsApi::Client.new(:server_ip => '10.1.17.14', 
+#   :username => 'qingmu', :password => '1')
+# p c.job.list("*")
+
 # require 'rubygems'
 # require 'cgi'
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
 require_relative './lib/labor/git/gitlab'
-require_relative './lib/labor/utils/async'
+
+# begin 
+# 	raise Labor::Error::Unauthorized, 'xxxx'
+# rescue Labor::Error::PermissionReject, Labor::Error::Unauthorized => e 
+# 	p e
+# end
+
+# require_relative './lib/labor/utils/async'
 # require_relative './lib/labor'
 # require 'uri'
 
@@ -69,10 +83,13 @@ require 'pp'
 # end
 
 # p k
+require 'pp'
 
 gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire-inc.com:qiandaojiang/a.git')
-pp gitlab.merge_request(project.id, '12').to_hash
+project = gitlab.project('git@git.2dfire-inc.com:ios/TDFTemplateMallModule.git')
+pp gitlab.merge_request(project.id, '1').to_hash
+# p gitlab.branch(project.id, 'develop')
+# pp gitlab.merge_request(project.id, '12').to_hash
 # # p gitlab.branch(project.id, 'develop')
 # p gitlab.compare(project.id, 'develop', 'release/0.2.3')
 

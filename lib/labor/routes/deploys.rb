@@ -165,6 +165,7 @@ module Labor
 			deploy.update(manual: true)
 			deploy.success
 			deploy.cancel_all_operation
+			deploy.main_deploy.process
 
 			labor_response @deploy
 		end
