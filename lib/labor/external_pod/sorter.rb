@@ -39,7 +39,7 @@ module ExternalPod
 						pod = Item.new(untagged_name)
 						pod.spec = reference_specifications.find { |spec| spec.name == untagged_name }	
 						pod.dependency = untagged_dependencies.find { |dep| dep.name == untagged_name }
-						pod.external_dependency_names = dependency_names.select { |name| untagged_dependency_names.include?(name) }
+						pod.external_dependency_names = dependency_names.select { |name| untagged_dependency_names.include?(name) }.uniq
 						pods << pod
 					end
 				end
