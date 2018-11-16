@@ -19,6 +19,15 @@ module Labor
 				deploy.with_lock do 
 					logger.info("process main deploy #{deploy.name} #{deploy.id}")
 
+					running_deploys = deploy.pod_deploys.select(&:deploying?)
+
+					# 这里可以检查有 cd_pl 的 deploying 组件，看有没有成功，成功了就标志为 success
+					# 以防 webhook 回调丢失后，一直处于 deploying 状态
+					running_deploys.select(&:cd_pipeline_id).each do |pod_deploy|
+						pipeline = gitlab.pipeline(pod_deploy.project_id, pod_deploy.cd_pipeline_id)
+						pod_deploy.success if pipeline&.status == 'success'
+					end
+
 					# 计算还未发布的 pod
 					left_pod_deploys = deploy.pod_deploys.reject(&:success?)
 					left_pod_deploy_names = left_pod_deploys.map(&:name)
@@ -26,7 +35,6 @@ module Labor
 					# 启动未分析的发布
 					left_pod_deploys.select(&:created?).each(&:enqueue)
 
-					running_deploy_names = deploy.pod_deploys.select(&:deploying?).map(&:name)
 
 					free_pod_deploys = left_pod_deploys.select do |pod_deploy|
 						(pod_deploy.external_dependency_names & left_pod_deploy_names).empty?
@@ -40,11 +48,6 @@ module Labor
 					# mr 和发布一样， lint 也需要按照依赖顺序
 					# 标志为 reviewed 并且 pending，说明首次 mr 的 ci 失败了，可能依赖了待发布的组件
 					# 这里触发 mr ci ，自动合并没有依赖待发布列表中组件的组件
-
-					#TODO
-					# 这里到时候要加 mr_pipeline_success
-					# pending 的时候是触发 pl 设置成功后合并，
-					# mr_pipeline_success 的时候，因为 pl 是成功的，只需要设置成功后合并（预防自动合并被取消的情况）
 					pending_reviewed_pod_deploys = free_pod_deploys.select do |pod_deploy|
 						pod_deploy.pending? && pod_deploy.reviewed
 					end
@@ -62,7 +65,7 @@ module Labor
 						---> left pod deploys #{left_pod_deploy_names}
 						---> free pod deploys #{free_pod_deploys.map(&:name)}
 						---> pending reviewed pod deploys #{pending_reviewed_pod_deploys.map(&:name)}
-						---> processing deploys #{running_deploy_names}
+						---> processing deploys #{running_deploys.map(&:name)}
 						---> next process pod deploys #{next_pod_deploys.map(&:name)}
 						EOF
 					)
