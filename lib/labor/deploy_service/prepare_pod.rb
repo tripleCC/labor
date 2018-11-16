@@ -21,14 +21,28 @@ module Labor
 				# 没有 CI/CD 配置文件的情况，直接 skipped
 				# 需要用户勾选手动发布成功后，直接将其设置为 manual
 				skip_deploy_block = proc do |post_content|
+					logger.error("【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】#{post_content}")
 					deploy.skip
 					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				end  
 
-				ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new(deploy.project_id, deploy.ref)
-				unless ci_yaml_file.has_deploy_jobs?
-					skip_deploy_block.call("pod deploy (id: #{deploy.id}, name: #{deploy.name}): 仓库未包含 .gitlab-ci.yaml 文件或 .gitlab-ci.yaml 文件未包含发布操作，无法自动发布。手动发布后，再勾选 <已发布>") 
-					return
+				begin 
+					ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new(deploy.project_id, deploy.ref)
+					unless ci_yaml_file.has_deploy_jobs?
+						skip_deploy_block.call("pod deploy (id: #{deploy.id}, name: #{deploy.name}): 仓库未包含 .gitlab-ci.yaml 文件或 .gitlab-ci.yaml 文件未包含发布操作，无法自动发布。手动发布后，再勾选 <已发布>") 
+						return
+					end
+				rescue Labor::Error::NotFound => error
+					skip_deploy_block.call(error.message)
+				end
+
+				# master 必须为 default 分支
+				master_branch = gitlab.branch(deploy.project_id, 'master')
+				unless master_branch.default
+					post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】master 分支必须为 default 分支"
+					logger.error(post_content)
+					deploy.drop(post_content)
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
 				end
 				
 				# 发布分支是 master || 发布分支已经合并到 master ，直接标志为可发布
@@ -36,13 +50,15 @@ module Labor
 				if deploy.ref == 'master' || ref_branch.merged
 					update_spec_version(deploy, 'master')
 					deploy.ready
-					# deploy.main_deploy.process
 				else
 					update_spec_version(deploy)
 					create_gitflow_merge_requests(ref_branch)
 				end
+			# 分支找不到的情况下
 			rescue Labor::Error::NotFound => error
-				skip_deploy_block.call(error.message)
+				logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to prepare pod with error #{error}.")
+				deploy.drop(error.message)
+				post(deploy.owner_ding_token, error.message, deploy.owner_mobile) if deploy.owner
 			end
 
 			def update_spec_version(deploy, ref = nil)

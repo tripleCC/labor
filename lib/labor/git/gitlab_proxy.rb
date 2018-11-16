@@ -33,6 +33,8 @@ module Labor
 
 		def branch(project_id, ref)
 			client.branch(project_id, ref)
+		rescue Gitlab::Error::NotFound => error 
+			raise Labor::Error::NotFound, "Can't find #{ref} on #{client.project(project_id).name} with gitlab error #{error}"
 		end
 
 		def file_path(project_id, file_name, ref = 'master', depth = 5)
