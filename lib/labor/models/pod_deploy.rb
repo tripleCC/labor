@@ -16,6 +16,8 @@ module Labor
     # serialize :merge_request_iids
     # serialize :external_dependency_names
 
+    # scope :need_retry, -> { failed? || canceled? || skipped? }
+
     self.per_page = 30
 
     validates :repo_url, presence: true

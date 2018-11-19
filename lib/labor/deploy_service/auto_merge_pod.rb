@@ -35,7 +35,10 @@ module Labor
 									deploy.update(mr_pipeline_id: pipeline.id)
 
 									# 已经设置成 pl 成功后合并，则不执行 accept_merge_request
-									next if mr.merge_when_pipeline_succeeds
+									#
+									# pl 的状态为 success 并且 merge_when_pipeline_succeeds 为 true 时，
+									# mr 不会自动合并，需要 accept 或者重新触发一次 pl ，这里直接采用 accept 一次
+									next if mr.merge_when_pipeline_succeeds && pipeline.status != 'success'
 
 									logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{deploy.name}'s MR(#{mr_iid}) when pipeline success")
 									# 发起合并请求，必须是 PL 成功后才合并
