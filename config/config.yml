@@ -5,6 +5,8 @@ host: '0.0.0.0'
 redis_port: 6379
 redis_db: 0
 
+message_server_url: 'http://0.0.0.0:3001'
+
 websocket_port: 8081
 
 log_file: '~/.labor/labor.log'
