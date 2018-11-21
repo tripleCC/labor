@@ -1,7 +1,13 @@
 #/bin/sh
 
-if ! whoami &> /dev/null; then
-  if [ -w /etc/passwd ]; then
-    echo "${USER_NAME:-default}:x:$(id -u):0:${USER_NAME:-default} user:${HOME}:/sbin/nologin" >> /etc/passwd
-  fi
+NB_USER=labor
+
+if [ `id -u` -ge 10000 ]; then
+    cat /etc/passwd | sed -e "s/^$NB_USER:/builder:/" > /tmp/passwd
+    echo "$NB_USER:x:`id -u`:`id -g`:,,,:/home/$NB_USER:/bin/bash" >> /tmp/passwd
+    cat /tmp/passwd > /etc/passwd
+    rm /tmp/passwd
 fi
+
+
+bundle exec rake deploy

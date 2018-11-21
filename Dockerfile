@@ -2,7 +2,7 @@ FROM ruby:alpine
 
 LABEL maintainer="Zhuohui <shupian@2dfire.com>"
 
-ENV HOME=/app
+ENV HOME=/home/labor
 
 WORKDIR ${HOME}/labor
 
@@ -11,10 +11,10 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
   && apk upgrade \
   && apk add --update --no-cache git openssl tzdata postgresql-dev make build-base autoconf automake zlib libstdc++ openssh-client\
   && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-  && echo "Asia/Shanghai" > /etc/timezone 
+  && echo "Asia/Shanghai" > /etc/timezone \
+  && chmod g+w /etc/passwd
 
-RUN addgroup -g 10001 -S labor && \
-    adduser -u 10001 -S -D -G labor labor -h ${HOME}
+RUN adduser -u 10001 -S -D -G root labor -h ${HOME}
 
 
 COPY ssh ${HOME}/.ssh
@@ -25,7 +25,7 @@ RUN chown -R labor:root ${HOME} \
   && chmod -R 0775 ${HOME} \
   && chmod 600 ${HOME}/.ssh/id_rsa
 
-USER 10001
+USER labor
 
 RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com && \
     bundle install && \
@@ -33,5 +33,5 @@ RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com && \
 
 EXPOSE 1080
 
-# ENTRYPOINT ["sh", "./entrypoint.sh"]
-CMD [ "bundle", "exec", "rake", "deploy" ]
+ENTRYPOINT ["sh", "uid-entrypoint"]
+# CMD [ "bundle", "exec", "rake", "deploy" ]
