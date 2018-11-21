@@ -1,6 +1,7 @@
 #/bin/sh
 
 NB_USER=labor
+REPO_PATH="${HOME}/.cocoapods/repos/2dfire"
 
 if [ `id -u` -ge 10000 ]; then
     cat /etc/passwd | sed -e "s/^$NB_USER:/builder:/" > /tmp/passwd
@@ -10,4 +11,9 @@ if [ `id -u` -ge 10000 ]; then
 fi
 
 
+bundle config mirror.https://rubygems.org https://gems.ruby-china.com
+bundle install
+if [ ! -x "$REPO_PATH" ];then
+  bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
+fi
 bundle exec rake deploy

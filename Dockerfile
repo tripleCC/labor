@@ -27,10 +27,6 @@ RUN chown -R labor:root ${HOME} \
 
 USER labor
 
-RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com && \
-    bundle install && \
-    bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
-
 EXPOSE 1080
 
 ENTRYPOINT ["sh", "uid-entrypoint"]
