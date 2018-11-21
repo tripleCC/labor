@@ -22,7 +22,7 @@ COPY ssh ${HOME}/.ssh
 ADD ./ ${HOME}/labor
 
 RUN chown -R labor:root ${HOME} \
-  && chmod -R 755 ${HOME} \
+  && chmod -R 0775 ${HOME} \
   && chmod 600 ${HOME}/.ssh/id_rsa
 
 USER 10001
