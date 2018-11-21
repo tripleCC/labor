@@ -25,7 +25,10 @@ RUN chown -R labor:root ${HOME} \
   && chmod -R 0775 ${HOME} \
   && chmod 600 ${HOME}/.ssh/id_rsa
 
-USER labor
+USER 10001
+
+RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com && \
+    bundle install
 
 EXPOSE 1080
 
