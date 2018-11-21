@@ -12,7 +12,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
   && echo "Asia/Shanghai" > /etc/timezone \
   && bundle config mirror.https://rubygems.org https://gems.ruby-china.com
 
-RUN addgroup -g 1001 -S labor && adduser -u 1001 -S labor -G labor
+RUN addgroup -g 10001 -S labor && adduser -u 10001 -S labor -G labor
   
 
 WORKDIR /home/labor/app
@@ -25,7 +25,7 @@ RUN bundle install \
   && chown -R labor:labor /home/labor \
   && chmod 600 /home/labor/.ssh/id_rsa
 
-USER 1001
+USER labor
 
 RUN bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
 
