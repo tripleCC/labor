@@ -1,7 +1,7 @@
 FROM ruby:alpine
 
-LABEL maintainer="Zhuohui <shupian@2dfire.com>"
-
+LABEL maintainer="Zhuohui <shupian@2dfire.com>" \
+      run='bundle exec rake deploy'
 
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
@@ -12,23 +12,27 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
   && echo "Asia/Shanghai" > /etc/timezone \
   && bundle config mirror.https://rubygems.org https://gems.ruby-china.com
 
-RUN addgroup -g 10001 -S labor && adduser -u 10001 -S labor -G labor
-  
 
-WORKDIR /home/labor/app
+ENV APP_ROOT=/opt/app-root
+ENV PATH=${APP_ROOT}/bin:${PATH} HOME=${APP_ROOT}
 
-COPY ssh /home/labor/.ssh
+WORKDIR ${APP_ROOT}
 
-ADD ./ /home/labor/app
+COPY ssh ${HOME}/.ssh
+
+ADD ./ ${APP_ROOT}
+
+RUN chgrp -R 0 ${APP_ROOT} \
+  && chmod 600 ${HOME}/.ssh/id_rsa \
+  && chmod -R g=u ${APP_ROOT} /etc/passwd
+
+USER 10001
 
 RUN bundle install \
-  && chown -R labor:labor /home/labor \
-  && chmod 600 /home/labor/.ssh/id_rsa
-
-USER labor
-
-RUN bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
+  && bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
 
 EXPOSE 1080
 
-ENTRYPOINT ["sh", "./entrypoint.sh"]
+ENTRYPOINT ["ud-entrypoint"]
+
+CMD run
