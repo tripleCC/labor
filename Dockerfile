@@ -25,7 +25,7 @@ RUN bundle install \
   && chown -R labor:labor /home/labor \
   && chmod 600 /home/labor/.ssh/id_rsa
 
-USER labor
+USER 1001
 
 RUN bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
 
