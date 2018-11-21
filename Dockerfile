@@ -15,8 +15,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 ENV APP_ROOT=/opt/app-root
 ENV PATH=${APP_ROOT}/bin:${PATH} HOME=${APP_ROOT}
 
-WORKDIR ${APP_ROOT}
-
 COPY ssh ${HOME}/.ssh
 
 ADD ./ ${APP_ROOT}
@@ -25,7 +23,9 @@ RUN chgrp -R 0 ${APP_ROOT} \
   && chmod 600 ${HOME}/.ssh/id_rsa \
   && chmod -R g=u ${APP_ROOT} /etc/passwd
 
-USER 10001
+USER 1001
+
+WORKDIR ${APP_ROOT}
 
 RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com \
   && bundle install \
