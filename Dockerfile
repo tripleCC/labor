@@ -9,8 +9,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
   && apk upgrade \
   && apk add --update --no-cache git openssl tzdata postgresql-dev make build-base autoconf automake zlib libstdc++ openssh-client\
   && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-  && echo "Asia/Shanghai" > /etc/timezone \
-  && bundle config mirror.https://rubygems.org https://gems.ruby-china.com
+  && echo "Asia/Shanghai" > /etc/timezone
 
 
 ENV APP_ROOT=/opt/app-root
@@ -28,7 +27,8 @@ RUN chgrp -R 0 ${APP_ROOT} \
 
 USER 10001
 
-RUN bundle install \
+RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com \
+  && bundle install \
   && bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
 
 EXPOSE 1080
