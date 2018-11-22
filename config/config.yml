@@ -9,9 +9,9 @@ websocket_service_url: 'http://labor-socket-server-labor.app.2dfire.com'
 
 log_file: '~/.labor/labor.log'
 sidekiq_log_file: '~/.labor/sidekiq.log'
-gitlab_endpoint: 'http://git.2dfire-inc.com/api/v4'
+gitlab_endpoint: 'http://git.2dfire.net/api/v4'
 # 私有源 ssh
-cocoapods_private_source_url: 'git@git.2dfire-inc.com:ios/cocoapods-spec.git'
+cocoapods_private_source_url: 'git@git.2dfire.net:ios/cocoapods-spec.git'
 
 # RestBuild's token
 gitlab_private_token: 'Se79zS8rgUupDZv6JN8G'
