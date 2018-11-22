@@ -3,7 +3,7 @@
 NB_USER=labor
 REPO_PATH="${HOME}/.cocoapods/repos/2dfire"
 
-git config --global core.sshCommand "ssh -i /var/run/secrets/kubernetes.io/serviceaccount/restbuild-ssh -F /dev/null"
+# git config --global core.sshCommand "ssh -i /var/run/secrets/kubernetes.io/serviceaccount/restbuild-ssh -F /dev/null"
 
 if [ `id -u` -ge 10000 ]; then
     cat /etc/passwd | sed -e "s/^$NB_USER:/builder:/" > /tmp/passwd
@@ -11,6 +11,8 @@ if [ `id -u` -ge 10000 ]; then
     cat /tmp/passwd > /etc/passwd
     rm /tmp/passwd
 fi
+
+echo "start container"
 
 
 
