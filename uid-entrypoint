@@ -14,7 +14,7 @@ fi
 
 
 
-if [ ! -x "$REPO_PATH" ];then
-  bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
-fi
-bundle exec rake deploy
+# if [ ! -x "$REPO_PATH" ];then
+#   bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
+# fi
+# bundle exec rake deploy
