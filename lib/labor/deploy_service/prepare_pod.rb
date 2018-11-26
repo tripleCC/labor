@@ -54,8 +54,9 @@ module Labor
 					update_spec_version(deploy)
 					create_gitflow_merge_requests(ref_branch)
 				end
-			# 分支找不到的情况下
-			rescue Labor::Error::NotFound => error
+			# 分支找不到, 没有权限的情况下
+			rescue Labor::Error::NotFound, 
+				Gitlab::Error::Forbidden => error
 				logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to prepare pod with error #{error}.")
 				deploy.drop(error.message)
 				post(deploy.owner_ding_token, error.message, deploy.owner_mobile) if deploy.owner
