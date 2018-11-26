@@ -35,20 +35,23 @@ module Labor
 						external_dependency_names: pod.external_dependency_names
 					}
 					member = bank.member_of_spec(pod.spec)
-					deploy_hash.merge!({
-						owner: member.name,
-						owner_mobile: member.mobile,
-						owner_ding_token: member.team.ding_token
-					}) if member 
 
-					if member.name
-						user = User.find_or_create_by({
-							nickname: member.name, 
-							phone_number: member.mobile
-						}) 
+					if member 
 						deploy_hash.merge!({
-							user: user
+							owner: member.name,
+							owner_mobile: member.mobile,
+							owner_ding_token: member.team.ding_token
 						})
+
+						if member.name
+							user = User.find_or_create_by({
+								nickname: member.name, 
+								phone_number: member.mobile
+							}) 
+							deploy_hash.merge!({
+								user: user
+							})
+						end
 					end
 
 					deploy_hash.merge!({
