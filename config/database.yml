@@ -27,4 +27,4 @@ production:
   database: defaultdb
   username: admin
   password: ajdhfiuh29hfsdhif
-  host: '10.136.24.174'
+  host: '10.136.42.65'
