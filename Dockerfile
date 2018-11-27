@@ -30,7 +30,7 @@ USER 10001
 RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com && \
     bundle install
 
-EXPOSE 1080
+EXPOSE 8080
 
 ENTRYPOINT ["sh", "uid-entrypoint"]
 # CMD [ "bundle", "exec", "rake", "deploy" ]

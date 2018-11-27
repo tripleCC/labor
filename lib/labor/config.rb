@@ -51,8 +51,9 @@ module Labor
 		private
 
 		def generate_webhook_url(path)
-			domain = @config.domain || webhook_host
-			"http://#{domain}:#{port}/#{path}"
+			ip_port = "#{webhook_host}:#{port}"
+			domain = @config.domain || ip_port
+			"http://#{domain}/#{path}"
 		end
 
 		def load_config 
