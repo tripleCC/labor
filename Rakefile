@@ -10,7 +10,7 @@ options = {
 
 pid_file = File.expand_path("#{__FILE__}/../labor.pid")
 redis_pid_file = File.expand_path("#{__FILE__}/../sidekiq.pid")
-# sidekiq_log_file = Labor.config.sidekiq_log_file
+sidekiq_log_file = Labor.config.sidekiq_log_file
 
 # 运行 sidekiq 前，需要手动启动 redis
 # redis 相关
@@ -40,8 +40,7 @@ task :deploy do
 	# 后台运行
 	#  -D 
 	# system "bundle exec sidekiq -r ./lib/labor/workers.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d -e production"  
-	# -P #{pid_file}
-	system "bundle exec rackup -p #{options[:port]} -o #{options[:deploy_host]} -E production"
+	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
 	puts "Deployed Labor web server"
 end
 

@@ -11,11 +11,11 @@ module Labor
     def self.logger
       return @logger if @logger
 
-      # if Labor.config.log_file && Sinatra::Base.settings.production?
-      #     log_file = File.expand_path(Labor.config.log_file)
-      # else
+      if Labor.config.log_file && Sinatra::Base.settings.production?
+          log_file = File.expand_path(Labor.config.log_file)
+      else
           log_file = STDOUT
-      # end
+      end
 
       unless log_file == STDOUT
         parent_dir, _separator, _filename = log_file.rpartition('/')
