@@ -31,7 +31,7 @@ RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.com && \
     bundle install && \
     bundle exec pod repo add 2dfire git@git.2dfire.net:ios/cocoapods-spec.git
 
-EXPOSE 1080
+EXPOSE 8080
 
 # ENTRYPOINT ["sh", "./entrypoint.sh"]
 CMD [ "bundle", "exec", "rake", "deploy" ]
