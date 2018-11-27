@@ -40,7 +40,8 @@ task :deploy do
 	# 后台运行
 	#  -D 
 	# system "bundle exec sidekiq -r ./lib/labor/workers.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -d -e production"  
-	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production"
+	# -P #{pid_file}
+	system "bundle exec rackup -p #{options[:port]} -o #{options[:deploy_host]} -E production"
 	puts "Deployed Labor web server"
 end
 
