@@ -14,17 +14,17 @@ development:
   password: daimao
 
 # local test
-production: 
-  <<: *default
-  database: labor_production
-  username: postgres
-  password: daimao
+# production: 
+#   <<: *default
+#   database: labor_production
+#   username: postgres
+#   password: daimao
   # host: localhostd
 
 # openshift postgresql
-# production: 
-#   <<: *default
-#   database: defaultdb
-#   username: admin
-#   password: ajdhfiuh29hfsdhif
-#   host: '10.136.24.174'
+production: 
+  <<: *default
+  database: defaultdb
+  username: admin
+  password: ajdhfiuh29hfsdhif
+  host: '10.136.24.174'

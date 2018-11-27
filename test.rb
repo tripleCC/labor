@@ -12,9 +12,48 @@
 
 # require 'jenkins_api_client'
 
-# c = JenkinsApi::Client.new(:server_ip => '10.1.17.14', 
-#   :username => 'qingmu', :password => '1')
-# p c.job.list("*")
+# module JenkinsApi
+#   class Client
+#     class Job
+#     	def last_build(job_name)
+#     		@client.api_get_request("/job/#{path_encode job_name}/lastBuild")
+#     	end
+#     end
+#   end
+# end
+
+# c = JenkinsApi::Client.new(
+# 	:server_url => 'http://jenkins-shopkeeper-client.2dfire.net', 
+# 	:server_port => 80, 
+#   :username => 'qingmu', 
+#   :password => '1',
+#   # :log_level => :debug
+#   )
+
+# c.job.list_all.map do |job_name|
+# 	Thread.new do 
+# 		begin
+# 			lastBuild = c.job.last_build(job_name) 
+# 			timestamp = lastBuild['timestamp'].to_i / 1000.0
+# 			gap_days = (Time.now - Time.at(timestamp)) / 3600.0 / 24.0 
+
+# 			# 模版 Job 不删除，供 jb 使用
+# 			if gap_days > 10 && !job_name.include?('template')
+# 				puts "#{job_name} #{gap_days}" 
+# 				# c.job.delete(job_name)  
+# 			end
+# 		rescue => e
+# 			# p e
+# 		end
+# 	end
+# end.each(&:join)
+
+
+
+
+
+
+# puts c.job.list_details('2ye-android-1.8.0')
 
 # require 'rubygems'
 # require 'cgi'
@@ -83,11 +122,11 @@ require 'pp'
 # end
 
 # p k
-require 'pp'
+# require 'pp'
 
 gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire-inc.com:ios/TDFTemplateMallModule.git')
-pp gitlab.merge_request(project.id, '1').to_hash
+project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
+pp gitlab.merge_request(project.id, '18').to_hash
 # p gitlab.branch(project.id, 'develop')
 # pp gitlab.merge_request(project.id, '12').to_hash
 # # p gitlab.branch(project.id, 'develop')
