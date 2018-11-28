@@ -26,5 +26,5 @@ production:
   <<: *default
   database: labor
   username: labor
-  password: 2dfire.com
+  password: 2Dfire.com
   host: '10.136.42.65'
