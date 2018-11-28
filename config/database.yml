@@ -19,12 +19,13 @@ development:
 #   database: labor_production
 #   username: postgres
 #   password: daimao
-  # host: localhostd
+#   host: localhost
 
 # openshift postgresql
+#'10.136.42.65'
 production: 
   <<: *default
   database: labor
   username: labor
   password: 2Dfire.com
-  host: '10.136.42.65'
+  host: postgresql-labor.app.2dfire.com

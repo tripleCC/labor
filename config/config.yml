@@ -6,6 +6,8 @@ domain: 'labor-labor.app.2dfire.com'
 redis_port: 6379
 redis_db: 0
 
+labor_app_url: http://labor-app-labor.app.2dfire.com
+
 websocket_service_url: 'http://labor-socket-server-labor.app.2dfire.com'
 
 log_file: '~/.labor/labor.log'

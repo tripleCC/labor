@@ -75,6 +75,11 @@ module Labor
     	labor_error 'page not found'
     end
 
+    get '/' do 
+    	'Welcome !'
+    	# redirect Labor.config.labor_app_url
+    end
+
     # 这里如果是 webhook 阶段抛出的错误
     # 设置 error 就没用了，因为是返回给 gitlab 接口
     error Labor::Error::NotFound,
