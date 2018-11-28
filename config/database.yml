@@ -24,7 +24,7 @@ development:
 # openshift postgresql
 production: 
   <<: *default
-  database: defaultdb
-  username: admin
-  password: ajdhfiuh29hfsdhif
+  database: labor
+  username: labor
+  password: 2dfire.com
   host: '10.136.42.65'
