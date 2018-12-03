@@ -37,7 +37,8 @@ module Labor
 									# 已经设置成 pl 成功后合并，则不执行 accept_merge_request
 									#
 									# pl 的状态为 success 并且 merge_when_pipeline_succeeds 为 true 时，
-									# mr 不会自动合并，需要 accept 或者重新触发一次 pl ，这里直接采用 accept 一次
+									# 有时候即使 merge_when_pipeline_succeeds 为 true， mr 还不会自动合并，需要 accept 或者重新触发一次 pl
+									# 这里直接采用 accept 一次，如果自动 merge 了，在 rescue 里面判断，直接 ready
 									next if mr.merge_when_pipeline_succeeds && pipeline.status != 'success'
 
 									logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): accept #{deploy.name}'s MR(#{mr_iid}) when pipeline success")
@@ -50,24 +51,29 @@ module Labor
 
 									mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
 
-									post_content = error.message
-									if mr.state == 'closed' 
-										# 这里 mr closed 后，移除 merge_request_iid，然后 drop
-										deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
-										post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】MR #{object_attributes.iid} 已被关闭，地址: #{mr.web_url}"
-									elsif !mr.merge_when_pipeline_succeeds && mr.merge_status == 'can_be_merged'
-										# 有些需要合并的 ref 没有 stages /jobs，会导致 mr 报 400 #35
-										gitlab.accept_merge_request(deploy.project_id, mr_iid, {})
-									elsif deploy.reviewed?
-										# mr.merge_status == 'cannot_be_merged' 
-										# pipeline 已经成功了，但是合并冲突 || 没有对应 mr，会直接走这里
-										post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR (iid: #{mr_iid}, state: #{mr.state}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url}) 失败, 请确认合并是否出现冲突, 原因: #{error}"
+									# 这里有可能是因为 mr 在上次确认～accept之间被 merge 了，如果是的话，直接ready
+									if mr.state == 'merged'
+										deploy.ready
+									else
+										post_content = error.message
+										if mr.state == 'closed' 
+											# 这里 mr closed 后，移除 merge_request_iid，然后 drop
+											deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
+											post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】MR #{object_attributes.iid} 已被关闭，地址: #{mr.web_url}"
+										elsif !mr.merge_when_pipeline_succeeds && mr.merge_status == 'can_be_merged'
+											# 有些需要合并的 ref 没有 stages /jobs，会导致 mr 报 400 #35
+											gitlab.accept_merge_request(deploy.project_id, mr_iid, {})
+										elsif deploy.reviewed?
+											# mr.merge_status == 'cannot_be_merged' 
+											# pipeline 已经成功了，但是合并冲突 || 没有对应 mr，会直接走这里
+											post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR (iid: #{mr_iid}, state: #{mr.state}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url}) 失败, 请确认合并是否出现冲突, 原因: #{error}"
+										end
+
+										deploy.drop(post_content)
+										post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner 
+
+										logger.error("【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】fail to accept #{deploy.name}'s MR(iid: #{mr_iid}, state: #{mr.state}) with error: #{error}")
 									end
-
-									deploy.drop(post_content)
-									post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner 
-
-									logger.error("【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】fail to accept #{deploy.name}'s MR(iid: #{mr_iid}, state: #{mr.state}) with error: #{error}")
 								end
 							end
 						# end
