@@ -112,6 +112,10 @@ module Labor
 	  			RangeError do |error|
 	  	halt 500, labor_error(error.message)
 	  end
+
+	  error do |error|
+	  	halt 500, labor_error(error.message)
+	  end
 	end
 end
 
