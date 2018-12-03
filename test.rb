@@ -128,7 +128,10 @@ require 'pp'
 
 gitlab = Labor::GitLab.gitlab
 project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
-pp gitlab.merge_request(project.id, '18').to_hash
+pp gitlab.tags(project.id).map(&:name)
+pp gitlab.create_pipeline(project.id, '0.1.1')	
+
+# pp gitlab.merge_request(project.id, '18').to_hash
 # p gitlab.branch(project.id, 'develop')
 # pp gitlab.merge_request(project.id, '12').to_hash
 # # p gitlab.branch(project.id, 'develop')
