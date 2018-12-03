@@ -28,5 +28,5 @@ production:
   database: labor
   username: labor
   password: 2Dfire.com
-  host: 10.136.42.65
+  host: 10.136.33.205
   # host: postgresql-labor.app.2dfire.com
