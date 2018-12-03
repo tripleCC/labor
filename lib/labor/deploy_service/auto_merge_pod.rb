@@ -34,10 +34,7 @@ module Labor
 									# 记录 MR 对应的 PL id ，失败了去 hook event handler 中的 Pipeline 提醒开发者
 									deploy.update(mr_pipeline_id: pipeline.id)
 
-									# 已经设置成 pl 成功后合并，则不执行 accept_merge_request
-									#
-									# pl 的状态为 success 并且 merge_when_pipeline_succeeds 为 true 时，
-									# 有时候即使 merge_when_pipeline_succeeds 为 true， mr 还不会自动合并，需要 accept 或者重新触发一次 pl
+									# pl 的状态为 success 并且 merge_when_pipeline_succeeds 为 true 时，mr 有概率不会自动合并，需要 accept 或者重新触发一次 pl
 									# 这里直接采用 accept 一次，如果自动 merge 了，在 rescue 里面判断，直接 ready
 									next if mr.merge_when_pipeline_succeeds && pipeline.status != 'success'
 
