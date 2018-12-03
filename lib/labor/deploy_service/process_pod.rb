@@ -63,7 +63,7 @@ module Labor
 				# 规避了这个问题
 				pipeline = gitlab.newest_active_pipeline(project.id, name)
 				# 这里立刻创建 pipeline 的话，可能会出现找不到 tag 错误，所以延迟重试 0.15
-				retry_rescue Gitlab::Error::BadRequest do |rest_times|
+				retry_rescue Gitlab::Error::BadRequest, 5, 1 do |rest_times|
 					logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): create pipeline with rest times #{rest_times}")
 					pipeline = gitlab.create_pipeline(project.id, name)	if pipeline.nil?
 				end
