@@ -57,7 +57,7 @@ module Labor
 						# thread
 					end#.each(&:join)
 
-					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner && !post_content.length.zero?
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding? && !post_content.length.zero?
 
 					deploy.drop(post_content)
 					#TODO
@@ -91,7 +91,7 @@ module Labor
 					post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】发布 #{object_attributes.ref} 执行 CI 失败, 地址: #{pipeline_web_url}"
 					deploy.drop(post_content)
 					
-					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding?
 				when 'success'
 					logger.info("pod deploy #{deploy.name} success with pipeline (id: #{object_attributes.id}, status: #{object_attributes.status}, ref: #{object_attributes.ref})")
 

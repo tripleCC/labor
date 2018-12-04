@@ -66,7 +66,14 @@ module Labor
 
 				# 可以针对同个仓库，同个分支创建发布
 				user = User.find(auth_user_id)
-				@deploy = MainDeploy.create!({ name: params['name'], repo_url: params['repo_url'],  ref: params['ref'],  user: user })
+				
+				@deploy = MainDeploy.create!({ 
+					name: params['name'], 
+					repo_url: params['repo_url'],  
+					ref: params['ref'],  
+					should_push_ding: params['should_push_ding'],
+					user: user 
+					})
 
 				labor_response @deploy
 			rescue ActiveRecord::RecordInvalid => error 

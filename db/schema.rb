@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181112115705) do
+ActiveRecord::Schema.define(version: 20181204031420) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,6 +28,7 @@ ActiveRecord::Schema.define(version: 20181112115705) do
     t.datetime "finished_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "should_push_ding", default: true
   end
 
   add_index "main_deploys", ["user_id"], name: "index_main_deploys_on_user_id", using: :btree

@@ -23,7 +23,7 @@ module Labor
 				skip_deploy_block = proc do |post_content|
 					logger.error("【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】#{post_content}")
 					deploy.skip
-					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding?
 				end  
 
 				begin 
@@ -42,7 +42,7 @@ module Labor
 					post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】master 分支必须为 default 分支"
 					logger.error(post_content)
 					deploy.drop(post_content)
-					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding?
 				end
 				
 				# 发布分支是 master || 发布分支已经合并到 master ，直接标志为可发布
@@ -59,7 +59,7 @@ module Labor
 				Gitlab::Error::Forbidden => error
 				logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to prepare pod with error #{error}.")
 				deploy.drop(error.message)
-				post(deploy.owner_ding_token, error.message, deploy.owner_mobile) if deploy.owner
+				post(deploy.owner_ding_token, error.message, deploy.owner_mobile) if deploy.can_push_ding?
 			end
 
 			def update_spec_version(deploy, ref = nil)
@@ -95,7 +95,7 @@ module Labor
 				deploy.pend
 
 				# 发送组件合并钉钉消息
-				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner && Labor.config.remind_owner_when_merge_request_created
+				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding? && Labor.config.remind_owner_when_merge_request_created
 			end
 
 			def create_merge_request(project_id, ref, target, assignee_name)

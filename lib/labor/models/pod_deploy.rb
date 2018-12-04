@@ -18,6 +18,8 @@ module Labor
 
     # scope :need_retry, -> { failed? || canceled? || skipped? }
 
+    delegate :should_push_ding, to: :main_deploy, prefix: true, allow_nil: true
+
     self.per_page = 30
 
     validates :repo_url, presence: true
@@ -130,6 +132,11 @@ module Labor
 
     def need_retry?
       failed? || canceled? || skipped?
+    end
+
+    def can_push_ding?
+      false
+      # main_deploy_should_push_ding && owner
     end
 
     def cancel_all_operation
