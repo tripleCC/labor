@@ -63,11 +63,11 @@ module Labor
 										elsif deploy.reviewed?
 											# mr.merge_status == 'cannot_be_merged' 
 											# pipeline 已经成功了，但是合并冲突 || 没有对应 mr，会直接走这里
-											post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR (iid: #{mr_iid}, state: #{mr.state}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url}) 失败, 请确认合并是否出现冲突, 原因: #{error}"
+											post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】合并 MR ( iid: #{mr_iid}, state: #{mr.state}, 源分支: #{mr.source_branch}, 目标分支: #{mr.target_branch}, 地址: #{mr.web_url} ) 失败, 请确认合并是否出现冲突, 原因: #{error}"
 										end
 
 										deploy.drop(post_content)
-										post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner 
+										post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding? 
 
 										logger.error("【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】fail to accept #{deploy.name}'s MR(iid: #{mr_iid}, state: #{mr.state}) with error: #{error}")
 									end
