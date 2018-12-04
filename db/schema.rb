@@ -17,7 +17,6 @@ ActiveRecord::Schema.define(version: 20181204031420) do
   enable_extension "plpgsql"
 
   create_table "main_deploys", force: :cascade do |t|
-    t.integer  "user_id"
     t.string   "name"
     t.string   "repo_url"
     t.string   "ref"
@@ -30,8 +29,6 @@ ActiveRecord::Schema.define(version: 20181204031420) do
     t.datetime "updated_at"
     t.boolean  "should_push_ding", default: true
   end
-
-  add_index "main_deploys", ["user_id"], name: "index_main_deploys_on_user_id", using: :btree
 
   create_table "operations", force: :cascade do |t|
     t.integer  "user_id"
@@ -47,7 +44,6 @@ ActiveRecord::Schema.define(version: 20181204031420) do
   add_index "operations", ["user_id"], name: "index_operations_on_user_id", using: :btree
 
   create_table "pod_deploys", force: :cascade do |t|
-    t.integer  "user_id"
     t.integer  "main_deploy_id"
     t.string   "name"
     t.string   "project_id"
@@ -73,7 +69,6 @@ ActiveRecord::Schema.define(version: 20181204031420) do
   end
 
   add_index "pod_deploys", ["main_deploy_id"], name: "index_pod_deploys_on_main_deploy_id", using: :btree
-  add_index "pod_deploys", ["user_id"], name: "index_pod_deploys_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "sub"
@@ -81,8 +76,8 @@ ActiveRecord::Schema.define(version: 20181204031420) do
     t.string   "email"
     t.string   "phone_number"
     t.string   "picture"
-    t.boolean  "superman"
-    t.text     "unofficial_names", default: [], array: true
+    t.boolean  "superman",         default: false
+    t.text     "unofficial_names", default: [],    array: true
     t.datetime "created_at"
     t.datetime "updated_at"
   end

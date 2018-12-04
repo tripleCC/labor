@@ -21,7 +21,7 @@ module Labor
 		# }
 		get '/deploys' do 
 			# page ; per_page
-			@deploys = MainDeploy.paginate(page: params['page'], per_page: params['per_page']).order('id DESC')
+			@deploys = MainDeploy.includes(:user).paginate(page: params['page'], per_page: params['per_page']).order('id DESC')
 			@size = MainDeploy.all.size
 			@per_page = params[:per_page] || MainDeploy.per_page
 

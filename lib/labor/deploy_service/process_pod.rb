@@ -39,7 +39,7 @@ module Labor
 				deploy.drop!(error.message)
 
 				post_content = "发版进程[id: #{deploy.main_deploy.id}, name: #{deploy.main_deploy.name}]:  #{deploy.name} 组件发版失败，错误信息：#{error.message}." 
-				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding?
 			end
 
 			def delete_tag(name)
