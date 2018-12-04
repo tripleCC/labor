@@ -26,6 +26,9 @@ module Labor
 			@per_page = params[:per_page] || MainDeploy.per_page
 
 			labor_response @deploys, {
+				includes: [
+					:user
+				],
 				meta: {
 					total_count: @size,
 					per_page: @per_page
