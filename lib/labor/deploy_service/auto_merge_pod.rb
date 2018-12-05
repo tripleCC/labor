@@ -55,8 +55,8 @@ module Labor
 										post_content = error.message
 										if mr.state == 'closed' 
 											# 这里 mr closed 后，移除 merge_request_iid，然后 drop
-											deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
-											post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】MR #{object_attributes.iid} 已被关闭，地址: #{mr.web_url}"
+											deploy.update(merge_request_iids: deploy.merge_request_iids.delete(mr.iid.to_s))
+											post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】MR #{mr.iid} 已被关闭，地址: #{mr.web_url}"
 										elsif !mr.merge_when_pipeline_succeeds && mr.merge_status == 'can_be_merged'
 											# 有些需要合并的 ref 没有 stages /jobs，会导致 mr 报 400 #35
 											gitlab.accept_merge_request(deploy.project_id, mr_iid, {})
