@@ -19,7 +19,7 @@ module Labor
 		# 	'page' : 1
 		# 	'per_page' : 2
 		# }
-		get '/deploys' do 
+		clean_options_get '/deploys' do 
 			# page ; per_page
 			@deploys = MainDeploy.includes(:user).paginate(page: params['page'], per_page: params['per_page']).order('id DESC')
 			@size = MainDeploy.all.size
@@ -42,7 +42,7 @@ module Labor
 		# 	labor_response deploy.operations
 		# end
 
-		get '/deploys/:id' do |id|
+		clean_options_get '/deploys/:id' do |id|
 			@deploy = MainDeploy.includes(:user, :pod_deploys => :user).find(id)
 
 			labor_response @deploy, {
@@ -177,7 +177,18 @@ module Labor
 			deploy.cancel_all_operation
 			deploy.main_deploy.process
 
-			labor_response @deploy
+			labor_response deploy
+		end
+
+		clean_options_post '/deploys/:id/pods/:pid/enqueue' do |_, pid|
+			deploy = PodDeploy.find(pid)
+
+			permission_require(deploy, :enqueue)
+
+			deploy.enqueue
+			deploy.main_deploy.process
+
+			labor_response deploy
 		end
 
 		clean_options_post '/deploys/:id/pods/:pid/retry' do |_, pid|
@@ -189,7 +200,7 @@ module Labor
 			# 和 main deploy 不同，这里 retry 走的是 enqueue，重新更新 spec，发起 MR
 			deploy.retry
 
-			labor_response @deploy
+			labor_response deploy
 		end
 
 		clean_options_post '/deploys/:id/pods/:pid/cancel' do |_, pid|
