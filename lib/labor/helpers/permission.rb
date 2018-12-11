@@ -25,7 +25,9 @@ module Labor
 
 			# 这里可以记录操作日志
 			operation = Operation.create(name: operate)
-			operation.send("#{deploy.class.to_s.demodulize.underscore}=", deploy)
+			operation.deploy_name = deploy.try(:name)
+			operation.deploy_type = deploy.class.to_s.demodulize.underscore.split('_').first
+			# operation.send("#{deploy.class.to_s.demodulize.underscore}=", deploy)
 			operation.user = user 
 			operation.save
 		end

@@ -8,7 +8,7 @@ require_relative '../workers'
 
 module Labor
   class MainDeploy < ActiveRecord::Base
-  	has_many :pod_deploys, -> { order :id }, dependent: :destroy
+  	has_many :pod_deploys, -> { order :id }, dependent: :destroy # 替换时删除原来的pod_deploys
     has_many :operations, -> { order :id }
     belongs_to :user 
 

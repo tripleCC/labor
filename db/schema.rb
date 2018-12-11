@@ -11,12 +11,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181204031420) do
+ActiveRecord::Schema.define(version: 20181211131712) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "main_deploys", force: :cascade do |t|
+    t.integer  "user_id"
     t.string   "name"
     t.string   "repo_url"
     t.string   "ref"
@@ -30,26 +31,27 @@ ActiveRecord::Schema.define(version: 20181204031420) do
     t.boolean  "should_push_ding", default: true
   end
 
+  add_index "main_deploys", ["user_id"], name: "index_main_deploys_on_user_id", using: :btree
+
   create_table "operations", force: :cascade do |t|
     t.integer  "user_id"
-    t.integer  "pod_deploy_id"
-    t.integer  "main_deploy_id"
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "deploy_name"
+    t.integer  "deploy_type", default: 0
   end
 
-  add_index "operations", ["main_deploy_id"], name: "index_operations_on_main_deploy_id", using: :btree
-  add_index "operations", ["pod_deploy_id"], name: "index_operations_on_pod_deploy_id", using: :btree
   add_index "operations", ["user_id"], name: "index_operations_on_user_id", using: :btree
 
   create_table "pod_deploys", force: :cascade do |t|
+    t.integer  "user_id"
     t.integer  "main_deploy_id"
     t.string   "name"
     t.string   "project_id"
     t.string   "repo_url"
     t.string   "ref",                       default: "master"
-    t.string   "version"
+    t.string   "version",                                      null: false
     t.text     "external_dependency_names", default: [],                    array: true
     t.string   "mr_pipeline_id"
     t.string   "cd_pipeline_id"
@@ -69,6 +71,7 @@ ActiveRecord::Schema.define(version: 20181204031420) do
   end
 
   add_index "pod_deploys", ["main_deploy_id"], name: "index_pod_deploys_on_main_deploy_id", using: :btree
+  add_index "pod_deploys", ["user_id"], name: "index_pod_deploys_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "sub"
