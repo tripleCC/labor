@@ -17,10 +17,13 @@ module Pod
 
 			protected
 			def direct_value(name, platform = :ios)
-				subspec_consumers = recursive_subspecs.select { |s| s.supported_on_platform?(platform) }
-																							.map { |s| s.consumer(platform) }
-																							.uniq
-				value = (Array(consumer(platform)) + subspec_consumers).map { |c| c.send(name) }.flatten.uniq
+				subspec_consumers = 
+					recursive_subspecs
+						.select { |s| s.supported_on_platform?(platform) }
+						.map { |s| s.consumer(platform) }
+						.uniq
+
+				value = [consumer(platform), *subspec_consumers].map { |c| c.send(name) }.flatten.uniq
 				value
 			end
 
@@ -28,8 +31,8 @@ module Pod
 				direct_dependencies.map do |dep|
 					spec = specs.find { |s| s.name == dep.name }
 					next dep if spec.nil? || spec.direct_dependencies.empty?
-						
-					(Array(dep) + spec.resolve_recursive_dependencies(specs)).flatten
+					
+					[dep, *spec.resolve_recursive_dependencies(specs)].flatten
 				end.compact.flatten.uniq
 			end
 		end
