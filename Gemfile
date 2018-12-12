@@ -12,6 +12,7 @@ gem 'sidekiq', '~> 5.2'
 # gem 'delayed_job_active_record'
 # gem 'resque'
 gem 'will_paginate', '~> 3.1.0'
+gem 'parallel'
 # kaminari
 
 # gem 'sqlite3' # 并发访问有问题，文件级锁
