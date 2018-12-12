@@ -30,21 +30,25 @@ module Labor
         # transition [:created, :canceled, :failed, :success] => :analyzing
       end
 
+      event :wait do
+        transition [:analyzing] => :waiting
+      end
+
       event :deploy do
-        transition [:analyzing, :failed, :canceled] => :deploying
+        transition [:waiting, :failed, :canceled] => :deploying
       end
 
       event :success do 
-        transition [:analyzing, :deploying] => :success
+        transition [:waiting, :deploying] => :success
       end
 
       event :drop do
-        transition [:created, :analyzing, :deploying] => :failed
+        transition [:created, :waiting, :deploying] => :failed
         # transition any => :failed
       end
 
       event :cancel do
-        transition [:created, :analyzing, :deploying] => :canceled
+        transition [:created, :waiting, :deploying] => :canceled
       end
 
 
@@ -91,7 +95,7 @@ module Labor
         block.call
         # 2
         # DeployMessagerWorker.perform_later(deploy.id, deploy)
-        Labor::DeployMessager.send(deploy.id, deploy)        
+        Labor::DeployMessager.send(deploy.id, deploy, :main)        
         # after
       end
     end

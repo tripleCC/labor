@@ -18,6 +18,7 @@ module Labor
 
 				deploy.pod_deploys = create_pod_deploys(grouped_pods)
 				deploy.save!
+				deploy.wait
 
 				# 没有可发布组件直接标志成功
 				deploy.success unless deploy.pod_deploys.any?

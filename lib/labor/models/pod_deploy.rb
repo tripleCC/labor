@@ -26,16 +26,15 @@ module Labor
 
   	state_machine :status, :initial => :created do
       event :enqueue do
-        # transition any - [:analyzing] => :analyzing
-        transition [:created, :canceled, :failed, :success, :skipped] => :analyzing
+        transition [:created, :canceled, :failed, :success, :skipped] => :preparing
       end
 
       event :skip do 
-        transition analyzing: :skipped
+        transition preparing: :skipped
       end
 
       event :pend do
-        transition analyzing: :pending
+        transition preparing: :pending
       end
 
       # reviewed 打勾，触发 auto merge (auto merge 如果出错，状态还是 pending) ，（这部分手动合并也可以接盘走后面流程） 监听 MR 状态，后更新 merged
@@ -43,7 +42,7 @@ module Labor
       # 否则直接在 ready after_transition 里面执行 deploy.main_deploy.process ，会让后面的 deploy 重复执行 auto_merge
       # 程序卡死
       event :ready do  
-        transition [:pending, :analyzing] => :merged
+        transition [:pending, :preparing] => :merged
       end
 
       # master 分支不需要 merge
@@ -73,7 +72,7 @@ module Labor
       #   deploy.main_deploy.process
       # end
 
-      after_transition any => :analyzing do |deploy, transition|
+      after_transition any => :preparing do |deploy, transition|
         next if transition.loopback?
         deploy.prepare
       end
