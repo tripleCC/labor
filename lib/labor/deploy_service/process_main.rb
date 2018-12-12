@@ -33,7 +33,7 @@ module Labor
 					left_pod_deploy_names = left_pod_deploys.map(&:name)
 
 					# 启动未分析的发布
-					left_pod_deploys.select(&:created?).each(&:enqueue)
+					# left_pod_deploys.select(&:created?).each(&:enqueue)
 
 
 					free_pod_deploys = left_pod_deploys.select do |pod_deploy|

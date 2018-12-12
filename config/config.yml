@@ -9,6 +9,7 @@ redis_db: 0
 labor_app_url: http://labor-app-labor.app.2dfire.com
 
 websocket_service_url: 'http://labor-socket-server-labor.app.2dfire.com'
+# websocket_service_url: 'http://localhost:8081'
 
 log_file: '~/.labor/labor.log'
 sidekiq_log_file: '~/.labor/sidekiq.log'

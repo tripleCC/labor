@@ -51,7 +51,7 @@ ActiveRecord::Schema.define(version: 20181211131712) do
     t.string   "project_id"
     t.string   "repo_url"
     t.string   "ref",                       default: "master"
-    t.string   "version",                                      null: false
+    t.string   "version"
     t.text     "external_dependency_names", default: [],                    array: true
     t.string   "mr_pipeline_id"
     t.string   "cd_pipeline_id"
@@ -79,8 +79,8 @@ ActiveRecord::Schema.define(version: 20181211131712) do
     t.string   "email"
     t.string   "phone_number"
     t.string   "picture"
-    t.boolean  "superman",         default: false
-    t.text     "unofficial_names", default: [],    array: true
+    t.boolean  "superman"
+    t.text     "unofficial_names", default: [], array: true
     t.datetime "created_at"
     t.datetime "updated_at"
   end

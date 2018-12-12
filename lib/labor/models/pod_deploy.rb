@@ -140,19 +140,21 @@ module Labor
     end
 
     def cancel_all_operation
-      DeployService::CancelPod.new(self).execute 
+      CancelPodWorker.perform_later(id)
     end
 
     def prepare
+      # PreparePodWorker.perform_later(id)
       DeployService::PreparePod.new(self).execute
     end
 
     def process
       deploy
-      DeployService::ProcessPod.new(self).execute
+      ProcessPodWorker.perform_later(id)
     end
 
     def auto_merge
+      # AutoMergePodWorker.perform_later(id)
       DeployService::AutoMergePod.new(self).execute
     end
   end

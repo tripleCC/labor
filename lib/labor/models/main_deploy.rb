@@ -79,7 +79,7 @@ module Labor
       before_transition any => :canceled do |deploy, transition|
         next if transition.loopback?
 
-        deploy.pod_deploys.each(&:cancel)
+        CancelMainWorker.perform_later(deploy.id)
       end
 
       around_transition do |deploy, transition, block|
@@ -90,6 +90,7 @@ module Labor
         # before
         block.call
         # 2
+        # DeployMessagerWorker.perform_later(deploy.id, deploy)
         Labor::DeployMessager.send(deploy.id, deploy)        
         # after
       end
@@ -106,11 +107,11 @@ module Labor
     end
 
     def start 
-      DeployService::StartMain.new(self).execute 
+      StartMainWorker.perform_later(id)
     end
 
     def process
-      DeployService::ProcessMain.new(self).execute
+      ProcessMainWorker.perform_later(id)
     end
   end
 end
