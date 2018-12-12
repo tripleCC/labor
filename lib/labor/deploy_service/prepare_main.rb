@@ -40,7 +40,7 @@ module Labor
 						deploy_hash.merge!({
 							owner: member.name,
 							owner_mobile: member.mobile,
-							owner_ding_token: member.team.ding_token
+							owner_ding_token: member.team&.ding_token
 						})
 
 						if member.name
