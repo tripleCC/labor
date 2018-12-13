@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'benchmark'
 
 
 # begin
@@ -62,6 +63,7 @@
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
 require_relative './lib/labor/git/gitlab'
+require_relative './lib/labor/external_pod/sorter'
 
 # begin 
 # 	raise Labor::Error::Unauthorized, 'xxxx'
@@ -124,13 +126,18 @@ require 'pp'
 # end
 
 # p k
-# require 'pp'
 
-gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
-gitlab.tags(project.id).map(&:name)
-pp gitlab.create_pipeline(project.id, '0.1.1')	
+# puts Benchmark.measure { 
+	gitlab = Labor::GitLab.gitlab
+project = gitlab.project('git@git.2dfire.net:ios/restapp.git')
+ 
+data_source = ExternalPod::Sorter::DataSource::Remote.new(project.id, 'release/5.8.12')
+sorter = ExternalPod::Sorter.new(data_source)
 
+p sorter.sort
+
+	
+# }
 # 0%2E1%2E1
 
 # pp gitlab.merge_request(project.id, '18').to_hash
@@ -663,7 +670,7 @@ pp gitlab.create_pipeline(project.id, '0.1.1')
 # require 'yaml'
 # require_relative './member_reminder'
 # require_relative './labor'
-require 'state_machine'
+# require 'state_machine'
 
 # module HashStatus
 # 	extend ActiveSupport::Concern
@@ -714,69 +721,69 @@ require 'state_machine'
 
 # include Labor
 
-class Deploy
-	attr_accessor :failure_reason
-	attr_accessor :started_at
-	attr_accessor :finished_at
-	attr_accessor :repo_url
-	attr_accessor :ref
+# class Deploy
+# 	attr_accessor :failure_reason
+# 	attr_accessor :started_at
+# 	attr_accessor :finished_at
+# 	attr_accessor :repo_url
+# 	attr_accessor :ref
 
-	state_machine :status, :initial => :created do
-      event :enqueue do
-        # transition any - [:analyzing] => :analyzing
-        transition any => :analyzing
-      end
+# 	state_machine :status, :initial => :created do
+#       event :enqueue do
+#         # transition any - [:analyzing] => :analyzing
+#         transition any => :analyzing
+#       end
 
-      event :skip do 
-        transition analyzing: :skipped
-      end
+#       event :skip do 
+#         transition analyzing: :skipped
+#       end
 
-      event :pend do
-        transition analyzing: :pending
-      end
+#       event :pend do
+#         transition analyzing: :pending
+#       end
 
-      # reviewed 打勾，触发 auto merge (auto merge 如果出错，状态还是 pending) ，（这部分手动合并也可以接盘走后面流程） 监听 MR 状态，后更新 merged
-      event :ready do  
-        transition [:pending, :analyzing] => :merged
-      end
+#       # reviewed 打勾，触发 auto merge (auto merge 如果出错，状态还是 pending) ，（这部分手动合并也可以接盘走后面流程） 监听 MR 状态，后更新 merged
+#       event :ready do  
+#         transition [:pending, :analyzing] => :merged
+#       end
 
-      # master 分支不需要 merge
-      event :deploy do 
-        # 失败了重试 PL，视作 deploying
-        transition [:merged, :pending, :failed] => :deploying
-      end
+#       # master 分支不需要 merge
+#       event :deploy do 
+#         # 失败了重试 PL，视作 deploying
+#         transition [:merged, :pending, :failed] => :deploying
+#       end
 
-      event :success do 
-        transition deploying: :success
-      end
+#       event :success do 
+#         transition deploying: :success
+#       end
 
-      event :drop do
-        transition any - [:failed] => :failed
-      end
+#       event :drop do
+#         transition any - [:failed] => :failed
+#       end
 
-      event :cancel do
-        transition any - [:canceled, :success, :failed, :skipped] => :canceled
-      end
+#       event :cancel do
+#         transition any - [:canceled, :success, :failed, :skipped] => :canceled
+#       end
 
-      before_transition do |deploy, transition|
-      	# p transition.to == 'analyzing'
-      end
+#       before_transition do |deploy, transition|
+#       	# p transition.to == 'analyzing'
+#       end
 
-      # after_transition any => [:merged, :success] do |deploy, transition|
-      #   next if transition.loopback?
-      #   # 当组件标识为已合并，则让主发布处理组件 CD
-      #   # deploy.main_deploy.process
-      #   p '1'
-      #   deploy.deploy
-      #   p 'kkk'
-      # end
+#       # after_transition any => [:merged, :success] do |deploy, transition|
+#       #   next if transition.loopback?
+#       #   # 当组件标识为已合并，则让主发布处理组件 CD
+#       #   # deploy.main_deploy.process
+#       #   p '1'
+#       #   deploy.deploy
+#       #   p 'kkk'
+#       # end
 
-      around_transition do |vehicle, transition, block|
-      	p 'Zzzzz'
-      	block.call
-      	# p vehicle.status
-        false
-      end
+#       around_transition do |vehicle, transition, block|
+#       	p 'Zzzzz'
+#       	block.call
+#       	# p vehicle.status
+#         false
+#       end
 
       # before_transition any => :analyzing do |deploy, transition|
       #   next if transition.loopback?
@@ -818,13 +825,13 @@ class Deploy
       #   # DeployMessagerWorker.perform_later(deploy.main_deploy.id, deploy.to_json)
       #   # Labor::DeployMessager.send(deploy.main_deploy.id, deploy)
       # end
-    end
-end
+#     end
+# end
 
-d = Deploy.new 
+# d = Deploy.new 
 # # d.status
 # p d.analyzing?
-p d.enqueue
+# p d.enqueue
 # p d.analyzing?
 
 # d.ready

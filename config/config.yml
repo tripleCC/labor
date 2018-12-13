@@ -3,8 +3,10 @@ port: 8080
 host: '0.0.0.0'
 domain: 'labor-labor.app.2dfire.com'
 
+redis_host: redis-persistent
 redis_port: 6379
 redis_db: 0
+redis_password: ik1BxmTPSCcLc4ll
 
 labor_app_url: http://labor-app-labor.app.2dfire.com
 
