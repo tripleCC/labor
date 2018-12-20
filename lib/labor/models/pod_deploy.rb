@@ -5,13 +5,23 @@ require 'will_paginate/active_record'
 require_relative '../deploy_service'
 require_relative '../workers'
 require_relative '../logger'
+require_relative './project'
+require_relative './merge_request'
+require_relative './tag'
+require_relative './pipeline'
 
 module Labor
   class PodDeploy < ActiveRecord::Base
-    has_many :operations, -> { order :id }
+    has_many :tags, -> { distinct }, dependent: :destroy
+    has_many :merge_requests, -> { distinct }, dependent: :destroy
+    has_many :pipelines, -> { distinct }, dependent: :destroy
   	belongs_to :main_deploy
+    belongs_to :project
     belongs_to :user
 
+    # scope with_tags -> (query) { join(:tags).where(tags: query) }
+
+    # before_create :set_project
     # sqlite3 不支持 array 类型
     # serialize :merge_request_iids
     # serialize :external_dependency_names
@@ -156,5 +166,7 @@ module Labor
       # AutoMergePodWorker.perform_later(id)
       DeployService::AutoMergePod.new(self).execute
     end
+
+    private
   end
 end

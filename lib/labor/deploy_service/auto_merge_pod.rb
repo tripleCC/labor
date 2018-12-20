@@ -49,8 +49,11 @@ module Labor
 									mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
 
 									# 这里有可能是因为 mr 在上次确认～accept之间被 merge 了，如果是的话，直接ready
-									if mr.state == 'merged'
+									if mr.state == 'merged' && mr.target_branch == 'master'
 										deploy.ready
+									elsif mr.state == 'locked'
+											# locked 表示 mr 正在进行
+											# 这里不做处理，等 mr 好了之后 webhook 会触发 merged 动作
 									else
 										post_content = error.message
 										if mr.state == 'closed' 

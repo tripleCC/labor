@@ -3,14 +3,15 @@ require_relative '../external_pod/sorter'
 require_relative '../git/string_extension'
 require_relative '../remote_file'
 require_relative '../models/user'
+require_relative '../models/project'
 require_relative '../config'
 
 module Labor
 	module DeployService
 		class PrepareMain < Base 
 			def execute
-				project = gitlab.project(deploy.repo_url)
-				deploy.update(project_id: project.id)
+				# project = gitlab.project(deploy.repo_url)
+				# deploy.update(project_id: project.id)
 
 				# 分析依赖，获取需要发布的组件
 				grouped_pods = sort_grouped_pods
@@ -59,7 +60,8 @@ module Labor
 						reviewed: true 
 					}) if Labor.config.reviewed_merge_request_when_created
 
-					pod_deploy = PodDeploy.create!(deploy_hash)
+					project = Project.find_or_create_by_repo_url(pod.repo_url)
+					pod_deploy = project.pod_deploys.create!(deploy_hash)
 					pod_deploy
 				end
 				pod_deploys

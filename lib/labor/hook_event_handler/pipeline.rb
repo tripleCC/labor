@@ -72,6 +72,15 @@ module Labor
 			end
 
 			def handle_deploy_pipeline
+				# tags = Tag.includes(:pod_deploy).where(
+				# 	pod_deploy: {status: :deploying}, 
+				# 	sha: object_attributes.sha, 
+				# 	name: object_attributes.ref, 
+				# 	project_id: object.project.id
+				# 	)
+
+				# return if tags.empty?
+
 				deploy = PodDeploy.find_by(project_id: object.project.id, version: object_attributes.ref, status: :deploying)
 
 				# 手动启动 PL， cd_pipeline_id 会对不上，这里去除这个查询条件

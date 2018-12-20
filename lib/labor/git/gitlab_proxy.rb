@@ -16,7 +16,8 @@ module Labor
 			pipeline_events: true,
 			wiki_page_events: false,
 			job_events: false,
-			push_events: false
+			push_events: false,
+			tag_push_events: true
 		}.freeze
 		DEFAULT_PROJECT_PUSH_RULE = { 
 			deny_delete_tag: true

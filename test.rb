@@ -63,7 +63,7 @@ require 'benchmark'
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
 require_relative './lib/labor/git/gitlab'
-require_relative './lib/labor/external_pod/sorter'
+# require_relative './lib/labor/external_pod/sorter'
 
 # begin 
 # 	raise Labor::Error::Unauthorized, 'xxxx'
@@ -129,12 +129,13 @@ require 'pp'
 
 # puts Benchmark.measure { 
 	gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire.net:ios/restapp.git')
- 
-data_source = ExternalPod::Sorter::DataSource::Remote.new(project.id, 'release/5.8.12')
-sorter = ExternalPod::Sorter.new(data_source)
+project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
+pp gitlab.create_tag(project.id, '0.1.9.1', 'master').to_hash
+# pp project.to_hash
+# data_source = ExternalPod::Sorter::DataSource::Remote.new(project.id, 'release/5.8.12')
+# sorter = ExternalPod::Sorter.new(data_source)
 
-p sorter.sort
+# p sorter.sort
 
 	
 # }
@@ -476,8 +477,13 @@ p sorter.sort
 # sorter.sort
 # p sorter.grouped_pods
 
-# podfile = Labor::RemoteFile::Podfile.new('2441', 'master')
-# s = Labor::RemoteFile::Podfile::Generator.new(podfile, podfile.template.file_contents).generate
+# podfile = Labor::RemoteFile::Podfile.new('197', 'feature/pantry-kds')
+
+# eval %Q[ENV['DEBUG'] = 'false']
+
+# p podfile.file_contents
+# p podfile.podfile.dependencies
+# p ENV['DEBUG']
 # p podfile.edit_remote
 # podfile_template = Labor::RemoteFile::Podfile::Template.new('2441', 'master')
 # podfile = podfile.podfile
