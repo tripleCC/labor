@@ -6,6 +6,8 @@ require 'will_paginate/active_record'
 require_relative '../models/main_deploy'
 require_relative '../models/user'
 require_relative '../models/operation'
+require_relative '../models/project'
+require_relative '../models/tag'
 require_relative '../deploy_messager'
 require_relative '../logger'
 require_relative '../remote_file'
@@ -70,7 +72,8 @@ module Labor
 				# 可以针对同个仓库，同个分支创建发布
 				user = User.find(auth_user_id)
 				
-				@deploy = MainDeploy.create!({ 
+				project = Project.find_or_create_by_repo_url(params['repo_url'])
+				deploy = project.main_deploys.create!({ 
 					name: params['name'], 
 					repo_url: params['repo_url'],  
 					ref: params['ref'],  
@@ -78,7 +81,7 @@ module Labor
 					user: user 
 					})
 
-				labor_response @deploy
+				labor_response deploy
 			rescue ActiveRecord::RecordInvalid => error 
 				logger.error "Failed to create main deploy with error #{error.message}, params #{params}"
 

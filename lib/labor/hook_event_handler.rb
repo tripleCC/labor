@@ -1,6 +1,7 @@
 require_relative './hook_event_handler/merge_request'
 require_relative './hook_event_handler/pipeline'
 require_relative './hook_event_handler/push'
+require_relative './hook_event_handler/tag_push'
 
 module Labor
 	module HookEventHandler

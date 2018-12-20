@@ -11,9 +11,6 @@ module Labor
 			using StringExtension
 			
 			def execute
-				project = gitlab.project(deploy.repo_url)
-				deploy.update(project_id: project.id)
-				
 				logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): prepare deploy")
 				# 添加 project hook，监听 MR / PL 的执行进度
 				add_project_hook(deploy.project_id)
