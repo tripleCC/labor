@@ -10,8 +10,10 @@ module Labor
 	module DeployService
 		class PrepareMain < Base 
 			def execute
-				# project = gitlab.project(deploy.repo_url)
-				# deploy.update(project_id: project.id)
+				unless deploy.project
+					project = Project.find_or_create_by_repo_url(deploy.repo_url)
+					project.main_deploys << deploy 
+				end
 
 				# 分析依赖，获取需要发布的组件
 				grouped_pods = sort_grouped_pods

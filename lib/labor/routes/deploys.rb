@@ -23,14 +23,13 @@ module Labor
 		# }
 		clean_options_get '/deploys' do 
 			# page ; per_page
-			@deploys = MainDeploy.includes(:user).paginate(page: params['page'], per_page: params['per_page']).order('id DESC')
+			includes = [:user, :project]
+			@deploys = MainDeploy.includes(includes).paginate(page: params['page'], per_page: params['per_page']).order('id DESC')
 			@size = MainDeploy.all.size
 			@per_page = params[:per_page] || MainDeploy.per_page
 
 			labor_response @deploys, {
-				includes: [
-					:user
-				],
+				includes: includes,
 				meta: {
 					total_count: @size,
 					per_page: @per_page
@@ -45,14 +44,15 @@ module Labor
 		# end
 
 		clean_options_get '/deploys/:id' do |id|
-			@deploy = MainDeploy.includes(:user, :pod_deploys => :user).find(id)
+			includes = [:user, :project]
+			@deploy = MainDeploy.includes([*includes, :pod_deploys => includes]).find(id)
 
 			labor_response @deploy, {
 				includes: [
-					:user,
+					*includes,
 					{ 
 						pod_deploys: {
-							include: :user
+							include: includes
 						}
 					}
 				]

@@ -8,6 +8,11 @@ redis_port: 6379
 redis_db: 0
 redis_password: ik1BxmTPSCcLc4ll
 
+# redis_host: localhost
+# redis_port: 6379
+# redis_db: 0
+# redis_password: 
+
 labor_app_url: http://labor-app-labor.app.2dfire.com
 
 websocket_service_url: 'http://labor-socket-server-labor.app.2dfire.com'
