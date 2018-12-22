@@ -20,24 +20,24 @@ module Pod
 	end
 end
 
-module Labor
-	module Source
-		class Updater
-			extend Labor::Logger
+# module Labor
+# 	module Source
+# 		class Updater
+# 			extend Labor::Logger
 
-			@lock = Mutex.new
+# 			@lock = Mutex.new
 
-			def self.update 
-				# 这块应该放到 sidekiq 处理的
+# 			def self.update 
+# 				# 这块应该放到 sidekiq 处理的
 
-				Thread.new do 
-					@lock.synchronize do 
-						logger.info("update cocoapods private source #{Labor.config.cocoapods_private_source_url}")
+# 				Thread.new do 
+# 					@lock.synchronize do 
+# 						logger.info("update cocoapods private source #{Labor.config.cocoapods_private_source_url}")
 
-						Pod::Config.instance.sources_manager.default_source.update(false)
-					end
-				end
-			end
-		end
-	end
-end
+# 						Pod::Config.instance.sources_manager.default_source.update(false)
+# 					end
+# 				end
+# 			end
+# 		end
+# 	end
+# end
