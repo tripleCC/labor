@@ -16,9 +16,10 @@ module Labor
 	    user_id = auth_user_id
 
 			user = User.find(user_id)
-			return if user.superman
 
-			unless deploy.user_id == user_id || deploy.try(:main_deploy)&.user_id == user_id
+			unless user.superman || 
+				deploy.user_id == user_id || 
+				deploy.try(:main_deploy)&.user_id == user_id
 				# 外层拦截，转成 403
 				raise Labor::Error::PermissionReject, "User #{user.nickname} doesn't have permission to operate #{deploy.name} with operation #{operate}"
 			end
