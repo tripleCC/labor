@@ -20,4 +20,5 @@ fi
 #fi
 RACK_ENV=production rake db:migrate
 RACK_ENV=production rake db:seed
+bundle exec pod binary search TDFCore
 bundle exec rake deploy
