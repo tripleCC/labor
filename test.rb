@@ -2,7 +2,6 @@
 
 require 'benchmark'
 
-
 # begin
 #   a = 1
 #   raise StandardError

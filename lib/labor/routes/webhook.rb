@@ -1,15 +1,15 @@
 require "sinatra/base"
 require_relative '../hook_event_handler'
 require_relative '../workers'
-require_relative '../external_pod/sorter'
 require_relative '../deploy_service'
+require_relative '../external_pod/cocoapods/sources_manager'
+require_relative '../config'
 
 module Labor
 	class App < Sinatra::Base
 		post '/webhook' do 
-			hook_string = request.body.read
 			# WebhookWorker.perform_later(hook_string)
-			hash = JSON.parse(hook_string)
+			hash = body_params
 			object_kind = hash['object_kind']
 			if Labor::HookEventHandler.event_kinds.include?(object_kind)
 				handler = Labor::HookEventHandler.handler(object_kind, hash)
@@ -19,8 +19,13 @@ module Labor
 		end
 
 		post '/webhook/cocoapods' do 
-			UpdatePodSourceWorker.perform_later
-			# Labor::Source::Updater.update
+			hash = body_params
+			object_kind = hash['object_kind']
+			if object_kind == 'push'
+				Labor::Source::Updater.update
+				UpdatePodSourceWorker.perform_later(hash)
+			end
+
 			labor_response
 		end
 	end

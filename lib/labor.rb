@@ -16,10 +16,13 @@ require_relative './labor/helpers'
 require_relative './labor/errors'
 require_relative './labor/initializers'
 require_relative './labor/workers'
+require_relative './labor/middlewares'
 
 module Labor
 	class App < Sinatra::Base
 		include Labor::Logger
+
+		# use Labor::WebhookParser
 
 		register Sinatra::Namespace
 		register Sinatra::ActiveRecordExtension

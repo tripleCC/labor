@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181218140234) do
+ActiveRecord::Schema.define(version: 20181224031531) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -115,6 +115,25 @@ ActiveRecord::Schema.define(version: 20181218140234) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  create_table "specifications", force: :cascade do |t|
+    t.integer  "project_id"
+    t.integer  "user_id"
+    t.string   "name"
+    t.string   "version"
+    t.string   "summary"
+    t.json     "authors",                        default: []
+    t.json     "source",                         default: {}
+    t.integer  "spec_type",                      default: 2
+    t.string   "spec_external_dependency_names", default: [],    array: true
+    t.text     "spec_content"
+    t.boolean  "third_party",                    default: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "specifications", ["project_id"], name: "index_specifications_on_project_id", using: :btree
+  add_index "specifications", ["user_id"], name: "index_specifications_on_user_id", using: :btree
 
   create_table "tags", force: :cascade do |t|
     t.integer  "pod_deploy_id"

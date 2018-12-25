@@ -1,7 +1,7 @@
 require 'active_job'
 require_relative '../logger'
 require_relative '../config'
-require_relative '../external_pod/cocoapods/sources_manager'
+require_relative '../models/specification'
 
 module Labor
 	class UpdatePodSourceWorker < ActiveJob::Base
@@ -9,10 +9,8 @@ module Labor
 
 		queue_as :default
 
-		def perform
-			logger.info("update cocoapods private source #{Labor.config.cocoapods_private_source_url}")
-
-			Pod::Config.instance.sources_manager.default_source.update(false)
+		def perform(object)
+			Labor::Specification.update_or_delete_by_webhook_object(object)
 		end
 	end
 end

@@ -1,0 +1,1 @@
+require_relative './middlewares/webhook_parser'
