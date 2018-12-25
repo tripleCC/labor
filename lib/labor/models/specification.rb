@@ -4,6 +4,7 @@ require 'will_paginate/active_record'
 require_relative '../external_pod/sorter'
 require_relative '../models/project'
 require_relative '../remote_file'
+require_relative '../config'
 
 module Labor
   class Specification < ActiveRecord::Base
@@ -13,6 +14,7 @@ module Labor
 		enum spec_type: { basic: 0, weak_business: 1, business: 2 }  	
 
 		before_save :set_spec_type
+		before_save :set_third_party
 
 		class << self 
 			def update_or_delete_by_webhook_object(object)
@@ -62,6 +64,15 @@ module Labor
 		def set_spec_type
 			matched_type = Specification.spec_types.keys.find { |t| summary&.start_with?(t) }
 			self.spec_type = (matched_type || 'business').to_sym
+		end
+
+		def set_third_party
+			return if source&.empty?
+
+			in_third_party_group = source['git']&.include?(Labor.config.cocoapods_third_party_group)
+			# in_internal_server = (source['http'] || source['https'])&.include?('2dfire') 
+			self.third_party = !!in_third_party_group #|| !in_internal_server
+				
 		end
 	end
 end

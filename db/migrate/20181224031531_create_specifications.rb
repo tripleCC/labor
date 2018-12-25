@@ -11,6 +11,7 @@ class CreateSpecifications < ActiveRecord::Migration
 			t.integer :spec_type, default: 2
 			t.string :spec_external_dependency_names, array: true, default: []
   		t.text :spec_content
+  		t.boolean :third_party, default: false
   		t.timestamps null: true
   	end
   end
