@@ -19,6 +19,7 @@ fi
 # bundle exec pod repo add 2dfire git@git.2dfire-inc.com:ios/cocoapods-spec.git
 #fi
 RACK_ENV=production rake db:migrate
-RACK_ENV=production rake db:seed
 bundle exec pod binary search TDFCore
+RACK_ENV=production rake db:seed
+
 bundle exec rake deploy
