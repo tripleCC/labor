@@ -5,18 +5,18 @@ require 'benchmark'
 source = Pod::Config.instance.sources_manager.default_source
 
 puts "start create specifications (last 2)"
-benchmark = Benchmark.measure {
-	#https://pg.sjk66.com/postgresql/select-distinct
-	Labor::Specification.newest.third_party.each do |s|
-		# puts s.project if s.project
-		puts "#{s.project&.name}" if s.project
-	end
-	# Labor::Specification.where(third_party: false).order({ name: :asc, version: :desc }).group_by(&:name).each do |name, value|
-		# p s.first
-	# end
-}
+# benchmark = Benchmark.measure {
+# 	#https://pg.sjk66.com/postgresql/select-distinct
+# 	Labor::Specification.newest.third_party.each do |s|
+# 		# puts s.project if s.project
+# 		puts "#{s.project&.name}" if s.project
+# 	end
+# 	# Labor::Specification.where(third_party: false).order({ name: :asc, version: :desc }).group_by(&:name).each do |name, value|
+# 		# p s.first
+# 	# end
+# }
 
-puts benchmark
+# puts benchmark
 
 benchmark = Benchmark.measure {
 	Parallel.each(source.pods, in_threads: 8) do |pod|
