@@ -43,6 +43,7 @@ module Labor
 				spec = Specification.find_or_create_by(name: name, version: version).tap do |spec|
 					spec.spec_content = spec_content
 					spec.source = spec_source
+					spec.authors = specification.authors
 					spec.summary = specification.summary
 					spec.project = Project.find_or_create_by_repo_url(repo_url) if repo_url
 					spec.save

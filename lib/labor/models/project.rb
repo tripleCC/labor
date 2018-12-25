@@ -5,6 +5,7 @@ module Labor
   class Project < ActiveRecord::Base
   	has_many :pod_deploys, -> { distinct }
   	has_many :main_deploys, -> { distinct }
+  	has_many :specifications, -> { distinct }
 
   	# before_save { |user|  }
 

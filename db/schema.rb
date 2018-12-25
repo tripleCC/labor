@@ -118,9 +118,11 @@ ActiveRecord::Schema.define(version: 20181224031531) do
 
   create_table "specifications", force: :cascade do |t|
     t.integer  "project_id"
+    t.integer  "user_id"
     t.string   "name"
     t.string   "version"
     t.string   "summary"
+    t.json     "authors",                        default: []
     t.json     "source",                         default: {}
     t.integer  "spec_type",                      default: 2
     t.string   "spec_external_dependency_names", default: [], array: true
@@ -130,6 +132,7 @@ ActiveRecord::Schema.define(version: 20181224031531) do
   end
 
   add_index "specifications", ["project_id"], name: "index_specifications_on_project_id", using: :btree
+  add_index "specifications", ["user_id"], name: "index_specifications_on_user_id", using: :btree
 
   create_table "tags", force: :cascade do |t|
     t.integer  "pod_deploy_id"
