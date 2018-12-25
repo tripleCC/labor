@@ -13,7 +13,9 @@ module Labor
 		clean_options_get '/ci/status' do 
 			bank = MemberReminder::MemberBank.new
 			specifications = Labor::Specification.newest.without_third_party
+			p specifications.map(&:name)
 			response = specifications.map do |spec|
+				p spec.project
 				next nil unless spec.project
 
 				hash = {

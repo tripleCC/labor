@@ -4,7 +4,7 @@ require 'benchmark'
 
 source = Pod::Config.instance.sources_manager.default_source
 
-puts "start create specifications (last 2)"
+puts "start create specifications (last 1)"
 # benchmark = Benchmark.measure {
 # 	#https://pg.sjk66.com/postgresql/select-distinct
 # 	Labor::Specification.newest.third_party.each do |s|
@@ -17,6 +17,18 @@ puts "start create specifications (last 2)"
 # }
 
 # puts benchmark
+
+# for cocoapods-tdfire-binary
+# 后期改
+dir = Pathname.new('~/.cocoapods').expand_path
+FileUtils.cd(dir) do
+	FileUtils.rm_rf(dir + 'cocoapods-tdfire-binary-config') if File.exist?('cocoapods-tdfire-binary-config')
+
+  `git clone http://git.2dfire.net/qingmu/cocoapods-tdfire-binary-config`
+
+  FileUtils.mv(dir + "cocoapods-tdfire-binary-config/binary_config.yml", '.')
+  FileUtils.rm_rf(dir + 'cocoapods-tdfire-binary-config')
+end
 
 benchmark = Benchmark.measure {
 	Parallel.each(source.pods, in_threads: 8) do |pod|
@@ -33,7 +45,7 @@ benchmark = Benchmark.measure {
 		end
 	end
 }
-puts "finish create specifications (last 2) with benchmark #{benchmark}"
+puts "finish create specifications (last 1) with benchmark #{benchmark}"
 # Labor::Specification.transaction do
 # 	source.pods.each do |pod|
 # 		versions = source.versions(pod)

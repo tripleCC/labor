@@ -19,7 +19,6 @@ if [ ! -x "$REPO_PATH" ];then
   bundle exec pod repo add 2dfire git@git.2dfire.net:ios/cocoapods-spec.git
 fi
 RACK_ENV=production rake db:migrate
-bundle exec pod binary search TDFCore
 RACK_ENV=production rake db:seed
 
 bundle exec rake deploy
