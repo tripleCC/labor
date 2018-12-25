@@ -125,8 +125,9 @@ ActiveRecord::Schema.define(version: 20181224031531) do
     t.json     "authors",                        default: []
     t.json     "source",                         default: {}
     t.integer  "spec_type",                      default: 2
-    t.string   "spec_external_dependency_names", default: [], array: true
+    t.string   "spec_external_dependency_names", default: [],    array: true
     t.text     "spec_content"
+    t.boolean  "third_party",                    default: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end

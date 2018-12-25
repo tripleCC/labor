@@ -5,9 +5,17 @@ module Labor
   class Project < ActiveRecord::Base
   	has_many :pod_deploys, -> { distinct }
   	has_many :main_deploys, -> { distinct }
-  	has_many :specifications, -> { distinct }
+  	has_many :specifications#, -> { distinct }
 
   	# before_save { |user|  }
+
+  	def pipeline_url 
+  		"#{web_url}/badges/master/pipeline.svg"
+  	end
+
+  	def master_url
+  		"#{web_url}/commits/master"
+  	end
 
   	class << self 
 	  	def find_or_create_by_repo_url(repo_url)

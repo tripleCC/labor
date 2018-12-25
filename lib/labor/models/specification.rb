@@ -16,6 +16,9 @@ module Labor
 		before_save :set_spec_type
 		before_save :set_third_party
 
+		scope :newest, -> { order({ name: :asc, version: :desc }).select('distinct on (name) *') }
+		scope :without_third_party, -> { where(third_party: false) }
+
 		class << self 
 			def update_or_delete_by_webhook_object(object)
 				repo_url = object['project']['git_ssh_url']
@@ -72,7 +75,6 @@ module Labor
 			in_third_party_group = source['git']&.include?(Labor.config.cocoapods_third_party_group)
 			# in_internal_server = (source['http'] || source['https'])&.include?('2dfire') 
 			self.third_party = !!in_third_party_group #|| !in_internal_server
-				
 		end
 	end
 end
