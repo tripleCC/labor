@@ -13,8 +13,8 @@ module Labor
 
 		enum spec_type: { basic: 0, weak_business: 1, business: 2 }  	
 
-		before_save :set_spec_type
-		before_save :set_third_party
+		# before_save :set_spec_type
+		# before_save :set_third_party
 
 		scope :newest, -> { order({ name: :asc, version: :desc }).select('distinct on (name) *') }
 		scope :without_third_party, -> { where(third_party: false) }
@@ -50,10 +50,14 @@ module Labor
 					spec.source = spec_source
 					spec.authors = specification.authors
 					spec.summary = specification.summary
-					spec.project = Project.find_or_create_by_repo_url(repo_url) if repo_url
+					begin 
+						spec.project = Project.find_or_create_by_repo_url(repo_url) if repo_url
+					rescue Labor::Error::NotFound => error
+					end
+					spec.set_spec_type
+					spec.set_third_party
 					spec.save
 				end
-			rescue Labor::Error::NotFound => error
 			end
 
 			def remove_specification_by(name, version)
@@ -63,7 +67,6 @@ module Labor
 			end
 		end
 
-		private
 		def set_spec_type
 			matched_type = Specification.spec_types.keys.find { |t| summary&.start_with?(t) }
 			self.spec_type = (matched_type || 'business').to_sym
