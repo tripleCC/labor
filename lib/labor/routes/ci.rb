@@ -14,7 +14,6 @@ module Labor
 			bank = MemberReminder::MemberBank.new
 			specifications = Labor::Specification.includes(:project).newest.without_third_party
 			response = specifications.map do |spec|
-				p spec.project
 				next nil unless spec.project
 
 				hash = {
