@@ -7,7 +7,7 @@ module Labor
 
 		def labor_raw_response(data = {}, options = {}) 
 			errors = options[:errors]
-			meta = options[:meta]
+			meta = options[:meta] || {}
 			{
 				data: data,
 				errors: errors,
