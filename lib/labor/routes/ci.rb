@@ -12,31 +12,26 @@ module Labor
 
 		clean_options_get '/ci/status' do 
 			keys = [:owner, :team, :name].map(&:to_s)
-			querys = params.select { |key, value| keys.include?(key) }
+			querys = params.select { |key, value| keys.include?(key) && value.present? }
 
-			bank = MemberReminder::MemberBank.new
-
-			all = Labor::Specification.with_project.newest.without_third_party.where(querys)
-			specifications = all.paginate(page: params['page'], per_page: params['per_page'])
+			newest_ids = Labor::Specification.newest(:id).without_third_party.where(querys)
+			all = Labor::Specification.where(id: newest_ids).with_project.order(owner: :desc)
+			specifications = all.paginate(page: params[:page], per_page: params[:per_page])
 			response = specifications.map do |spec|
-				hash = {
+				{
 					id: spec.id,
 					name: spec.name,
+					owner: spec.owner,
+					team: spec.team,
 					pipeline_url: spec.project.pipeline_url,
 					web_url: spec.project.web_url,
 					master_url: spec.project.master_url,
 				}
-
-				if spec.authors
-					member = bank.member_of_authors(spec.authors) 
-					owner = member&.name || spec.authors.keys.first
-					hash[:owner] = owner
-					hash[:team_name] = member&.team&.name
-				end
-				hash
-			end.compact
+			end
 
 			per_page = params[:per_page] || Labor::Specification.per_page
+
+			bank = MemberReminder::MemberBank.new
 
 			labor_response response, {
 				meta: {

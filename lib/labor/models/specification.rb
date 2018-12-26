@@ -16,7 +16,7 @@ module Labor
 		# before_save :set_spec_type
 		# before_save :set_third_party
 
-		scope :newest, -> { order({ name: :asc, version: :desc }).select('distinct on (name) *') }
+		scope :newest, ->(column) { order({name: :asc, version: :desc }).select("distinct on (name) #{column || '*'}") }
 		scope :without_third_party, -> { where(third_party: false) }
 		scope :with_project, -> { where.not(project_id: nil) }
 
@@ -29,10 +29,20 @@ module Labor
 					removed = commit['removed']
 					updated = commit['added'] + commit['modified']
 
-					updated.each do |blob|
-						name, version, _ = blob.split('/') 
-						remote_spec = Labor::RemoteFile::Specification.new(project.id, 'master', blob)
-						create_or_update_specification_by(name, version, remote_spec.file_contents, remote_spec.specification)
+					unless updated.empty?
+						bank = MemberReminder::MemberBank.new
+						updated.each do |blob|
+							name, version, _ = blob.split('/') 
+							remote_spec = Labor::RemoteFile::Specification.new(project.id, 'master', blob)
+							create_or_update_specification_by(name, version, remote_spec.file_contents, remote_spec.specification)do |spec|
+								if spec.authors
+									member = bank.member_of_authors(spec.authors) 
+									owner = member&.name || spec.authors.keys.first
+									spec.owner = owner
+									spec.team = member&.team&.name if member&.team
+								end
+						 	end
+						end
 					end
 
 					removed.each do |blob| 
@@ -42,7 +52,7 @@ module Labor
 				end
 			end
 
-			def create_or_update_specification_by(name, version, spec_content, specification)
+			def create_or_update_specification_by(name, version, spec_content, specification, &block)
 				spec_source = specification.source
 				repo_url = spec_source && spec_source[:git]
 
@@ -57,6 +67,7 @@ module Labor
 					end
 					spec.set_spec_type
 					spec.set_third_party
+					yield spec if block_given?
 					spec.save
 				end
 			end

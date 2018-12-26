@@ -1,6 +1,7 @@
 require_relative '../lib/labor/models/specification'
 require_relative '../lib/labor/external_pod/sorter'
 require 'benchmark'
+require 'member_reminder'
 
 source = Pod::Config.instance.sources_manager.default_source
 
@@ -18,17 +19,12 @@ puts "start create specifications (last 1)"
 
 # puts benchmark
 
-# for cocoapods-tdfire-binary
-# 后期改
-dir = Pathname.new('~/.cocoapods').expand_path
-FileUtils.cd(dir) do
-	FileUtils.rm_rf(dir + 'cocoapods-tdfire-binary-config') if File.exist?('cocoapods-tdfire-binary-config')
+# all = Labor::Specification.where(id: Labor::Specification.newest.without_third_party).with_project.order(owner: :asc)
 
-  `git clone http://git.2dfire.net/qingmu/cocoapods-tdfire-binary-config`
+# puts all
+# return 
 
-  FileUtils.mv(dir + "cocoapods-tdfire-binary-config/binary_config.yml", '.')
-  FileUtils.rm_rf(dir + 'cocoapods-tdfire-binary-config')
-end
+bank = MemberReminder::MemberBank.new
 
 benchmark = Benchmark.measure {
 	Parallel.each(source.pods, in_threads: 8) do |pod|
@@ -39,7 +35,14 @@ benchmark = Benchmark.measure {
 			spec_path = source.specification_path(pod, version)
 			spec_content = File.read(spec_path)
 			ActiveRecord::Base.connection_pool.with_connection do
-			 	Labor::Specification.create_or_update_specification_by(pod, version.to_s, spec_content, spec)
+			 	Labor::Specification.create_or_update_specification_by(pod, version.to_s, spec_content, spec) do |spec|
+					if spec.authors
+						member = bank.member_of_authors(spec.authors) 
+						owner = member&.name || spec.authors.keys.first
+						spec.owner = owner
+						spec.team = member&.team&.name if member&.team
+					end
+			 	end
 		  end
 			# p "create or update specification #{pod} #{version}"
 		end
