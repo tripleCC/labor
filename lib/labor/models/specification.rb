@@ -18,6 +18,7 @@ module Labor
 
 		scope :newest, -> { order({ name: :asc, version: :desc }).select('distinct on (name) *') }
 		scope :without_third_party, -> { where(third_party: false) }
+		scope :with_project, -> { where.not(project_id: nil) }
 
 		class << self 
 			def update_or_delete_by_webhook_object(object)

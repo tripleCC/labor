@@ -11,11 +11,14 @@ module Labor
 	class App < Sinatra::Base
 
 		clean_options_get '/ci/status' do 
-			bank = MemberReminder::MemberBank.new
-			specifications = Labor::Specification.includes(:project).newest.without_third_party
-			response = specifications.map do |spec|
-				next nil unless spec.project
+			keys = [:owner, :team, :name].map(&:to_s)
+			querys = params.select { |key, value| keys.include?(key) }
 
+			bank = MemberReminder::MemberBank.new
+
+			all = Labor::Specification.with_project.newest.without_third_party.where(querys)
+			specifications = all.paginate(page: params['page'], per_page: params['per_page'])
+			response = specifications.map do |spec|
 				hash = {
 					id: spec.id,
 					name: spec.name,
@@ -33,7 +36,16 @@ module Labor
 				hash
 			end.compact
 
-			labor_response response
+			per_page = params[:per_page] || Labor::Specification.per_page
+
+			labor_response response, {
+				meta: {
+					owners: bank.members.map(&:name),
+					teams: bank.teams.map(&:name),
+					total_count: all.size,
+					per_page: per_page
+				}
+			}
 		end
 	end
 end
