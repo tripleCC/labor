@@ -12,6 +12,7 @@ module Labor
   	self.per_page = 30
 
 		enum spec_type: { basic: 0, weak_business: 1, business: 2 }  	
+		enum platform_type: { ios: 0, android: 1 }  	
 
 		# before_save :set_spec_type
 		# before_save :set_third_party
@@ -34,7 +35,13 @@ module Labor
 						updated.each do |blob|
 							name, version, _ = blob.split('/') 
 							remote_spec = Labor::RemoteFile::Specification.new(project.id, 'master', blob)
-							create_or_update_specification_by(name, version, remote_spec.file_contents, remote_spec.specification)do |spec|
+							create_or_update_specification_by({
+								name: name, 
+								version: version, 
+								spec_content: remote_spec.file_contents, 
+								specification: remote_spec.specification,
+								platform_type: :ios
+								}) do |spec|
 								if spec.authors
 									member = bank.member_of_authors(spec.authors) 
 									owner = member&.name || spec.authors.keys.first
@@ -52,11 +59,17 @@ module Labor
 				end
 			end
 
-			def create_or_update_specification_by(name, version, spec_content, specification, &block)
+			def create_or_update_specification_by(options, &block)
+				name = options[:name]
+				version = options[:version]
+				spec_content = options[:spec_content]
+				specification = options[:specification]
+				platform_type = options[:platform_type] || :ios
+
 				spec_source = specification.source
 				repo_url = spec_source && spec_source[:git]
 
-				spec = Specification.find_or_create_by(name: name, version: version).tap do |spec|
+				spec = Specification.find_or_create_by(name: name, version: version, platform_type: platform_type).tap do |spec|
 					spec.spec_content = spec_content
 					spec.source = spec_source
 					spec.authors = specification.authors
