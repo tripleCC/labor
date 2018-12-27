@@ -3,6 +3,7 @@ require "sinatra/base"
 require 'http'
 require 'will_paginate'
 require 'will_paginate/active_record'
+require 'will_paginate/array'
 require_relative '../models/specification'
 require_relative '../errors'
 
@@ -16,7 +17,7 @@ module Labor
 
 			newest_ids = Labor::Specification.newest(:id).without_third_party.where(querys)
 			all = Labor::Specification.where(id: newest_ids).with_project.order(owner: :desc)
-			specifications = all.paginate(page: params[:page], per_page: params[:per_page])
+			specifications = all.to_a.paginate(page: params[:page], per_page: params[:per_page])
 			response = specifications.map do |spec|
 				{
 					id: spec.id,
