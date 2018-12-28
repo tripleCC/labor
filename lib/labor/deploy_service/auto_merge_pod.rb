@@ -23,7 +23,7 @@ module Labor
 							# 已合并，直接走 process 流程
 							# 已合并时，prepare 阶段不会提 mr，也就是 merge_request_iids 为空
 							# 这里主要考虑了 prepare 阶段创建了 mr ，开发者手动合并的情况
-							if mr.state == 'merged'
+							if mr.state == 'merged' && mr.target_branch == 'master'
 								deploy.ready
 							else
 								# accept_merge_request 的 merge_when_pipeline_succeeds 参数需要有活动的 PL 才会生效
