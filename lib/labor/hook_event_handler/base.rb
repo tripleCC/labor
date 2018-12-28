@@ -10,7 +10,8 @@ module Labor
 			include Labor::Logger
 			
 			attr_reader :object
-
+			attr_reader :deploy
+			
 			def initialize(hash) 
 				@object = Gitlab::ObjectifiedHash.new(hash)
 			end
