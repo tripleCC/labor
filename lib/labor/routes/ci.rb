@@ -23,6 +23,7 @@ module Labor
 					id: spec.id,
 					name: spec.name,
 					owner: spec.owner,
+					version: spec.version,
 					team: spec.team,
 					pipeline_url: spec.project.pipeline_url,
 					web_url: spec.project.web_url,
