@@ -36,9 +36,9 @@ module Labor
 
 			def rescue_accept_merge_request(mr_iid, error)
 				mr = gitlab.merge_request(deploy.project_id, mr_iid.to_s)
-				if mr.state == 'merged' && mr.target_branch == 'master'
+				if mr.state == 'merged' 
 					# 这里有可能是因为 mr 在上次确认～accept之间被 merge 了，如果是的话，直接ready
-					deploy.ready
+					deploy.ready if mr.target_branch == 'master'
 				elsif mr.state == 'locked'
 					# locked 表示 mr 正在进行, 这里不做处理，等 mr 好了之后 webhook 会触发 merged 动作
 				elsif !mr.merge_when_pipeline_succeeds && mr.merge_status == 'can_be_merged'
