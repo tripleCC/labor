@@ -129,6 +129,7 @@ specs.each do |s|
 		hooks = gitlab.client.project_hooks(pr.id)  
 
 		hooks = hooks.reject do |hook|
+			p hook
 			bool = true
 			Labor::GitLabProxy::DEFAULT_PROJECT_HOOK_OPTIONS.each do |k, v|
 				unless hook.send(k) == v
@@ -140,8 +141,9 @@ specs.each do |s|
 		end
 
 		hooks.each do |hook|
+
 			puts "delete #{pr.name}'s hook #{hook.id} #{hook.url}"
-			gitlab.delete_project_hook(pr.id, hook.id)
+			# gitlab.delete_project_hook(pr.id, hook.id)
 		end
 	rescue => e
 		# p e

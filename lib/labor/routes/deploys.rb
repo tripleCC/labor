@@ -12,7 +12,6 @@ require_relative '../deploy_messager'
 require_relative '../logger'
 require_relative '../remote_file'
 
-
 module Labor
 	class App < Sinatra::Base
 		include Labor::Logger

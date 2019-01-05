@@ -16,7 +16,7 @@ module Labor
 		# before_save :set_spec_type
 		# before_save :set_third_party
 
-		scope :newest, ->(column) { order({name: :asc, version: :desc }).select("distinct on (name) #{column || '*'}") }
+		scope :newest, ->(column = nil) { order({name: :asc, version: :desc }).select("distinct on (name) #{column || '*'}") }
 		scope :without_third_party, -> { where(third_party: false) }
 		scope :with_project, -> { where.not(project_id: nil) }
 

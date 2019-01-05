@@ -12,6 +12,15 @@ module Labor
 			user_id.to_i
 		end
 
+		def superman_require
+			user_id = auth_user_id
+			user = User.find(user_id)
+
+			unless user.superman
+				raise Labor::Error::PermissionReject, "User #{user.nickname} doesn't have permission, only superman is allowed"
+			end
+		end
+
 		def permission_require(deploy, operate)
 	    user_id = auth_user_id
 
