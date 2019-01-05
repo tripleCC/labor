@@ -13,20 +13,9 @@ development:
   username: postgres
   password: daimao
 
-# local test
-# production: 
-#   <<: *default
-#   database: labor_production
-#   username: postgres
-#   password: daimao
-#   host: localhost
-
-# openshift postgresql
-#'10.136.42.65'
 production: 
   <<: *default
-  database: labor
-  username: labor
-  password: 2Dfire.com
-  host: postgresql
-  # host: postgresql-labor.app.2dfire.com
+  database: <%= ENV['DATABASE'] || 'labor_production' %> 
+  username: <%= ENV['DATABASE_USERNAME'] || 'postgres' %> 
+  password: <%= ENV['DATABASE_PASSWORD'] || 'daimao' %>
+  host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
