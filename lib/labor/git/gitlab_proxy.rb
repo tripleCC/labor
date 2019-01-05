@@ -147,13 +147,19 @@ module Labor
 		end
 
 		def project(git_url)
-			project = client.project_search(git_url.git_name).find do |project| 
+			project = all_projects(git_url.git_name).find do |project| 
           project.ssh_url_to_repo == git_url ||
           project.http_url_to_repo == git_url
       end
 
       raise Labor::Error::NotFound.new("Can't find project with url #{git_url}") if project.nil?
       project
+		end
+
+		def all_projects(name) 
+			fetch_all do |client|
+				client.project_search(name, { per_page: 100 })
+			end
 		end
 
 		def all_branches(project_id)
