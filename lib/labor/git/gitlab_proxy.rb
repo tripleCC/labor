@@ -147,7 +147,7 @@ module Labor
 		end
 
 		def project(git_url)
-			project = all_projects(git_url.git_name).find do |project| 
+			project = client.project_search(git_url.git_name, {order_by: 'name', sort: 'asc'}).find do |project| 
           project.ssh_url_to_repo == git_url ||
           project.http_url_to_repo == git_url
       end
