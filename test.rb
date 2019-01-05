@@ -71,7 +71,7 @@ require_relative './lib/labor/git/gitlab'
 # end
 
 # require_relative './lib/labor/utils/async'
-# require_relative './lib/labor'
+require_relative './lib/labor'
 # require 'uri'
 
 # require 'thin'
@@ -116,9 +116,41 @@ require 'pp'
 
 # k = 0
 
-# async_each(10.times) do |i|
-#   gitlab = Labor::GitLab.gitlab
-#   project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
+
+# ====================== Delete project hooks ======================= #
+specs = Pod::Config.instance.sources_manager.default_source.newest_specs
+gitlab = Labor::GitLab.gitlab
+specs.each do |s|
+	git = s.source[:git]
+	next unless git 
+
+	begin
+		pr = gitlab.project(git) 
+		hooks = gitlab.client.project_hooks(pr.id)  
+
+		hooks = hooks.reject do |hook|
+			bool = true
+			Labor::GitLabProxy::DEFAULT_PROJECT_HOOK_OPTIONS.each do |k, v|
+				unless hook.send(k) == v
+					bool = false
+					break
+				end
+			end
+			bool
+		end
+
+		hooks.each do |hook|
+			puts "delete #{pr.name}'s hook #{hook.id} #{hook.url}"
+			gitlab.delete_project_hook(pr.id, hook.id)
+		end
+	rescue => e
+		# p e
+	end
+end
+# ====================== Delete project hooks ======================= #
+
+  
+  # p project
 #   p gitlab.merge_request(project.id, '1')  
 #   p i
 #   k += 1
@@ -127,9 +159,9 @@ require 'pp'
 # p k
 
 # puts Benchmark.measure { 
-	gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
-pp gitlab.create_tag(project.id, '0.1.9.1', 'master').to_hash
+# 	gitlab = Labor::GitLab.gitlab
+# project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
+# pp gitlab.create_tag(project.id, '0.1.9.1', 'master').to_hash
 # pp project.to_hash
 # data_source = ExternalPod::Sorter::DataSource::Remote.new(project.id, 'release/5.8.12')
 # sorter = ExternalPod::Sorter.new(data_source)
