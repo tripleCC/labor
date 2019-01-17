@@ -2,6 +2,7 @@
 
 require 'benchmark'
 
+
 # begin
 #   a = 1
 #   raise StandardError
@@ -71,7 +72,7 @@ require_relative './lib/labor/git/gitlab'
 # end
 
 # require_relative './lib/labor/utils/async'
-require_relative './lib/labor'
+# require_relative './lib/labor'
 # require 'uri'
 
 # require 'thin'
@@ -118,37 +119,37 @@ require 'pp'
 
 
 # ====================== Delete project hooks ======================= #
-specs = Pod::Config.instance.sources_manager.default_source.newest_specs
-gitlab = Labor::GitLab.gitlab
-specs.each do |s|
-	git = s.source[:git]
-	next unless git 
+# specs = Pod::Config.instance.sources_manager.default_source.newest_specs
+# gitlab = Labor::GitLab.gitlab
+# specs.each do |s|
+# 	git = s.source[:git]
+# 	next unless git 
 
-	begin
-		pr = gitlab.project(git) 
-		hooks = gitlab.client.project_hooks(pr.id)  
+# 	begin
+# 		pr = gitlab.project(git) 
+# 		hooks = gitlab.client.project_hooks(pr.id)  
 
-		hooks = hooks.reject do |hook|
-			p hook
-			bool = true
-			Labor::GitLabProxy::DEFAULT_PROJECT_HOOK_OPTIONS.each do |k, v|
-				unless hook.send(k) == v
-					bool = false
-					break
-				end
-			end
-			bool
-		end
+# 		hooks = hooks.reject do |hook|
+# 			p hook
+# 			bool = true
+# 			Labor::GitLabProxy::DEFAULT_PROJECT_HOOK_OPTIONS.each do |k, v|
+# 				unless hook.send(k) == v
+# 					bool = false
+# 					break
+# 				end
+# 			end
+# 			bool
+# 		end
 
-		hooks.each do |hook|
+# 		hooks.each do |hook|
 
-			puts "delete #{pr.name}'s hook #{hook.id} #{hook.url}"
-			# gitlab.delete_project_hook(pr.id, hook.id)
-		end
-	rescue => e
-		# p e
-	end
-end
+# 			puts "delete #{pr.name}'s hook #{hook.id} #{hook.url}"
+# 			# gitlab.delete_project_hook(pr.id, hook.id)
+# 		end
+# 	rescue => e
+# 		# p e
+# 	end
+# end
 # ====================== Delete project hooks ======================= #
 
   
@@ -161,7 +162,7 @@ end
 # p k
 
 # puts Benchmark.measure { 
-# 	gitlab = Labor::GitLab.gitlab
+	gitlab = Labor::GitLab.gitlab
 # project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
 # pp gitlab.create_tag(project.id, '0.1.9.1', 'master').to_hash
 # pp project.to_hash
@@ -251,9 +252,12 @@ end
 # p gitlab.merge_request(project.id, 1)
 # bytes = gitlab.repo_archive(project.id).to_hash[:data].read
 
-# project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodD.git')
+project = gitlab.project('git@git.2dfire.net:ios/TDFMIntegralModule.git')
 # p gitlab.file_path(project.id, 'PodfileTemplate', 'release/0.2.2')
-# p gitlab.branch(project.id, 'release/0.2.1').merged
+branch = gitlab.branch(project.id, 'release/0.0.1')
+compare_result = gitlab.compare(project.id, 'master', branch.name)
+p compare_result.diffs.empty?
+
 # name = 'PodA'
 # version = '1.2.1 '.strip
 # release = 'release/1.1.1'

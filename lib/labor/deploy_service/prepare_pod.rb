@@ -44,7 +44,10 @@ module Labor
 				
 				# 发布分支是 master || 发布分支已经合并到 master ，直接标志为可发布
 				ref_branch = gitlab.branch(deploy.project_id, deploy.ref)
-				if deploy.ref == 'master' || ref_branch.merged
+				if deploy.ref == 'master' || 
+					ref_branch.merged || 
+					# 有些没有 merged，但是 diffs 是空的，其实 commit 没有任何差别 
+					gitlab.compare(deploy.project_id, 'master', deploy.ref).diffs.empty?
 					update_spec_version(deploy, 'master')
 					deploy.ready
 				else
