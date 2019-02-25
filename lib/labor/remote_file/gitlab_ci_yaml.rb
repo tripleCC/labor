@@ -17,7 +17,7 @@ module Labor
 			end
 
 			def has_deploy_jobs?
-				config.keys & DEPLOY_JOBS == DEPLOY_JOBS			
+				(config.keys & DEPLOY_JOBS).any? #== DEPLOY_JOBS			
 			end
 
 			def config
