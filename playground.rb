@@ -1,8 +1,40 @@
 #!/usr/bin/env ruby
+require_relative './lib/labor/git/gitlab'
 
-require 'benchmark'
+gitlab = Labor::GitLab.gitlab
+%w[a b c d].each { |r| 
+	pr = gitlab.project("git@git.2dfire.net:qiandaojiang/#{r}.git")
+	gitlab.delete_tag(pr.id, '0.1.0')	
+	p "#{r} 0.1.0 delete"
+}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# require 'benchmark'
 # begin
 #   a = 1
 #   raise StandardError
@@ -62,12 +94,19 @@ require 'benchmark'
 # require 'cgi'
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
-require_relative './lib/labor/git/gitlab'
-require_relative './lib/labor/remote_file'
+# require_relative './lib/labor/git/gitlab'
+# # require_relative './lib/labor/remote_file'
+
+# gitlab = Labor::GitLab.gitlab
+# %w[a b c d].each { |r| 
+# 	pr = gitlab.project("git@git.2dfire.net:qiandaojiang/#{r}.git")
+# 	gitlab.delete_tag(pr.id, '0.1.0')	
+# }
+
 # require_relative './lib/labor/external_pod/sorter'
-ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new('3278', 'release/0.1.0')
-p ci_yaml_file.config.keys
-p ci_yaml_file.has_deploy_jobs?
+# ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new('3278', 'release/0.1.0')
+# p ci_yaml_file.config.keys
+# p ci_yaml_file.has_deploy_jobs?
 # begin 
 # 	raise Labor::Error::Unauthorized, 'xxxx'
 # rescue Labor::Error::PermissionReject, Labor::Error::Unauthorized => e 

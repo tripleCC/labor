@@ -39,7 +39,7 @@ end
 task :sidekiq do 
 	# -d 在有某些代码的情况下会失败
 	# 必须要有 active record 的初始代码，否则无法访问
-	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -e production"  
+	system "bundle exec sidekiq -r ./lib/labor_sidekiq.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -e production"  
 end
 
 
@@ -54,7 +54,7 @@ task :deploy do
 	# 
 	system "bundle exec rackup -P #{pid_file} -p #{options[:port]} -o #{options[:deploy_host]} -E production -D"
 	puts "Deployed Labor web server"
-	system "bundle exec sidekiq -r ./lib/labor.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -e production"  
+	system "bundle exec sidekiq -r ./lib/labor_sidekiq.rb -P #{redis_pid_file} -L #{sidekiq_log_file} -q default -e production"  
 end
 
 task :stop do 
