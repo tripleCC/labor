@@ -28,6 +28,8 @@ module Labor
 						pod_deploy.success if pipeline&.status == 'success'
 					end
 
+					# TODO: 这里可以查看下这在发布中的组件，在有 tag 的前提下是否有对应的 pl，没有的话，创建 pl
+
 					# 计算还未发布的 pod
 					left_pod_deploys = deploy.pod_deploys.reject(&:success?)
 					left_pod_deploy_names = left_pod_deploys.map(&:name)

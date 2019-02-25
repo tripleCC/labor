@@ -3,6 +3,8 @@ require_relative '../lib/labor/external_pod/sorter'
 require 'benchmark'
 require 'member_reminder'
 
+return
+
 source = Pod::Config.instance.sources_manager.default_source
 
 puts "start create specifications (last 1)"
