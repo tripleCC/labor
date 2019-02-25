@@ -63,8 +63,11 @@ require 'benchmark'
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
 require_relative './lib/labor/git/gitlab'
+require_relative './lib/labor/remote_file'
 # require_relative './lib/labor/external_pod/sorter'
-
+ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new('3278', 'release/0.1.0')
+p ci_yaml_file.config.keys
+p ci_yaml_file.has_deploy_jobs?
 # begin 
 # 	raise Labor::Error::Unauthorized, 'xxxx'
 # rescue Labor::Error::PermissionReject, Labor::Error::Unauthorized => e 
@@ -162,7 +165,7 @@ require 'pp'
 # p k
 
 # puts Benchmark.measure { 
-	gitlab = Labor::GitLab.gitlab
+	# gitlab = Labor::GitLab.gitlab
 # project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
 # pp gitlab.create_tag(project.id, '0.1.9.1', 'master').to_hash
 # pp project.to_hash
@@ -252,11 +255,11 @@ require 'pp'
 # p gitlab.merge_request(project.id, 1)
 # bytes = gitlab.repo_archive(project.id).to_hash[:data].read
 
-project = gitlab.project('git@git.2dfire.net:ios/TDFMIntegralModule.git')
+# project = gitlab.project('git@git.2dfire.net:ios/TDFMIntegralModule.git')
 # p gitlab.file_path(project.id, 'PodfileTemplate', 'release/0.2.2')
-branch = gitlab.branch(project.id, 'release/0.0.1')
-compare_result = gitlab.compare(project.id, 'master', branch.name)
-p compare_result.diffs.empty?
+# branch = gitlab.branch(project.id, 'release/0.0.1')
+# compare_result = gitlab.compare(project.id, 'master', branch.name)
+# p compare_result.diffs.empty?
 
 # name = 'PodA'
 # version = '1.2.1 '.strip

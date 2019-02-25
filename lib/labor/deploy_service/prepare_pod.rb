@@ -26,7 +26,7 @@ module Labor
 				begin 
 					ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new(deploy.project_id, deploy.ref)
 					unless ci_yaml_file.has_deploy_jobs?
-						skip_deploy_block.call("pod deploy (id: #{deploy.id}, name: #{deploy.name}): 仓库未包含 .gitlab-ci.yaml 文件或 .gitlab-ci.yaml 文件未包含发布操作，无法自动发布。手动发布后，再勾选 <已发布>") 
+						skip_deploy_block.call("pod deploy (id: #{deploy.id}, name: #{deploy.name}): repo doesn't include .gitlab-ci.yaml or .gitlab-ci.yaml doesn't include publish stages with keys #{ci_yaml_file.config.keys}。手动发布后，再勾选 <已发布>") 
 						return
 					end
 				rescue Labor::Error::NotFound => error
