@@ -6,10 +6,11 @@ require 'will_paginate/active_record'
 require_relative '../models/main_deploy'
 require_relative '../models/user'
 require_relative '../models/operation'
+require_relative '../models/project'
+require_relative '../models/tag'
 require_relative '../deploy_messager'
 require_relative '../logger'
 require_relative '../remote_file'
-
 
 module Labor
 	class App < Sinatra::Base
@@ -19,13 +20,15 @@ module Labor
 		# 	'page' : 1
 		# 	'per_page' : 2
 		# }
-		get '/deploys' do 
+		clean_options_get '/deploys' do 
 			# page ; per_page
-			@deploys = MainDeploy.paginate(page: params['page'], per_page: params['per_page']).order('id DESC')
+			includes = [:user, :project]
+			@deploys = MainDeploy.includes(includes).paginate(page: params['page'], per_page: params['per_page']).order('id DESC')
 			@size = MainDeploy.all.size
 			@per_page = params[:per_page] || MainDeploy.per_page
 
 			labor_response @deploys, {
+				includes: includes,
 				meta: {
 					total_count: @size,
 					per_page: @per_page
@@ -39,15 +42,16 @@ module Labor
 		# 	labor_response deploy.operations
 		# end
 
-		get '/deploys/:id' do |id|
-			@deploy = MainDeploy.includes(:user, :pod_deploys => :user).find(id)
+		clean_options_get '/deploys/:id' do |id|
+			includes = [:user, :project]
+			@deploy = MainDeploy.includes([*includes, :pod_deploys => includes]).find(id)
 
 			labor_response @deploy, {
 				includes: [
-					:user,
+					*includes,
 					{ 
 						pod_deploys: {
-							include: :user
+							include: includes
 						}
 					}
 				]
@@ -66,9 +70,17 @@ module Labor
 
 				# 可以针对同个仓库，同个分支创建发布
 				user = User.find(auth_user_id)
-				@deploy = MainDeploy.create!({ name: params['name'], repo_url: params['repo_url'],  ref: params['ref'],  user: user })
+				
+				project = Project.find_or_create_by_repo_url(params['repo_url'])
+				deploy = project.main_deploys.create!({ 
+					name: params['name'], 
+					repo_url: params['repo_url'],  
+					ref: params['ref'],  
+					should_push_ding: params['should_push_ding'],
+					user: user 
+					})
 
-				labor_response @deploy
+				labor_response deploy
 			rescue ActiveRecord::RecordInvalid => error 
 				logger.error "Failed to create main deploy with error #{error.message}, params #{params}"
 
@@ -167,7 +179,18 @@ module Labor
 			deploy.cancel_all_operation
 			deploy.main_deploy.process
 
-			labor_response @deploy
+			labor_response deploy
+		end
+
+		clean_options_post '/deploys/:id/pods/:pid/enqueue' do |_, pid|
+			deploy = PodDeploy.find(pid)
+
+			permission_require(deploy, :enqueue)
+
+			deploy.enqueue
+			deploy.main_deploy.process
+
+			labor_response deploy
 		end
 
 		clean_options_post '/deploys/:id/pods/:pid/retry' do |_, pid|
@@ -179,7 +202,7 @@ module Labor
 			# 和 main deploy 不同，这里 retry 走的是 enqueue，重新更新 spec，发起 MR
 			deploy.retry
 
-			labor_response @deploy
+			labor_response deploy
 		end
 
 		clean_options_post '/deploys/:id/pods/:pid/cancel' do |_, pid|

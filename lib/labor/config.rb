@@ -1,4 +1,5 @@
 require 'yaml'
+require 'erb'
 require 'ostruct'
 
 module Labor
@@ -51,8 +52,9 @@ module Labor
 		private
 
 		def generate_webhook_url(path)
-			domain = @config.domain || webhook_host
-			"http://#{domain}:#{port}/#{path}"
+			ip_port = "#{webhook_host}:#{port}"
+			domain = @config.domain || ip_port
+			"http://#{domain}/#{path}"
 		end
 
 		def load_config 
@@ -61,10 +63,10 @@ module Labor
 	    default_config_file = File.expand_path("#{current_path}/../../config/config.yml")
 
 	    abort 'labor config file #{default_config_file} is missing.' unless File.exists?(default_config_file)
-	    final_config = YAML.load_file(default_config_file)
+	    final_config = YAML.load(ERB.new(File.read(default_config_file)).result)
 	    if File.exists?(custom_config_file)
 	      begin
-	        custom_config = YAML.load_file(custom_config_file)
+	        custom_config = YAML.load(ERB.new(File.read(default_config_file)).result)
 	      rescue Psych::SyntaxError => ex
 	        puts "解析自定义配置文件失败 #{ex.message}."
 	        custom_config = {}

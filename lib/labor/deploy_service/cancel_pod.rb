@@ -16,6 +16,8 @@ module Labor
 				deploy.merge_request_iids.compact.each do |merge_request_iid|
 					gitlab.update_merge_request(deploy.project_id, merge_request_iid, { state_event: 'close' })
 				end
+				deploy.merge_request_iids.clear
+				deploy.save
 			end
 		end
 	end

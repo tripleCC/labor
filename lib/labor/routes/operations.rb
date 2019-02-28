@@ -8,11 +8,11 @@ require_relative '../errors'
 module Labor
 	class App < Sinatra::Base
 
-		get '/operations' do 
-			keys = [:pod_deploy_id, :main_deploy_id, :user_id].map(&:to_s)
+		clean_options_get '/operations' do 
+			keys = [:deploy_type, :deploy_name, :user_id].map(&:to_s)
 			querys = params.select { |key, value| keys.include?(key) }
 
-			includes = [:user, :pod_deploy, :main_deploy]
+			includes = [:user]
 
 			where = Operation.where(querys)
 		  operations = where.paginate(page: params['page'], per_page: params['per_page']).order('id DESC').includes(includes)

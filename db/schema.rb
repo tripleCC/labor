@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181112115705) do
+ActiveRecord::Schema.define(version: 20181226100223) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,35 +21,66 @@ ActiveRecord::Schema.define(version: 20181112115705) do
     t.string   "name"
     t.string   "repo_url"
     t.string   "ref"
-    t.string   "project_id"
     t.string   "status"
     t.string   "failure_reason"
     t.datetime "started_at"
     t.datetime "finished_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "should_push_ding", default: true
+    t.integer  "project_id"
   end
 
+  add_index "main_deploys", ["project_id"], name: "index_main_deploys_on_project_id", using: :btree
   add_index "main_deploys", ["user_id"], name: "index_main_deploys_on_user_id", using: :btree
 
-  create_table "operations", force: :cascade do |t|
-    t.integer  "user_id"
+  create_table "merge_requests", force: :cascade do |t|
     t.integer  "pod_deploy_id"
-    t.integer  "main_deploy_id"
-    t.string   "name"
+    t.string   "mid"
+    t.string   "miid"
+    t.string   "title"
+    t.string   "sha"
+    t.string   "state",                        default: "opened"
+    t.string   "merge_status",                 default: "unchecked"
+    t.string   "target_branch"
+    t.string   "source_branch"
+    t.string   "web_url"
+    t.boolean  "merge_when_pipeline_succeeds", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "operations", ["main_deploy_id"], name: "index_operations_on_main_deploy_id", using: :btree
-  add_index "operations", ["pod_deploy_id"], name: "index_operations_on_pod_deploy_id", using: :btree
+  add_index "merge_requests", ["pod_deploy_id"], name: "index_merge_requests_on_pod_deploy_id", using: :btree
+
+  create_table "operations", force: :cascade do |t|
+    t.integer  "user_id"
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "deploy_name"
+    t.integer  "deploy_type", default: 0
+  end
+
   add_index "operations", ["user_id"], name: "index_operations_on_user_id", using: :btree
+
+  create_table "pipelines", force: :cascade do |t|
+    t.integer  "pod_deploy_id"
+    t.string   "pid"
+    t.string   "sha"
+    t.string   "ref"
+    t.string   "status"
+    t.string   "web_url"
+    t.boolean  "tag"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "pipelines", ["pod_deploy_id"], name: "index_pipelines_on_pod_deploy_id", using: :btree
 
   create_table "pod_deploys", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "main_deploy_id"
     t.string   "name"
-    t.string   "project_id"
     t.string   "repo_url"
     t.string   "ref",                       default: "master"
     t.string   "version"
@@ -69,10 +100,54 @@ ActiveRecord::Schema.define(version: 20181112115705) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "created_tags",              default: [],                    array: true
+    t.integer  "project_id"
   end
 
   add_index "pod_deploys", ["main_deploy_id"], name: "index_pod_deploys_on_main_deploy_id", using: :btree
+  add_index "pod_deploys", ["project_id"], name: "index_pod_deploys_on_project_id", using: :btree
   add_index "pod_deploys", ["user_id"], name: "index_pod_deploys_on_user_id", using: :btree
+
+  create_table "projects", force: :cascade do |t|
+    t.string   "name"
+    t.string   "ssh_url_to_repo"
+    t.string   "http_url_to_repo"
+    t.string   "web_url"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "specifications", force: :cascade do |t|
+    t.integer  "project_id"
+    t.integer  "user_id"
+    t.string   "name"
+    t.string   "version"
+    t.string   "summary"
+    t.json     "authors",                        default: []
+    t.json     "source",                         default: {}
+    t.integer  "spec_type",                      default: 2
+    t.string   "spec_external_dependency_names", default: [],    array: true
+    t.text     "spec_content"
+    t.boolean  "third_party",                    default: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "owner",                          default: "未知"
+    t.string   "team",                           default: "未知"
+  end
+
+  add_index "specifications", ["project_id"], name: "index_specifications_on_project_id", using: :btree
+  add_index "specifications", ["user_id"], name: "index_specifications_on_user_id", using: :btree
+
+  create_table "tags", force: :cascade do |t|
+    t.integer  "pod_deploy_id"
+    t.string   "name"
+    t.string   "target"
+    t.string   "message"
+    t.string   "sha"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "tags", ["pod_deploy_id"], name: "index_tags_on_pod_deploy_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "sub"

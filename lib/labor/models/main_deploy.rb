@@ -5,11 +5,13 @@ require 'will_paginate/active_record'
 require_relative '../deploy_service'
 require_relative '../validations/repo_validator'
 require_relative '../workers'
+require_relative './project'
 
 module Labor
   class MainDeploy < ActiveRecord::Base
-  	has_many :pod_deploys, -> { order :id }, dependent: :destroy
-    has_many :operations, -> { order :id }
+  	has_many :pod_deploys, -> { order :id }, dependent: :destroy # 替换时删除原来的pod_deploys
+    # has_many :operations, -> { order :id }
+    belongs_to :project
     belongs_to :user 
 
     self.per_page = 15
@@ -17,7 +19,7 @@ module Labor
     validates :name, presence: true
     validates :repo_url, presence: true
     validates :ref, presence: true
-    validates_with Labor::RepoValidator
+    validates_with Labor::RepoValidator, on: :create
 
   	state_machine :status, :initial => :created do
       event :reset do 
@@ -30,21 +32,25 @@ module Labor
         # transition [:created, :canceled, :failed, :success] => :analyzing
       end
 
+      event :wait do
+        transition [:analyzing] => :waiting
+      end
+
       event :deploy do
-        transition [:analyzing, :failed, :canceled] => :deploying
+        transition [:waiting, :failed, :canceled] => :deploying
       end
 
       event :success do 
-        transition [:analyzing, :deploying] => :success
+        transition any - [:success] => :success
       end
 
       event :drop do
-        transition [:created, :analyzing, :deploying] => :failed
+        transition [:created, :waiting, :deploying] => :failed
         # transition any => :failed
       end
 
       event :cancel do
-        transition [:created, :analyzing, :deploying] => :canceled
+        transition [:created, :waiting, :deploying] => :canceled
       end
 
 
@@ -90,7 +96,8 @@ module Labor
         # before
         block.call
         # 2
-        Labor::DeployMessager.send(deploy.id, deploy)        
+        # DeployMessagerWorker.perform_later(deploy.id, deploy)
+        Labor::DeployMessager.send(deploy.id, deploy, :main)        
         # after
       end
     end
@@ -106,11 +113,14 @@ module Labor
     end
 
     def start 
-      DeployService::StartMain.new(self).execute 
+      StartMainWorker.perform_later(id)
     end
 
     def process
-      DeployService::ProcessMain.new(self).execute
+      ProcessMainWorker.perform_later(id)
     end
+
+    private
+
   end
 end

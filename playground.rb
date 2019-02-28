@@ -1,5 +1,40 @@
 #!/usr/bin/env ruby
+require_relative './lib/labor/git/gitlab'
 
+gitlab = Labor::GitLab.gitlab
+%w[a b c d].each { |r| 
+	pr = gitlab.project("git@git.2dfire.net:qiandaojiang/#{r}.git")
+	gitlab.delete_tag(pr.id, '0.1.0')	
+	p "#{r} 0.1.0 delete"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# require 'benchmark'
 # begin
 #   a = 1
 #   raise StandardError
@@ -59,8 +94,19 @@
 # require 'cgi'
 # require 'pp'
 # require 'cocoapods-tdfire-binary'
-require_relative './lib/labor/git/gitlab'
+# require_relative './lib/labor/git/gitlab'
+# # require_relative './lib/labor/remote_file'
 
+# gitlab = Labor::GitLab.gitlab
+# %w[a b c d].each { |r| 
+# 	pr = gitlab.project("git@git.2dfire.net:qiandaojiang/#{r}.git")
+# 	gitlab.delete_tag(pr.id, '0.1.0')	
+# }
+
+# require_relative './lib/labor/external_pod/sorter'
+# ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new('3278', 'release/0.1.0')
+# p ci_yaml_file.config.keys
+# p ci_yaml_file.has_deploy_jobs?
 # begin 
 # 	raise Labor::Error::Unauthorized, 'xxxx'
 # rescue Labor::Error::PermissionReject, Labor::Error::Unauthorized => e 
@@ -113,20 +159,65 @@ require 'pp'
 
 # k = 0
 
-# async_each(10.times) do |i|
-#   gitlab = Labor::GitLab.gitlab
-#   project = gitlab.project('git@git.2dfire-inc.com:ios/TDFMallStoreyModule.git')
+
+# ====================== Delete project hooks ======================= #
+# specs = Pod::Config.instance.sources_manager.default_source.newest_specs
+# gitlab = Labor::GitLab.gitlab
+# specs.each do |s|
+# 	git = s.source[:git]
+# 	next unless git 
+
+# 	begin
+# 		pr = gitlab.project(git) 
+# 		hooks = gitlab.client.project_hooks(pr.id)  
+
+# 		hooks = hooks.reject do |hook|
+# 			p hook
+# 			bool = true
+# 			Labor::GitLabProxy::DEFAULT_PROJECT_HOOK_OPTIONS.each do |k, v|
+# 				unless hook.send(k) == v
+# 					bool = false
+# 					break
+# 				end
+# 			end
+# 			bool
+# 		end
+
+# 		hooks.each do |hook|
+
+# 			puts "delete #{pr.name}'s hook #{hook.id} #{hook.url}"
+# 			# gitlab.delete_project_hook(pr.id, hook.id)
+# 		end
+# 	rescue => e
+# 		# p e
+# 	end
+# end
+# ====================== Delete project hooks ======================= #
+
+  
+  # p project
 #   p gitlab.merge_request(project.id, '1')  
 #   p i
 #   k += 1
 # end
 
 # p k
-# require 'pp'
 
-gitlab = Labor::GitLab.gitlab
-project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
-pp gitlab.merge_request(project.id, '18').to_hash
+# puts Benchmark.measure { 
+	# gitlab = Labor::GitLab.gitlab
+# project = gitlab.project('git@git.2dfire.net:qiandaojiang/a.git')
+# pp gitlab.create_tag(project.id, '0.1.9.1', 'master').to_hash
+# pp project.to_hash
+# data_source = ExternalPod::Sorter::DataSource::Remote.new(project.id, 'release/5.8.12')
+# sorter = ExternalPod::Sorter.new(data_source)
+
+# p sorter.sort
+
+	
+# }
+# 0%2E1%2E1
+
+# pp gitlab.merge_request(project.id, '18').to_hash
 # p gitlab.branch(project.id, 'develop')
 # pp gitlab.merge_request(project.id, '12').to_hash
 # # p gitlab.branch(project.id, 'develop')
@@ -203,9 +294,12 @@ pp gitlab.merge_request(project.id, '18').to_hash
 # p gitlab.merge_request(project.id, 1)
 # bytes = gitlab.repo_archive(project.id).to_hash[:data].read
 
-# project = gitlab.project('git@git.2dfire-inc.com:qingmu/PodD.git')
+# project = gitlab.project('git@git.2dfire.net:ios/TDFMIntegralModule.git')
 # p gitlab.file_path(project.id, 'PodfileTemplate', 'release/0.2.2')
-# p gitlab.branch(project.id, 'release/0.2.1').merged
+# branch = gitlab.branch(project.id, 'release/0.0.1')
+# compare_result = gitlab.compare(project.id, 'master', branch.name)
+# p compare_result.diffs.empty?
+
 # name = 'PodA'
 # version = '1.2.1 '.strip
 # release = 'release/1.1.1'
@@ -462,8 +556,13 @@ pp gitlab.merge_request(project.id, '18').to_hash
 # sorter.sort
 # p sorter.grouped_pods
 
-# podfile = Labor::RemoteFile::Podfile.new('2441', 'master')
-# s = Labor::RemoteFile::Podfile::Generator.new(podfile, podfile.template.file_contents).generate
+# podfile = Labor::RemoteFile::Podfile.new('197', 'feature/pantry-kds')
+
+# eval %Q[ENV['DEBUG'] = 'false']
+
+# p podfile.file_contents
+# p podfile.podfile.dependencies
+# p ENV['DEBUG']
 # p podfile.edit_remote
 # podfile_template = Labor::RemoteFile::Podfile::Template.new('2441', 'master')
 # podfile = podfile.podfile
@@ -656,7 +755,7 @@ pp gitlab.merge_request(project.id, '18').to_hash
 # require 'yaml'
 # require_relative './member_reminder'
 # require_relative './labor'
-require 'state_machine'
+# require 'state_machine'
 
 # module HashStatus
 # 	extend ActiveSupport::Concern
@@ -707,69 +806,69 @@ require 'state_machine'
 
 # include Labor
 
-class Deploy
-	attr_accessor :failure_reason
-	attr_accessor :started_at
-	attr_accessor :finished_at
-	attr_accessor :repo_url
-	attr_accessor :ref
+# class Deploy
+# 	attr_accessor :failure_reason
+# 	attr_accessor :started_at
+# 	attr_accessor :finished_at
+# 	attr_accessor :repo_url
+# 	attr_accessor :ref
 
-	state_machine :status, :initial => :created do
-      event :enqueue do
-        # transition any - [:analyzing] => :analyzing
-        transition any => :analyzing
-      end
+# 	state_machine :status, :initial => :created do
+#       event :enqueue do
+#         # transition any - [:analyzing] => :analyzing
+#         transition any => :analyzing
+#       end
 
-      event :skip do 
-        transition analyzing: :skipped
-      end
+#       event :skip do 
+#         transition analyzing: :skipped
+#       end
 
-      event :pend do
-        transition analyzing: :pending
-      end
+#       event :pend do
+#         transition analyzing: :pending
+#       end
 
-      # reviewed 打勾，触发 auto merge (auto merge 如果出错，状态还是 pending) ，（这部分手动合并也可以接盘走后面流程） 监听 MR 状态，后更新 merged
-      event :ready do  
-        transition [:pending, :analyzing] => :merged
-      end
+#       # reviewed 打勾，触发 auto merge (auto merge 如果出错，状态还是 pending) ，（这部分手动合并也可以接盘走后面流程） 监听 MR 状态，后更新 merged
+#       event :ready do  
+#         transition [:pending, :analyzing] => :merged
+#       end
 
-      # master 分支不需要 merge
-      event :deploy do 
-        # 失败了重试 PL，视作 deploying
-        transition [:merged, :pending, :failed] => :deploying
-      end
+#       # master 分支不需要 merge
+#       event :deploy do 
+#         # 失败了重试 PL，视作 deploying
+#         transition [:merged, :pending, :failed] => :deploying
+#       end
 
-      event :success do 
-        transition deploying: :success
-      end
+#       event :success do 
+#         transition deploying: :success
+#       end
 
-      event :drop do
-        transition any - [:failed] => :failed
-      end
+#       event :drop do
+#         transition any - [:failed] => :failed
+#       end
 
-      event :cancel do
-        transition any - [:canceled, :success, :failed, :skipped] => :canceled
-      end
+#       event :cancel do
+#         transition any - [:canceled, :success, :failed, :skipped] => :canceled
+#       end
 
-      before_transition do |deploy, transition|
-      	# p transition.to == 'analyzing'
-      end
+#       before_transition do |deploy, transition|
+#       	# p transition.to == 'analyzing'
+#       end
 
-      # after_transition any => [:merged, :success] do |deploy, transition|
-      #   next if transition.loopback?
-      #   # 当组件标识为已合并，则让主发布处理组件 CD
-      #   # deploy.main_deploy.process
-      #   p '1'
-      #   deploy.deploy
-      #   p 'kkk'
-      # end
+#       # after_transition any => [:merged, :success] do |deploy, transition|
+#       #   next if transition.loopback?
+#       #   # 当组件标识为已合并，则让主发布处理组件 CD
+#       #   # deploy.main_deploy.process
+#       #   p '1'
+#       #   deploy.deploy
+#       #   p 'kkk'
+#       # end
 
-      around_transition do |vehicle, transition, block|
-      	p 'Zzzzz'
-      	block.call
-      	# p vehicle.status
-        false
-      end
+#       around_transition do |vehicle, transition, block|
+#       	p 'Zzzzz'
+#       	block.call
+#       	# p vehicle.status
+#         false
+#       end
 
       # before_transition any => :analyzing do |deploy, transition|
       #   next if transition.loopback?
@@ -811,13 +910,13 @@ class Deploy
       #   # DeployMessagerWorker.perform_later(deploy.main_deploy.id, deploy.to_json)
       #   # Labor::DeployMessager.send(deploy.main_deploy.id, deploy)
       # end
-    end
-end
+#     end
+# end
 
-d = Deploy.new 
+# d = Deploy.new 
 # # d.status
 # p d.analyzing?
-p d.enqueue
+# p d.enqueue
 # p d.analyzing?
 
 # d.ready

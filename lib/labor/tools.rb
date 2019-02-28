@@ -1,0 +1,1 @@
+require_relative './tools/project_hooks_cleaner'

@@ -48,6 +48,9 @@ GEM
       nap (~> 1.0)
       ruby-macho (~> 1.1)
       xcodeproj (>= 1.5.7, < 2.0)
+    cocoapods-bin (0.1.1)
+      cocoapods (~> 1.4)
+      parallel
     cocoapods-core (1.5.3)
       activesupport (>= 4.0.2, < 6)
       fuzzy_match (~> 2.0.4)
@@ -60,7 +63,7 @@ GEM
       nap
     cocoapods-search (1.0.0)
     cocoapods-stats (1.0.0)
-    cocoapods-tdfire-binary (1.4.28)
+    cocoapods-tdfire-binary (2.0.3)
       cocoapods (~> 1.2)
       cocoapods-packager (~> 1.5.0)
     cocoapods-trunk (1.3.1)
@@ -69,7 +72,7 @@ GEM
     cocoapods-try (1.1.0)
     coderay (1.1.2)
     colored2 (3.1.2)
-    concurrent-ruby (1.1.3)
+    concurrent-ruby (1.1.4)
     connection_pool (2.2.2)
     domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
@@ -78,7 +81,7 @@ GEM
     fourflusher (2.0.1)
     fuzzy_match (2.0.4)
     gh_inspector (1.1.3)
-    gitlab (4.5.0)
+    gitlab (4.7.0)
       httparty (>= 0.14.0)
       terminal-table (>= 1.5.1)
     globalid (0.4.1)
@@ -92,12 +95,17 @@ GEM
       domain_name (~> 0.5)
     http-form_data (2.1.1)
     http_parser.rb (0.6.0)
-    httparty (0.16.2)
+    httparty (0.16.3)
+      mime-types (~> 3.0)
       multi_xml (>= 0.5.2)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    member_reminder (0.1.9)
+    member_reminder (0.1.12)
       chinese_pinyin
+      http
+    mime-types (3.2.2)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2018.0812)
     minitest (5.11.3)
     molinillo (0.6.6)
     multi_json (1.13.1)
@@ -106,8 +114,9 @@ GEM
     nanaimo (0.2.6)
     nap (1.1.0)
     netrc (0.11.0)
+    parallel (1.13.0)
     pg (0.21.0)
-    public_suffix (3.0.2)
+    public_suffix (3.0.3)
     puma (3.11.4)
     rack (2.0.5)
     rack-protection (2.0.3)
@@ -170,10 +179,12 @@ DEPENDENCIES
   activerecord (~> 4.0)
   better_errors (~> 2.4)
   cocoapods (~> 1.5)
+  cocoapods-bin
   cocoapods-tdfire-binary
-  gitlab (~> 4.5.0)
+  gitlab (~> 4.7.0)
   http
   member_reminder (~> 0.1)
+  parallel
   pg (~> 0.21.0)
   puma
   rake

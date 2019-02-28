@@ -16,10 +16,13 @@ require_relative './labor/helpers'
 require_relative './labor/errors'
 require_relative './labor/initializers'
 require_relative './labor/workers'
+require_relative './labor/middlewares'
 
 module Labor
 	class App < Sinatra::Base
 		include Labor::Logger
+
+		# use Labor::WebhookParser
 
 		register Sinatra::Namespace
 		register Sinatra::ActiveRecordExtension
@@ -75,6 +78,11 @@ module Labor
     	labor_error 'page not found'
     end
 
+    get '/' do 
+    	'Welcome !'
+    	# redirect Labor.config.labor_app_url
+    end
+
     # 这里如果是 webhook 阶段抛出的错误
     # 设置 error 就没用了，因为是返回给 gitlab 接口
     error Labor::Error::NotFound,
@@ -105,6 +113,10 @@ module Labor
 	  			StateMachines::InvalidTransition,
 	  			SocketError,
 	  			RangeError do |error|
+	  	halt 500, labor_error(error.message)
+	  end
+
+	  error do |error|
 	  	halt 500, labor_error(error.message)
 	  end
 	end

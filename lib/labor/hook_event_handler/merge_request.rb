@@ -34,12 +34,12 @@ module Labor
 					deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
 					post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】MR #{object_attributes.iid} 已被关闭，地址: #{object_attributes.url}"
 					deploy.drop(post_content)
-					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding?
 					logger.error(post_content)
 				when 'failed'
 					post_content = "pod deploy #{deploy.name} 合并  #{object_attributes.source_branch} 至 #{object_attributes.target_branch} 失败，地址: #{object_attributes.url}"
 					deploy.drop(post_content)
-					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding?
 				end
 			end
 		end

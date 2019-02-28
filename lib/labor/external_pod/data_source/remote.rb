@@ -1,3 +1,4 @@
+require 'parallel'
 require_relative './base'
 require_relative '../../logger'
 require_relative '../../remote_file'
@@ -27,22 +28,30 @@ module ExternalPod
 
 				def untagged_specs
 					untagged_specs = []
-					lock = Mutex.new
+					# lock = Mutex.new
 					# 过滤本地依赖
 					untagged_git_dependencies = untagged_dependencies.select { |dep| dep.external_source[:git] }
-					untagged_git_dependencies.map do |dep|
-						th = Thread.new do
-							git = dep.external_source[:git]
-							ref = dep.external_source[:branch]
-							# 这里后期再考虑 Podfile.lock 限定问题
-							component_project = gitlab.project(git)
-							remote_file = Labor::RemoteFile::Specification.new(component_project.id, ref)
-							lock.synchronize do 
-								untagged_specs << remote_file.specification
-							end
-						end
-						th
-					end.each(&:join)
+					untagged_specs = Parallel.map(untagged_git_dependencies, in_threads: 5) do |dep|  
+						git = dep.external_source[:git]
+						ref = dep.external_source[:branch]
+						# 这里后期再考虑 Podfile.lock 限定问题
+						component_project = gitlab.project(git)
+						remote_file = Labor::RemoteFile::Specification.new(component_project.id, ref)
+						remote_file.specification
+					end
+					# untagged_git_dependencies.map do |dep|
+					# 	th = Thread.new do
+					# 		git = dep.external_source[:git]
+					# 		ref = dep.external_source[:branch]
+					# 		# 这里后期再考虑 Podfile.lock 限定问题
+					# 		component_project = gitlab.project(git)
+					# 		remote_file = Labor::RemoteFile::Specification.new(component_project.id, ref)
+					# 		lock.synchronize do 
+					# 			untagged_specs << remote_file.specification
+					# 		end
+					# 	end
+					# 	th
+					# end.each(&:join)
 					untagged_specs
 				end
 

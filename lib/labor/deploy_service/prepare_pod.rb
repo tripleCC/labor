@@ -11,9 +11,6 @@ module Labor
 			using StringExtension
 			
 			def execute
-				project = gitlab.project(deploy.repo_url)
-				deploy.update(project_id: project.id)
-				
 				logger.info("pod deploy (id: #{deploy.id}, name: #{deploy.name}): prepare deploy")
 				# 添加 project hook，监听 MR / PL 的执行进度
 				add_project_hook(deploy.project_id)
@@ -23,13 +20,13 @@ module Labor
 				skip_deploy_block = proc do |post_content|
 					logger.error("【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】#{post_content}")
 					deploy.skip
-					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding?
 				end  
 
 				begin 
 					ci_yaml_file = Labor::RemoteFile::GitLabCIYaml.new(deploy.project_id, deploy.ref)
 					unless ci_yaml_file.has_deploy_jobs?
-						skip_deploy_block.call("pod deploy (id: #{deploy.id}, name: #{deploy.name}): 仓库未包含 .gitlab-ci.yaml 文件或 .gitlab-ci.yaml 文件未包含发布操作，无法自动发布。手动发布后，再勾选 <已发布>") 
+						skip_deploy_block.call("pod deploy (id: #{deploy.id}, name: #{deploy.name}): repo doesn't include .gitlab-ci.yaml or .gitlab-ci.yaml doesn't include publish stages with keys #{ci_yaml_file.config.keys}。手动发布后，再勾选 <已发布>") 
 						return
 					end
 				rescue Labor::Error::NotFound => error
@@ -42,12 +39,15 @@ module Labor
 					post_content = "【#{deploy.main_deploy.name}(id: #{deploy.main_deploy_id})|#{deploy.name}】master 分支必须为 default 分支"
 					logger.error(post_content)
 					deploy.drop(post_content)
-					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner
+					post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding?
 				end
 				
 				# 发布分支是 master || 发布分支已经合并到 master ，直接标志为可发布
 				ref_branch = gitlab.branch(deploy.project_id, deploy.ref)
-				if deploy.ref == 'master' || ref_branch.merged
+				if deploy.ref == 'master' || 
+					ref_branch.merged || 
+					# 有些没有 merged，但是 diffs 是空的，其实 commit 没有任何差别 
+					gitlab.compare(deploy.project_id, 'master', deploy.ref).diffs.empty?
 					update_spec_version(deploy, 'master')
 					deploy.ready
 				else
@@ -59,7 +59,7 @@ module Labor
 				Gitlab::Error::Forbidden => error
 				logger.error("pod deploy (id: #{deploy.id}, name: #{deploy.name}): fail to prepare pod with error #{error}.")
 				deploy.drop(error.message)
-				post(deploy.owner_ding_token, error.message, deploy.owner_mobile) if deploy.owner
+				post(deploy.owner_ding_token, error.message, deploy.owner_mobile) if deploy.can_push_ding?
 			end
 
 			def update_spec_version(deploy, ref = nil)
@@ -95,7 +95,7 @@ module Labor
 				deploy.pend
 
 				# 发送组件合并钉钉消息
-				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.owner && Labor.config.remind_owner_when_merge_request_created
+				post(deploy.owner_ding_token, post_content, deploy.owner_mobile) if deploy.can_push_ding? && Labor.config.remind_owner_when_merge_request_created
 			end
 
 			def create_merge_request(project_id, ref, target, assignee_name)

@@ -1,4 +1,5 @@
 require 'cocoapods-tdfire-binary'
+require 'cocoapods-bin'
 require_relative '../git/gitlab'
 require_relative '../errors'
 

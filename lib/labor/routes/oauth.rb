@@ -31,10 +31,10 @@ module Labor
 
 		  		labor_response user
 		  	else 
-		  		labor_error "Fail to get user with error #{result.to_s}"
+		  		halt result.code, labor_error("Fail to get user with error #{result.to_s}")
 		  	end
 		  else 
-		  	labor_error "Fail to get access_token with query_message #{query_message} host #{host} error #{result.to_s}"
+		  	halt result.code, labor_error("Fail to get access_token with query_message #{query_message} host #{host} error #{result.to_s}")
 		  end
 		end
 

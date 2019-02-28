@@ -29,7 +29,8 @@ module Labor
 
 			def self.update 
 				# 这块应该放到 sidekiq 处理的
-
+				# update 放在 sidekiq ，由于 git 操作不能多线程，sidekiq 并发 10 的话会出问题
+				# 暂时还是通过这种方式处理
 				Thread.new do 
 					@lock.synchronize do 
 						logger.info("update cocoapods private source #{Labor.config.cocoapods_private_source_url}")

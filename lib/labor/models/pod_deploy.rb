@@ -5,18 +5,30 @@ require 'will_paginate/active_record'
 require_relative '../deploy_service'
 require_relative '../workers'
 require_relative '../logger'
+require_relative './project'
+require_relative './merge_request'
+require_relative './tag'
+require_relative './pipeline'
 
 module Labor
   class PodDeploy < ActiveRecord::Base
-    has_many :operations, -> { order :id }
+    has_many :tags, -> { distinct }, dependent: :destroy
+    has_many :merge_requests, -> { distinct }, dependent: :destroy
+    has_many :pipelines, -> { distinct }, dependent: :destroy
   	belongs_to :main_deploy
+    belongs_to :project
     belongs_to :user
 
+    # scope with_tags -> (query) { join(:tags).where(tags: query) }
+
+    # before_create :set_project
     # sqlite3 不支持 array 类型
     # serialize :merge_request_iids
     # serialize :external_dependency_names
 
     # scope :need_retry, -> { failed? || canceled? || skipped? }
+
+    delegate :should_push_ding, to: :main_deploy, prefix: true, allow_nil: true
 
     self.per_page = 30
 
@@ -24,16 +36,15 @@ module Labor
 
   	state_machine :status, :initial => :created do
       event :enqueue do
-        # transition any - [:analyzing] => :analyzing
-        transition [:created, :canceled, :failed, :success, :skipped] => :analyzing
+        transition [:created, :canceled, :failed, :success, :skipped] => :preparing
       end
 
       event :skip do 
-        transition analyzing: :skipped
+        transition preparing: :skipped
       end
 
       event :pend do
-        transition analyzing: :pending
+        transition preparing: :pending
       end
 
       # reviewed 打勾，触发 auto merge (auto merge 如果出错，状态还是 pending) ，（这部分手动合并也可以接盘走后面流程） 监听 MR 状态，后更新 merged
@@ -41,7 +52,7 @@ module Labor
       # 否则直接在 ready after_transition 里面执行 deploy.main_deploy.process ，会让后面的 deploy 重复执行 auto_merge
       # 程序卡死
       event :ready do  
-        transition [:pending, :analyzing] => :merged
+        transition [:pending, :preparing] => :merged
       end
 
       # master 分支不需要 merge
@@ -71,7 +82,7 @@ module Labor
       #   deploy.main_deploy.process
       # end
 
-      after_transition any => :analyzing do |deploy, transition|
+      after_transition any => :preparing do |deploy, transition|
         next if transition.loopback?
         deploy.prepare
       end
@@ -132,21 +143,30 @@ module Labor
       failed? || canceled? || skipped?
     end
 
+    def can_push_ding?
+      false
+      # main_deploy_should_push_ding && owner
+    end
+
     def cancel_all_operation
-      DeployService::CancelPod.new(self).execute 
+      CancelPodWorker.perform_later(id)
     end
 
     def prepare
+      # PreparePodWorker.perform_later(id)
       DeployService::PreparePod.new(self).execute
     end
 
     def process
       deploy
-      DeployService::ProcessPod.new(self).execute
+      ProcessPodWorker.perform_later(id)
     end
 
     def auto_merge
+      # AutoMergePodWorker.perform_later(id)
       DeployService::AutoMergePod.new(self).execute
     end
+
+    private
   end
 end
