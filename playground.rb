@@ -3,9 +3,17 @@ require_relative './lib/labor/git/gitlab'
 
 gitlab = Labor::GitLab.gitlab
 %w[a b c d].each { |r| 
-	pr = gitlab.project("git@git.2dfire.net:qiandaojiang/#{r}.git")
-	gitlab.delete_tag(pr.id, '0.1.0')	
-	p "#{r} 0.1.0 delete"
+	if %w[b c d].include?(r)
+		pr = gitlab.project("git@git.2dfire.net:qiandaojiang/#{r}.git")
+	else 
+		pr = gitlab.project("git@git.2dfire.net:qingmu/#{r}.git")
+	end
+	begin
+		gitlab.delete_tag(pr.id, '0.1.0')	
+		p "#{r} 0.1.0 delete"
+	rescue => e 
+		p e
+	end
 }
 
 

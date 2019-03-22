@@ -12,6 +12,7 @@ module Labor
 			using StringExtension
 
 			SPECIFICATION_EXTNAMES = ['.podspec', '.podspec.json'].freeze
+			EXCLUDE_SPECIFICATION_EXTNAMES = ['.binary-template.podspec'].freeze
 
 			attr_reader :specification
 
@@ -42,7 +43,8 @@ module Labor
 			private
 			def podspec_path(project_id, ref)
 				file_path = gitlab.find_file_path(project_id, ref) do |name| 
-					SPECIFICATION_EXTNAMES.find { |extname| name.end_with?(extname) }
+					next if EXCLUDE_SPECIFICATION_EXTNAMES.find { |extname| name.end_with?(extname) }
+					SPECIFICATION_EXTNAMES.find { |extname| name.end_with?(extname) } 
 				end
 				file_path
 			end
