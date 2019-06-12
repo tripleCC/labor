@@ -1,7 +1,6 @@
 class CreatePipelines < ActiveRecord::Migration
   def change
   	create_table :pipelines do |t|
-  		# t.belongs_to :project, index: true
   		t.belongs_to :pod_deploy, index: true
   		t.string :pid
   		t.string :sha

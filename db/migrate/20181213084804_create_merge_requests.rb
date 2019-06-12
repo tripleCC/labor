@@ -1,7 +1,6 @@
 class CreateMergeRequests < ActiveRecord::Migration
   def change
   	create_table :merge_requests do |t|
-  		# t.belongs_to :project, index: true
   		t.belongs_to :pod_deploy, index: true
   		t.string :mid 
   		t.string :miid 

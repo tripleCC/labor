@@ -1,7 +1,6 @@
 class CreateTags < ActiveRecord::Migration
   def change
   	create_table :tags do |t|
-  		# t.belongs_to :project, index: true
   		t.belongs_to :pod_deploy, index: true
   		t.string :name
   		# The target will contain the tag objects ID when creating annotated tags, 

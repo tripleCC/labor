@@ -11,10 +11,40 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181226100223) do
+ActiveRecord::Schema.define(version: 20190612103911) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "applications", force: :cascade do |t|
+    t.string   "name"
+    t.string   "version"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "launch_infos", force: :cascade do |t|
+    t.integer  "application_id"
+    t.integer  "operation_system_id"
+    t.string   "will_to_did"
+    t.string   "start_to_did"
+    t.string   "load_total"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "launch_infos", ["application_id"], name: "index_launch_infos_on_application_id", using: :btree
+  add_index "launch_infos", ["operation_system_id"], name: "index_launch_infos_on_operation_system_id", using: :btree
+
+  create_table "load_duration_pairs", force: :cascade do |t|
+    t.integer  "launch_info_id"
+    t.string   "name"
+    t.string   "duration"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "load_duration_pairs", ["launch_info_id"], name: "index_load_duration_pairs_on_launch_info_id", using: :btree
 
   create_table "main_deploys", force: :cascade do |t|
     t.integer  "user_id"
@@ -35,6 +65,7 @@ ActiveRecord::Schema.define(version: 20181226100223) do
   add_index "main_deploys", ["user_id"], name: "index_main_deploys_on_user_id", using: :btree
 
   create_table "merge_requests", force: :cascade do |t|
+    t.integer  "project_id"
     t.integer  "pod_deploy_id"
     t.string   "mid"
     t.string   "miid"
@@ -51,6 +82,14 @@ ActiveRecord::Schema.define(version: 20181226100223) do
   end
 
   add_index "merge_requests", ["pod_deploy_id"], name: "index_merge_requests_on_pod_deploy_id", using: :btree
+  add_index "merge_requests", ["project_id"], name: "index_merge_requests_on_project_id", using: :btree
+
+  create_table "operation_systems", force: :cascade do |t|
+    t.string   "name"
+    t.string   "version"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "operations", force: :cascade do |t|
     t.integer  "user_id"
@@ -64,6 +103,7 @@ ActiveRecord::Schema.define(version: 20181226100223) do
   add_index "operations", ["user_id"], name: "index_operations_on_user_id", using: :btree
 
   create_table "pipelines", force: :cascade do |t|
+    t.integer  "project_id"
     t.integer  "pod_deploy_id"
     t.string   "pid"
     t.string   "sha"
@@ -76,6 +116,7 @@ ActiveRecord::Schema.define(version: 20181226100223) do
   end
 
   add_index "pipelines", ["pod_deploy_id"], name: "index_pipelines_on_pod_deploy_id", using: :btree
+  add_index "pipelines", ["project_id"], name: "index_pipelines_on_project_id", using: :btree
 
   create_table "pod_deploys", force: :cascade do |t|
     t.integer  "user_id"
@@ -83,7 +124,7 @@ ActiveRecord::Schema.define(version: 20181226100223) do
     t.string   "name"
     t.string   "repo_url"
     t.string   "ref",                       default: "master"
-    t.string   "version"
+    t.string   "version",                                      null: false
     t.text     "external_dependency_names", default: [],                    array: true
     t.string   "mr_pipeline_id"
     t.string   "cd_pipeline_id"
@@ -138,6 +179,7 @@ ActiveRecord::Schema.define(version: 20181226100223) do
   add_index "specifications", ["user_id"], name: "index_specifications_on_user_id", using: :btree
 
   create_table "tags", force: :cascade do |t|
+    t.integer  "project_id"
     t.integer  "pod_deploy_id"
     t.string   "name"
     t.string   "target"
@@ -148,6 +190,7 @@ ActiveRecord::Schema.define(version: 20181226100223) do
   end
 
   add_index "tags", ["pod_deploy_id"], name: "index_tags_on_pod_deploy_id", using: :btree
+  add_index "tags", ["project_id"], name: "index_tags_on_project_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "sub"
@@ -155,8 +198,8 @@ ActiveRecord::Schema.define(version: 20181226100223) do
     t.string   "email"
     t.string   "phone_number"
     t.string   "picture"
-    t.boolean  "superman"
-    t.text     "unofficial_names", default: [], array: true
+    t.boolean  "superman",         default: false
+    t.text     "unofficial_names", default: [],    array: true
     t.datetime "created_at"
     t.datetime "updated_at"
   end
