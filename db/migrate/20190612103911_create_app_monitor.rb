@@ -1,12 +1,12 @@
 class CreateAppMonitor < ActiveRecord::Migration
   def change
-  	create_table :applications do |t|
+  	create_table :app_infos do |t|
   		t.string :name
   		t.string :version
   		t.timestamps null: true
   	end
 
-  	create_table :operation_systems do |t|
+  	create_table :os_infos do |t|
   		t.string :name
   		t.string :version
   		t.timestamps null: true
@@ -20,8 +20,8 @@ class CreateAppMonitor < ActiveRecord::Migration
   	end
 
   	create_table :launch_infos do |t|
-  		t.belongs_to :application, index: true
-  		t.belongs_to :operation_system, index: true
+  		t.belongs_to :app_info, index: true
+  		t.belongs_to :os_info, index: true
   		t.string :will_to_did
   		t.string :start_to_did
   		t.string :load_total

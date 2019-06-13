@@ -16,7 +16,7 @@ ActiveRecord::Schema.define(version: 20190612103911) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "applications", force: :cascade do |t|
+  create_table "app_infos", force: :cascade do |t|
     t.string   "name"
     t.string   "version"
     t.datetime "created_at"
@@ -24,8 +24,8 @@ ActiveRecord::Schema.define(version: 20190612103911) do
   end
 
   create_table "launch_infos", force: :cascade do |t|
-    t.integer  "application_id"
-    t.integer  "operation_system_id"
+    t.integer  "app_info_id"
+    t.integer  "os_info_id"
     t.string   "will_to_did"
     t.string   "start_to_did"
     t.string   "load_total"
@@ -33,8 +33,8 @@ ActiveRecord::Schema.define(version: 20190612103911) do
     t.datetime "updated_at"
   end
 
-  add_index "launch_infos", ["application_id"], name: "index_launch_infos_on_application_id", using: :btree
-  add_index "launch_infos", ["operation_system_id"], name: "index_launch_infos_on_operation_system_id", using: :btree
+  add_index "launch_infos", ["app_info_id"], name: "index_launch_infos_on_app_info_id", using: :btree
+  add_index "launch_infos", ["os_info_id"], name: "index_launch_infos_on_os_info_id", using: :btree
 
   create_table "load_duration_pairs", force: :cascade do |t|
     t.integer  "launch_info_id"
@@ -84,13 +84,6 @@ ActiveRecord::Schema.define(version: 20190612103911) do
   add_index "merge_requests", ["pod_deploy_id"], name: "index_merge_requests_on_pod_deploy_id", using: :btree
   add_index "merge_requests", ["project_id"], name: "index_merge_requests_on_project_id", using: :btree
 
-  create_table "operation_systems", force: :cascade do |t|
-    t.string   "name"
-    t.string   "version"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "operations", force: :cascade do |t|
     t.integer  "user_id"
     t.string   "name"
@@ -101,6 +94,13 @@ ActiveRecord::Schema.define(version: 20190612103911) do
   end
 
   add_index "operations", ["user_id"], name: "index_operations_on_user_id", using: :btree
+
+  create_table "os_infos", force: :cascade do |t|
+    t.string   "name"
+    t.string   "version"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "pipelines", force: :cascade do |t|
     t.integer  "project_id"
