@@ -32,22 +32,24 @@ module Labor
         os.save!
       end
 
-      labor_response 
+      labor_response
     end
 
     clean_options_get '/app/monitor/launch' do 
+      param :app_name, String, required: true
+      param :os_name, String, required: true
+
       keys = [:app_name, :app_version, :os_name, :os_version].map(&:to_s)
       querys = params.select { |key, value| keys.include?(key) }
 
       app_query = { name: querys['app_name'], version: querys['app_version'] }.delete_if { |_, v| v.nil? }
       os_query = { name: querys['os_name'], version: querys['os_version'] }.delete_if { |_, v| v.nil? }
-      includes = [:app_info, :os_info]
+      includes = [:app_info, :os_info, :load_duration_pairs]
       infos = LaunchInfo.with_app(app_query).with_os(os_query).includes(includes)
 
       labor_response infos, {
         includes: includes
       }
     end
-
   end
 end

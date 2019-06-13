@@ -3,20 +3,20 @@ class CreateAppMonitor < ActiveRecord::Migration
   	create_table :app_infos do |t|
   		t.string :name
   		t.string :version
-  		t.timestamps null: true
+  		t.datetime :created_at, null: true
   	end
 
   	create_table :os_infos do |t|
   		t.string :name
   		t.string :version
-  		t.timestamps null: true
+  		t.datetime :created_at, null: true
   	end
 
   	create_table :load_duration_pairs do |t|
   		t.belongs_to :launch_info, index: true
   		t.string :name
   		t.string :duration
-  		t.timestamps null: true
+  		t.datetime :created_at, null: true
   	end
 
   	create_table :launch_infos do |t|

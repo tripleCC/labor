@@ -20,7 +20,6 @@ ActiveRecord::Schema.define(version: 20190612103911) do
     t.string   "name"
     t.string   "version"
     t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "launch_infos", force: :cascade do |t|
@@ -41,7 +40,6 @@ ActiveRecord::Schema.define(version: 20190612103911) do
     t.string   "name"
     t.string   "duration"
     t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   add_index "load_duration_pairs", ["launch_info_id"], name: "index_load_duration_pairs_on_launch_info_id", using: :btree
@@ -99,7 +97,6 @@ ActiveRecord::Schema.define(version: 20190612103911) do
     t.string   "name"
     t.string   "version"
     t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "pipelines", force: :cascade do |t|
