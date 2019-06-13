@@ -2,6 +2,8 @@ require 'active_record'
 
 module Labor
   class LaunchInfo < ActiveRecord::Base
+  	# join app_info os_info 导致这里的 order 失效
+  	# https://github.com/rails/rails/issues/6769
   	has_many :load_duration_pairs, -> { order :duration }
   	belongs_to :app_info
   	belongs_to :os_info
