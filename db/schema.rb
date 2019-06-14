@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190612103911) do
+ActiveRecord::Schema.define(version: 20190614031235) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -19,6 +19,12 @@ ActiveRecord::Schema.define(version: 20190612103911) do
   create_table "app_infos", force: :cascade do |t|
     t.string   "name"
     t.string   "version"
+    t.datetime "created_at"
+  end
+
+  create_table "devices", force: :cascade do |t|
+    t.string   "name"
+    t.string   "simple_name"
     t.datetime "created_at"
   end
 
@@ -30,9 +36,11 @@ ActiveRecord::Schema.define(version: 20190612103911) do
     t.string   "load_total"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "device_id"
   end
 
   add_index "launch_infos", ["app_info_id"], name: "index_launch_infos_on_app_info_id", using: :btree
+  add_index "launch_infos", ["device_id"], name: "index_launch_infos_on_device_id", using: :btree
   add_index "launch_infos", ["os_info_id"], name: "index_launch_infos_on_os_info_id", using: :btree
 
   create_table "load_duration_pairs", force: :cascade do |t|
