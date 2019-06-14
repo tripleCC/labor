@@ -51,7 +51,7 @@ module Labor
       os_query = { name: querys['os_name'], version: querys['os_version'] }.delete_if { |_, v| v.nil? }
       device_query = { simple_name: querys['device_name'] }.delete_if { |_, v| v.nil? }
       includes = [:app_info, :os_info, :load_duration_pairs, :device]
-      infos = LaunchInfo.with_app(app_query).with_os(os_query).with_device(device_query).includes(includes)
+      infos = LaunchInfo.with_app(app_query).with_os(os_query).with_device(device_query).includes(includes).order(created_at: :desc)
 
       labor_response infos, {
         includes: includes
