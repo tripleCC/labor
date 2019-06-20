@@ -57,5 +57,20 @@ module Labor
         includes: includes
       }
     end
+
+    clean_options_get '/app/all' do
+      apps = AppInfo.all
+      labor_response apps
+    end
+
+    clean_options_get '/os/all' do
+      apps = OsInfo.all
+      labor_response apps
+    end
+
+    clean_options_get '/device/all' do
+      apps = Device.all
+      labor_response apps
+    end
   end
 end
