@@ -16,7 +16,11 @@ module Labor
 				deploys = PodDeploy.where(project_id: object.project.id, ref: object_attributes.source_branch, status: :pending)
 				deploy = deploys.find { |deploy| deploy.merge_request_iids.include?(object_attributes.iid.to_s) }
 
-				return unless deploy
+				# Bug 日志到这里消失了，而且没有执行发布动作
+				unless deploy
+					logger.info("can't find deploy for merge request #{deploy.name}(#{deploy.id}) with MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
+					return 
+				end
 				logger.info("handle pod deploy merge request #{deploy.name}(#{deploy.id}) with MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
 
 				case object_attributes.state
