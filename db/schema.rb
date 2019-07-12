@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190614031235) do
+ActiveRecord::Schema.define(version: 20190712012523) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -42,6 +42,19 @@ ActiveRecord::Schema.define(version: 20190614031235) do
   add_index "launch_infos", ["app_info_id"], name: "index_launch_infos_on_app_info_id", using: :btree
   add_index "launch_infos", ["device_id"], name: "index_launch_infos_on_device_id", using: :btree
   add_index "launch_infos", ["os_info_id"], name: "index_launch_infos_on_os_info_id", using: :btree
+
+  create_table "leak_infos", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "app_info_id"
+    t.string   "name"
+    t.text     "trace"
+    t.boolean  "active",      default: true
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "leak_infos", ["app_info_id"], name: "index_leak_infos_on_app_info_id", using: :btree
+  add_index "leak_infos", ["user_id"], name: "index_leak_infos_on_user_id", using: :btree
 
   create_table "load_duration_pairs", force: :cascade do |t|
     t.integer  "launch_info_id"

@@ -6,9 +6,51 @@ require_relative '../models/launch_info'
 require_relative '../models/load_duration_pair'
 require_relative '../models/os_info'
 require_relative '../models/device'
+require_relative '../models/leak_info'
 
 module Labor
   class App < Sinatra::Base
+    clean_options_post '/app/monitor/leaks' do 
+      hash = body_params
+      leaks = hash['leaks']
+
+      ActiveRecord::Base.transaction do
+        app = AppInfo.find_or_initialize_by(hash['app'])
+        app.save!
+
+        leaks.each do |leak| 
+          leak_info = LeakInfo.find_or_initialize_by(name: leak['name'], trace: leak['trace'])
+          leak_info.app_info = app
+          leak_info.save!
+        end
+      end
+
+      labor_response
+    end
+
+    clean_options_get '/app/monitor/leaks' do 
+      param :app_name, String, required: true
+
+      keys = [:app_name].map(&:to_s)
+      querys = params.select { |key, value| keys.include?(key) }
+
+      app_query = {name: querys['app_name']}
+      includes = [:user, :app_info]
+
+      where = LeakInfo.with_app(app_query)
+      infos = where.includes(includes).paginate(page: params['page'], per_page: params['per_page']).order(created_at: :desc)
+      size = where.all.size
+      per_page = params[:per_page] || LeakInfo.per_page
+
+      labor_response infos, {
+        includes: includes,
+        meta: {
+          total_count: size,
+          per_page: per_page
+        }
+      }
+    end
+
     clean_options_post '/app/monitor/launch' do 
       hash = body_params
       launch = hash['launch']
