@@ -28,6 +28,20 @@ module Labor
       labor_response
     end
 
+    clean_options_post '/app/monitor/leaks/:id/fix' do |id|
+      user_id = auth_user_id
+      user = User.find(user_id)
+
+      leak = LeakInfo.find(id)
+      leak.user = user
+      leak.active = false
+      leak.save!
+
+      labor_response leak, {
+        includes: [:user]
+      }
+    end
+
     clean_options_get '/app/monitor/leaks' do 
       param :app_name, String, required: true
 
