@@ -25,8 +25,9 @@ module Labor
             )
           leak_info.cycles = leak['cycles']
 
-          if leak_info.app_info &&
-             app.version > leak_info.app_info.version
+          leak_info.app_info = app unless leak_info.app_info
+
+          if app.version > leak_info.app_info.version
             leak_info.active = true
             leak_info.app_info = app
           end
