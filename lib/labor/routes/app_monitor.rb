@@ -19,8 +19,17 @@ module Labor
         app.save!
 
         leaks.each do |leak| 
-          leak_info = LeakInfo.find_or_initialize_by(name: leak['name'], trace: leak['trace'], cycles: leak['cycles'])
-          leak_info.app_info = app
+          leak_info = LeakInfo.find_or_initialize_by(
+            name: leak['name'], 
+            trace: leak['trace']
+            )
+          leak_info.cycles = leak['cycles']
+
+          if leak_info.app_info &&
+             app.version > leak_info.app_info.version
+            leak_info.active = true
+            leak_info.app_info = app
+          end
           leak_info.save!
         end
       end
@@ -52,7 +61,7 @@ module Labor
       includes = [:user, :app_info]
 
       where = LeakInfo.with_app(app_query)
-      infos = where.includes(includes).paginate(page: params['page'], per_page: params['per_page']).order(created_at: :desc)
+      infos = where.includes(includes).paginate(page: params['page'], per_page: params['per_page']).order(updated_at: :desc)
       size = where.all.size
       per_page = params[:per_page] || LeakInfo.per_page
 
