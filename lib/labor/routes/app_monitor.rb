@@ -19,7 +19,7 @@ module Labor
         app.save!
 
         leaks.each do |leak| 
-          leak_info = LeakInfo.find_or_initialize_by(name: leak['name'], trace: leak['trace'])
+          leak_info = LeakInfo.find_or_initialize_by(name: leak['name'], trace: leak['trace'], cycles: leak['cycles'])
           leak_info.app_info = app
           leak_info.save!
         end

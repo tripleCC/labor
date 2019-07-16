@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190712012523) do
+ActiveRecord::Schema.define(version: 20190716025740) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -51,6 +51,7 @@ ActiveRecord::Schema.define(version: 20190712012523) do
     t.boolean  "active",      default: true
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "cycles"
   end
 
   add_index "leak_infos", ["app_info_id"], name: "index_leak_infos_on_app_info_id", using: :btree
