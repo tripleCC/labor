@@ -23,7 +23,6 @@ module Labor
             name: leak['name'], 
             trace: leak['trace']
             )
-          leak_info.cycles = leak['cycles']
 
           leak_info.app_info = app unless leak_info.app_info
 
@@ -31,6 +30,11 @@ module Labor
             leak_info.active = true
             leak_info.app_info = app
           end
+
+          if leak_info.active
+            leak_info.cycles = leak['cycles']
+          end
+
           leak_info.save!
         end
       end
