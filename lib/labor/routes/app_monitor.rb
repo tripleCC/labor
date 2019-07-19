@@ -65,7 +65,7 @@ module Labor
       app_query = {name: querys['app_name']}
       includes = [:user, :app_info]
 
-      where = LeakInfo.with_app(app_query)
+      where = LeakInfo.with_app(app_query).with_cycles
       infos = where.includes(includes).paginate(page: params['page'], per_page: params['per_page']).order(updated_at: :desc)
       size = where.all.size
       per_page = params[:per_page] || LeakInfo.per_page

@@ -8,5 +8,6 @@ module Labor
   	self.per_page = 15
 
   	scope :with_app, lambda { |app| app.any? ? joins(:app_info).where(app_infos: app) : all }
+  	scope :with_cycles, lambda { |app| where(cycles: [nil, '']) }
 	end
 end
