@@ -7,9 +7,30 @@ require_relative '../models/load_duration_pair'
 require_relative '../models/os_info'
 require_relative '../models/device'
 require_relative '../models/leak_info'
+require_relative '../models/comment'
 
 module Labor
   class App < Sinatra::Base
+    clean_options_post '/app/monitor/leak/:id/comments' do |id|
+      user_id = auth_user_id
+
+      hash = body_params
+
+      leak = LeakInfo.find(id)
+      user = User.find(user_id)
+      comment = Comment.create!({
+        content: hash['content'], 
+        leak_info: leak, 
+        user: user
+        })
+
+      includes = [:user, :app_info, :comments]
+
+      labor_response leak, {
+        includes: includes
+      }
+    end
+
     clean_options_post '/app/monitor/leaks' do 
       hash = body_params
       leaks = hash['leaks']
@@ -51,8 +72,10 @@ module Labor
       leak.active = false
       leak.save!
 
+      includes = [:user, :app_info, :comments]
+
       labor_response leak, {
-        includes: [:user]
+        includes: includes
       }
     end
 
@@ -63,7 +86,7 @@ module Labor
       querys = params.select { |key, value| keys.include?(key) }
 
       app_query = {name: querys['app_name']}
-      includes = [:user, :app_info]
+      includes = [:user, :app_info, :comments]
 
       where = LeakInfo.with_app(app_query).with_cycles
       infos = where.includes(includes).paginate(page: params['page'], per_page: params['per_page']).order(active: :desc, updated_at: :desc)
