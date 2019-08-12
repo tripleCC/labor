@@ -40,6 +40,8 @@ module Labor
         app.save!
 
         leaks.each do |leak| 
+          next if leak.will_to_did.to_f < 0 || leak.start_to_did.to_f < 0
+
           leak_info = LeakInfo.find_or_initialize_by(
             name: leak['name'], 
             trace: leak['trace']
