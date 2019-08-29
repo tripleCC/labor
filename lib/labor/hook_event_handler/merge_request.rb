@@ -21,12 +21,12 @@ module Labor
 					logger.info("can't find deploy for merge request #{deploy.name}(#{deploy.id}) with MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
 					return 
 				end
-				logger.info("handle pod deploy merge request #{deploy.name}(#{deploy.id}) with MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
+				logger.info("handle pod deploy merge request #{deploy.name}(#{deploy.id}, [#{deploy.merge_request_iids}]) with MR(iid: #{object_attributes.iid}, state: #{object_attributes.state}, source: #{object_attributes.source_branch}, target: #{object_attributes.target_branch})")
 
 				case object_attributes.state
 				when 'merged' 
 					# 已合并，更新 mr_iids ，删除合并的 mr_iid
-					deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
+					# deploy.update(merge_request_iids: deploy.merge_request_iids.delete(object_attributes.iid.to_s))
 
 					if object_attributes.target_branch == 'master'
 						# 如果是已合并到 master，则触发主发布处理 CD
